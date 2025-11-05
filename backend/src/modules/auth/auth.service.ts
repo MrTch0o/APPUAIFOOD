@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -154,23 +153,16 @@ export class AuthService {
     return { message: 'Logout realizado com sucesso' };
   }
 
-  private async generateTokens(
-    userId: string,
-    email: string,
-    role: UserRole,
-  ) {
+  private async generateTokens(userId: string, email: string, role: UserRole) {
     const payload = { sub: userId, email, role };
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('jwt.secret'),
-        expiresIn: this.configService.get<string>('jwt.expiresIn'),
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('jwt.refreshSecret'),
-        expiresIn: this.configService.get<string>('jwt.refreshExpiresIn'),
-      }),
-    ]);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('jwt.secret'),
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('jwt.refreshSecret'),
+    });
 
     return {
       accessToken,

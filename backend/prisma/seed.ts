@@ -271,7 +271,7 @@ async function main() {
   console.log('🍕 Criando produtos...');
 
   // Produtos da Pizzaria
-  const produtos Pizzaria = await prisma.product.createMany({
+  await prisma.product.createMany({
     data: [
       {
         name: 'Pizza Margherita',
@@ -525,6 +525,13 @@ async function main() {
   console.log('📦 Criando pedidos de exemplo...');
 
   // Pedido 1 - Entregue
+  const pizzaMargherita = await prisma.product.findFirst({
+    where: { name: 'Pizza Margherita' },
+  });
+  const pizzaCalabresa = await prisma.product.findFirst({
+    where: { name: 'Pizza Calabresa' },
+  });
+
   const order1 = await prisma.order.create({
     data: {
       userId: cliente1.id,
@@ -538,13 +545,13 @@ async function main() {
       items: {
         create: [
           {
-            productId: (await prisma.product.findFirst({ where: { name: 'Pizza Margherita' } })).id,
+            productId: pizzaMargherita!.id,
             quantity: 1,
             price: 45.0,
             subtotal: 45.0,
           },
           {
-            productId: (await prisma.product.findFirst({ where: { name: 'Pizza Calabresa' } })).id,
+            productId: pizzaCalabresa!.id,
             quantity: 1,
             price: 48.0,
             subtotal: 48.0,
@@ -555,6 +562,13 @@ async function main() {
   });
 
   // Pedido 2 - Em preparo
+  const baconBurger = await prisma.product.findFirst({
+    where: { name: 'Bacon Burger' },
+  });
+  const batataFrita = await prisma.product.findFirst({
+    where: { name: 'Batata Frita Grande' },
+  });
+
   const order2 = await prisma.order.create({
     data: {
       userId: cliente2.id,
@@ -568,13 +582,13 @@ async function main() {
       items: {
         create: [
           {
-            productId: (await prisma.product.findFirst({ where: { name: 'Bacon Burger' } })).id,
+            productId: baconBurger!.id,
             quantity: 2,
             price: 32.0,
             subtotal: 64.0,
           },
           {
-            productId: (await prisma.product.findFirst({ where: { name: 'Batata Frita Grande' } })).id,
+            productId: batataFrita!.id,
             quantity: 1,
             price: 15.0,
             subtotal: 15.0,

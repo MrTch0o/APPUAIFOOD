@@ -48,4 +48,8 @@ async function bootstrap() {
   console.log(`🚀 Servidor rodando em: http://localhost:${port}`);
   console.log(`📚 Documentação Swagger: http://localhost:${port}/api/docs`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('❌ Erro ao iniciar o servidor:', error);
+  process.exit(1);
+});

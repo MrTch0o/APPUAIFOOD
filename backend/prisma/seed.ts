@@ -26,7 +26,7 @@ async function main() {
   // ===== USUÁRIOS =====
   console.log('👥 Criando usuários...');
 
-  const adminUser = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: 'admin@uaifood.com',
       password: await hashPassword('Admin@123'),
@@ -120,7 +120,7 @@ async function main() {
     },
   });
 
-  const endereco3 = await prisma.address.create({
+  await prisma.address.create({
     data: {
       userId: cliente3.id,
       label: 'Trabalho',
@@ -569,7 +569,7 @@ async function main() {
     where: { name: 'Batata Frita Grande' },
   });
 
-  const order2 = await prisma.order.create({
+  await prisma.order.create({
     data: {
       userId: cliente2.id,
       restaurantId: hamburgueria.id,

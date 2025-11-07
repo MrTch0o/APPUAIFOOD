@@ -11,6 +11,15 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserRole } from '@prisma/client';
 
+// Interface que define a estrutura do payload JWT
+interface JwtPayload {
+  sub: string; // ID do usuário
+  email: string;
+  role: UserRole;
+  iat?: number; // Issued at (timestamp)
+  exp?: number; // Expiration time (timestamp)
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -114,7 +123,8 @@ export class AuthService {
 
   async refreshTokens(refreshToken: string) {
     try {
-      const payload = this.jwtService.verify(refreshToken, {
+      // Verificar e decodificar o refresh token
+      const payload = this.jwtService.verify<JwtPayload>(refreshToken, {
         secret: this.configService.get<string>('jwt.refreshSecret'),
       });
 
@@ -139,7 +149,7 @@ export class AuthService {
       await this.updateRefreshToken(user.id, tokens.refreshToken);
 
       return tokens;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Refresh token inválido');
     }
   }

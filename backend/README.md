@@ -137,24 +137,24 @@ Após iniciar, acesse:
 
 ```
 backend/
-├── docs/                        # 📚 Documentação
-│   ├── 2FA-GUIDE.md            # Guia de autenticação 2FA
-│   └── UPLOAD.md               # Guia de upload de imagens
 ├── prisma/
 │   ├── schema.prisma           # Modelo do banco de dados
 │   └── migrations/             # Histórico de migrations
 ├── src/
-│   ├── auth/                   # 🔐 Autenticação (JWT + 2FA)
-│   ├── users/                  # 👤 Módulo de usuários
-│   ├── restaurants/            # 🏪 Módulo de restaurantes
-│   ├── products/               # 🍕 Módulo de produtos
+│   ├── modules/                # 📦 Módulos da aplicação
+│   │   ├── auth/              # 🔐 Autenticação (JWT + 2FA)
+│   │   ├── users/             # 👤 CRUD de usuários
+│   │   ├── restaurants/       # 🏪 CRUD de restaurantes
+│   │   └── products/          # 🍕 CRUD de produtos
 │   ├── common/
 │   │   ├── decorators/         # Decorators customizados
 │   │   ├── guards/             # Guards (JWT, Roles)
 │   │   ├── filters/            # Exception filters
 │   │   ├── interceptors/       # Interceptors
 │   │   └── config/             # Configurações (Multer)
+│   ├── config/                 # Configurações da aplicação
 │   ├── database/               # Prisma Service
+│   ├── app.module.ts           # Módulo raiz
 │   └── main.ts                 # Bootstrap da aplicação
 ├── uploads/                    # 🖼️ Arquivos enviados
 └── README.md                   # Este arquivo
@@ -208,8 +208,9 @@ backend/
 
 ## 📚 Documentação Adicional
 
-- **[Guia 2FA](./docs/2FA-GUIDE.md)** - Implementação completa de autenticação de 2 fatores
-- **[Guia Upload](./docs/UPLOAD.md)** - Sistema de upload de imagens com Multer
+- **[Guia 2FA](../docs/2FA-GUIDE.md)** - Implementação completa de autenticação de 2 fatores
+- **[Guia Upload](../docs/UPLOAD.md)** - Sistema de upload de imagens com Multer
+- **[Panorama Geral](../docs/PANORAMA.md)** - Visão completa do projeto e progresso
 - **[Swagger UI](http://localhost:3000/api/docs)** - Documentação interativa (quando o servidor estiver rodando)
 
 ## 🧪 Testes

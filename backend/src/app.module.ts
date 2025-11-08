@@ -4,10 +4,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { RestaurantsModule } from './modules/restaurants/restaurants.module';
+import { ProductsModule } from './modules/products/products.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { UsersModule } from './users/users.module';
-import { RestaurantsModule } from './restaurants/restaurants.module';
-import { ProductsModule } from './products/products.module';
 import configuration from './config/configuration';
 
 @Module({

@@ -9,13 +9,20 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from '../common/config/multer.config';
 import { RestaurantsService } from './restaurants.service';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
@@ -88,5 +95,40 @@ export class RestaurantsController {
   @ApiResponse({ status: 404, description: 'Restaurante não encontrado' })
   remove(@Param('id') id: string) {
     return this.restaurantsService.remove(id);
+  }
+
+  @Post(':id/image')
+  @Roles(UserRole.ADMIN, UserRole.RESTAURANT_OWNER)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('image', multerConfig))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload de imagem do restaurante (ADMIN ou OWNER)',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Imagem do restaurante (JPEG, PNG, GIF, WEBP - max 5MB)',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Imagem enviada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Arquivo inválido' })
+  @ApiResponse({ status: 404, description: 'Restaurante não encontrado' })
+  uploadImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Nenhum arquivo foi enviado');
+    }
+
+    const imageUrl = `/uploads/${file.filename}`;
+    return this.restaurantsService.updateImage(id, imageUrl);
   }
 }

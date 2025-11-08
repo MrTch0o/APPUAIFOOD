@@ -148,4 +148,28 @@ export class RestaurantsService {
       message: 'Restaurante removido com sucesso',
     };
   }
+
+  /**
+   * Atualiza a imagem do restaurante
+   */
+  async updateImage(id: string, imageUrl: string) {
+    // Verificar se restaurante existe
+    await this.findOne(id);
+
+    const restaurant = await this.prisma.restaurant.update({
+      where: { id },
+      data: { image: imageUrl },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'Imagem do restaurante atualizada com sucesso',
+      restaurant,
+    };
+  }
 }

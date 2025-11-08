@@ -136,4 +136,28 @@ export class ProductsService {
       message: 'Produto removido com sucesso',
     };
   }
+
+  /**
+   * Atualiza a imagem do produto
+   */
+  async updateImage(id: string, imageUrl: string) {
+    // Verificar se produto existe
+    await this.findOne(id);
+
+    const product = await this.prisma.product.update({
+      where: { id },
+      data: { image: imageUrl },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'Imagem do produto atualizada com sucesso',
+      product,
+    };
+  }
 }

@@ -10,6 +10,9 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,7 +20,11 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiQuery,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from '../common/config/multer.config';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -94,5 +101,38 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
+  }
+
+  @Post(':id/image')
+  @Roles(UserRole.ADMIN, UserRole.RESTAURANT_OWNER)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('image', multerConfig))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload de imagem do produto (ADMIN ou OWNER)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Imagem do produto (JPEG, PNG, GIF, WEBP - max 5MB)',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Imagem enviada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Arquivo inválido' })
+  @ApiResponse({ status: 404, description: 'Produto não encontrado' })
+  uploadImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Nenhum arquivo foi enviado');
+    }
+
+    const imageUrl = `/uploads/${file.filename}`;
+    return this.productsService.updateImage(id, imageUrl);
   }
 }

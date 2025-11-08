@@ -5,6 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { UsersModule } from './users/users.module';
+import { RestaurantsModule } from './restaurants/restaurants.module';
+import { ProductsModule } from './products/products.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -14,6 +17,9 @@ import configuration from './config/configuration';
       load: [configuration],
     }),
     AuthModule,
+    UsersModule,
+    RestaurantsModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [

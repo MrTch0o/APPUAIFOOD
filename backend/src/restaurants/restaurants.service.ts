@@ -1,0 +1,151 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateRestaurantDto } from './dto/create-restaurant.dto';
+import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { PrismaService } from '../database/prisma.service';
+
+@Injectable()
+export class RestaurantsService {
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Cria um novo restaurante
+   */
+  async create(createRestaurantDto: CreateRestaurantDto, ownerId: string) {
+    const restaurant = await this.prisma.restaurant.create({
+      data: {
+        ...createRestaurantDto,
+        ownerId,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        category: true,
+        image: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      message: 'Restaurante criado com sucesso',
+      restaurant,
+    };
+  }
+
+  /**
+   * Lista todos os restaurantes (apenas ativos para clientes)
+   */
+  async findAll(showInactive = false) {
+    const where = showInactive ? {} : { isActive: true };
+
+    return this.prisma.restaurant.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        category: true,
+        image: true,
+        isActive: true,
+        rating: true,
+        createdAt: true,
+        _count: {
+          select: {
+            products: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Busca um restaurante específico com seus produtos
+   */
+  async findOne(id: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id },
+      include: {
+        products: {
+          where: { available: true },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            image: true,
+            category: true,
+            available: true,
+          },
+        },
+      },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException('Restaurante não encontrado');
+    }
+
+    return restaurant;
+  }
+
+  /**
+   * Atualiza um restaurante
+   */
+  async update(id: string, updateRestaurantDto: UpdateRestaurantDto) {
+    // Verificar se restaurante existe
+    await this.findOne(id);
+
+    const restaurant = await this.prisma.restaurant.update({
+      where: { id },
+      data: updateRestaurantDto,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        category: true,
+        image: true,
+        isActive: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'Restaurante atualizado com sucesso',
+      restaurant,
+    };
+  }
+
+  /**
+   * Remove um restaurante (hard delete)
+   */
+  async remove(id: string) {
+    // Verificar se restaurante existe
+    await this.findOne(id);
+
+    await this.prisma.restaurant.delete({
+      where: { id },
+    });
+
+    return {
+      message: 'Restaurante removido com sucesso',
+    };
+  }
+}

@@ -1,98 +1,281 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🍔 UAIFOOD - Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> API REST completa para aplicativo de delivery de comida desenvolvida com NestJS, TypeScript e PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📋 Índice
 
-## Description
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Tecnologias](#tecnologias)
+- [Status do Projeto](#status-do-projeto)
+- [Instalação](#instalação)
+- [Executando o Projeto](#executando-o-projeto)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Endpoints Disponíveis](#endpoints-disponíveis)
+- [Documentação Adicional](#documentação-adicional)
+- [Testes](#testes)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🎯 Sobre o Projeto
 
-## Project setup
+UAIFOOD é uma API REST robusta para gerenciamento de pedidos de delivery, incluindo:
+
+- ✅ Autenticação JWT com refresh token
+- ✅ Autenticação de 2 fatores (2FA/TOTP)
+- ✅ Sistema de roles (ADMIN, RESTAURANT_OWNER, CLIENT)
+- ✅ CRUD completo de Usuários, Restaurantes e Produtos
+- ✅ Upload de imagens para restaurantes e produtos
+- ✅ Exception filters personalizados
+- ✅ Response transformation padronizado
+- ✅ Documentação Swagger/OpenAPI
+- ✅ Validação com class-validator
+- ✅ Integração com PostgreSQL via Prisma ORM
+
+## 🚀 Tecnologias
+
+- **Framework**: [NestJS](https://nestjs.com/) v11
+- **Linguagem**: [TypeScript](https://www.typescriptlang.org/) v5
+- **Banco de Dados**: [PostgreSQL](https://www.postgresql.org/) v15
+- **ORM**: [Prisma](https://www.prisma.io/) v6.18.0
+- **Autenticação**: JWT + Passport.js
+- **2FA**: Speakeasy (TOTP)
+- **Upload**: Multer
+- **Validação**: class-validator
+- **Documentação**: Swagger/OpenAPI
+- **Containerização**: Docker
+
+## 📊 Status do Projeto
+
+### ✅ Completado (Etapas 1-5)
+
+- [x] **Etapa 1**: Configuração inicial e estrutura
+- [x] **Etapa 2**: Modelo de dados (Prisma Schema)
+- [x] **Etapa 3**: Autenticação JWT
+- [x] **Etapa 4**: Autenticação 2FA (TOTP)
+- [x] **Etapa 5**: API REST - Módulos Core
+  - [x] CRUD de Usuários
+  - [x] CRUD de Restaurantes
+  - [x] CRUD de Produtos
+  - [x] Sistema de Upload de Imagens
+  - [x] Exception Filters
+  - [x] Transform Interceptor
+
+### 🔄 Em Desenvolvimento
+
+- [ ] **Etapa 6**: Pedidos e Carrinho
+- [ ] **Etapa 7**: Sistema de Pagamentos
+- [ ] **Etapa 8**: Notificações em Tempo Real
+- [ ] **Etapa 9**: Testes Automatizados
+- [ ] **Etapa 10**: Deploy e CI/CD
+
+**Total de Endpoints Ativos**: 24
+
+## ⚙️ Instalação
+
+### Pré-requisitos
+
+- Node.js v18+
+- PostgreSQL v15+
+- npm ou yarn
+
+### Passos
 
 ```bash
-$ npm install
+# 1. Clone o repositório
+git clone https://github.com/MrTch0o/APPUAIFOOD.git
+cd APPUAIFOOD/backend
+
+# 2. Instale as dependências
+npm install
+
+# 3. Configure as variáveis de ambiente
+cp .env.example .env
+# Edite o arquivo .env com suas configurações
+
+# 4. Execute as migrations do banco
+npx prisma migrate dev
+
+# 5. (Opcional) Popule o banco com dados de exemplo
+npx prisma db seed
 ```
 
-## Compile and run the project
+### Variáveis de Ambiente
+
+```env
+# Database
+DATABASE_URL="postgresql://usuario:senha@localhost:5432/uaifood"
+
+# JWT
+JWT_SECRET="seu-secret-super-seguro"
+JWT_REFRESH_SECRET="seu-refresh-secret-super-seguro"
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# Server
+PORT=3000
+CORS_ORIGIN="http://localhost:5173"
+```
+
+## 🏃 Executando o Projeto
 
 ```bash
-# development
-$ npm run start
+# Desenvolvimento (com hot-reload)
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
+# Produção
+npm run build
+npm run start:prod
 
-# production mode
-$ npm run start:prod
+# Modo debug
+npm run start:debug
 ```
 
-## Run tests
+Após iniciar, acesse:
+- **API**: http://localhost:3000/api
+- **Swagger**: http://localhost:3000/api/docs
+- **Imagens**: http://localhost:3000/uploads
+
+## 📁 Estrutura do Projeto
+
+```
+backend/
+├── docs/                        # 📚 Documentação
+│   ├── 2FA-GUIDE.md            # Guia de autenticação 2FA
+│   └── UPLOAD.md               # Guia de upload de imagens
+├── prisma/
+│   ├── schema.prisma           # Modelo do banco de dados
+│   └── migrations/             # Histórico de migrations
+├── src/
+│   ├── auth/                   # 🔐 Autenticação (JWT + 2FA)
+│   ├── users/                  # 👤 Módulo de usuários
+│   ├── restaurants/            # 🏪 Módulo de restaurantes
+│   ├── products/               # 🍕 Módulo de produtos
+│   ├── common/
+│   │   ├── decorators/         # Decorators customizados
+│   │   ├── guards/             # Guards (JWT, Roles)
+│   │   ├── filters/            # Exception filters
+│   │   ├── interceptors/       # Interceptors
+│   │   └── config/             # Configurações (Multer)
+│   ├── database/               # Prisma Service
+│   └── main.ts                 # Bootstrap da aplicação
+├── uploads/                    # 🖼️ Arquivos enviados
+└── README.md                   # Este arquivo
+```
+
+## 🌐 Endpoints Disponíveis
+
+### Autenticação (8 endpoints)
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| POST | `/api/auth/register` | Registrar novo usuário | ❌ |
+| POST | `/api/auth/login` | Login (retorna access + refresh token) | ❌ |
+| POST | `/api/auth/refresh` | Renovar access token | ❌ |
+| POST | `/api/auth/logout` | Logout | ✅ |
+| POST | `/api/auth/2fa/generate` | Gerar QR Code 2FA | ✅ |
+| POST | `/api/auth/2fa/enable` | Ativar 2FA | ✅ |
+| POST | `/api/auth/2fa/disable` | Desativar 2FA | ✅ |
+| POST | `/api/auth/2fa/verify` | Verificar código 2FA no login | ❌ |
+
+### Usuários (4 endpoints)
+
+| Método | Endpoint | Descrição | Roles |
+|--------|----------|-----------|-------|
+| GET | `/api/users/me` | Perfil do usuário autenticado | Todos |
+| PATCH | `/api/users/me` | Atualizar perfil | Todos |
+| DELETE | `/api/users/me` | Deletar conta | Todos |
+| GET | `/api/users` | Listar todos os usuários | ADMIN |
+
+### Restaurantes (6 endpoints)
+
+| Método | Endpoint | Descrição | Roles |
+|--------|----------|-----------|-------|
+| POST | `/api/restaurants` | Criar restaurante | ADMIN |
+| GET | `/api/restaurants` | Listar restaurantes ativos | Público |
+| GET | `/api/restaurants/:id` | Detalhes do restaurante | Público |
+| PATCH | `/api/restaurants/:id` | Atualizar restaurante | ADMIN/OWNER |
+| DELETE | `/api/restaurants/:id` | Deletar restaurante | ADMIN |
+| POST | `/api/restaurants/:id/image` | Upload de imagem | ADMIN/OWNER |
+
+### Produtos (6 endpoints)
+
+| Método | Endpoint | Descrição | Roles |
+|--------|----------|-----------|-------|
+| POST | `/api/products` | Criar produto | ADMIN/OWNER |
+| GET | `/api/products` | Listar produtos (com filtros) | Público |
+| GET | `/api/products/:id` | Detalhes do produto | Público |
+| PATCH | `/api/products/:id` | Atualizar produto | ADMIN/OWNER |
+| DELETE | `/api/products/:id` | Deletar produto | ADMIN/OWNER |
+| POST | `/api/products/:id/image` | Upload de imagem | ADMIN/OWNER |
+
+## 📚 Documentação Adicional
+
+- **[Guia 2FA](./docs/2FA-GUIDE.md)** - Implementação completa de autenticação de 2 fatores
+- **[Guia Upload](./docs/UPLOAD.md)** - Sistema de upload de imagens com Multer
+- **[Swagger UI](http://localhost:3000/api/docs)** - Documentação interativa (quando o servidor estiver rodando)
+
+## 🧪 Testes
 
 ```bash
-# unit tests
-$ npm run test
+# Testes unitários
+npm run test
 
-# e2e tests
-$ npm run test:e2e
+# Testes e2e
+npm run test:e2e
 
-# test coverage
-$ npm run test:cov
+# Cobertura de testes
+npm run test:cov
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🐛 Debugging
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Verificar erros de compilação
+npm run build
+
+# Verificar formatação
+npm run format
+
+# Lint
+npm run lint
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 📝 Scripts Úteis
 
-## Resources
+```bash
+# Gerar novo módulo
+npm run nest g module nome-modulo
 
-Check out a few resources that may come in handy when working with NestJS:
+# Gerar novo controller
+npm run nest g controller nome-controller
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Gerar novo service
+npm run nest g service nome-service
 
-## Support
+# Gerar resource completo (CRUD)
+npm run nest g resource nome-resource
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Prisma Studio (GUI do banco)
+npx prisma studio
 
-## Stay in touch
+# Resetar banco de dados
+npx prisma migrate reset
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🤝 Contribuindo
 
-## License
+1. Fork o projeto
+2. Crie sua feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📄 Licença
+
+Este projeto está sob a licença MIT.
+
+## 👨‍💻 Desenvolvido por
+
+**MrTch0o** - [GitHub](https://github.com/MrTch0o)
+
+---
+
+⭐ Se este projeto te ajudou, considere dar uma estrela!

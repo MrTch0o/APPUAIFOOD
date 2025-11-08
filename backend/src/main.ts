@@ -2,6 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +27,16 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Exception Filters (ordem importante: mais específico primeiro)
+  app.useGlobalFilters(
+    new AllExceptionsFilter(),
+    new PrismaExceptionFilter(),
+    new HttpExceptionFilter(),
+  );
+
+  // Transform Interceptor (padroniza respostas de sucesso)
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   // Swagger
   const config = new DocumentBuilder()

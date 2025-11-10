@@ -7,6 +7,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
 import { ProductsModule } from './modules/products/products.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { CartModule } from './modules/cart/cart.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 
@@ -20,6 +22,8 @@ import configuration from './config/configuration';
     UsersModule,
     RestaurantsModule,
     ProductsModule,
+    OrdersModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [

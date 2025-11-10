@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +18,8 @@ import { CartService } from './cart.service';
 import { AddToCartDto } from './dto/create-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('cart')
 @ApiBearerAuth()
@@ -35,15 +36,18 @@ export class CartController {
     status: 400,
     description: 'Produto ou restaurante indisponível',
   })
-  addToCart(@Request() req, @Body() addToCartDto: AddToCartDto) {
-    return this.cartService.addToCart(req.user.sub, addToCartDto);
+  addToCart(
+    @CurrentUser() user: JwtPayload,
+    @Body() addToCartDto: AddToCartDto,
+  ) {
+    return this.cartService.addToCart(user.sub, addToCartDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Obter carrinho do usuário' })
   @ApiResponse({ status: 200, description: 'Carrinho retornado com sucesso' })
-  getCart(@Request() req) {
-    return this.cartService.getCart(req.user.sub);
+  getCart(@CurrentUser() user: JwtPayload) {
+    return this.cartService.getCart(user.sub);
   }
 
   @Patch('items/:id')
@@ -51,25 +55,25 @@ export class CartController {
   @ApiResponse({ status: 200, description: 'Item atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Item não encontrado' })
   updateCartItem(
-    @Request() req,
+    @CurrentUser() user: JwtPayload,
     @Param('id') id: string,
     @Body() updateCartItemDto: UpdateCartItemDto,
   ) {
-    return this.cartService.updateCartItem(req.user.sub, id, updateCartItemDto);
+    return this.cartService.updateCartItem(user.sub, id, updateCartItemDto);
   }
 
   @Delete('items/:id')
   @ApiOperation({ summary: 'Remover item do carrinho' })
   @ApiResponse({ status: 200, description: 'Item removido com sucesso' })
   @ApiResponse({ status: 404, description: 'Item não encontrado' })
-  removeCartItem(@Request() req, @Param('id') id: string) {
-    return this.cartService.removeCartItem(req.user.sub, id);
+  removeCartItem(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.cartService.removeCartItem(user.sub, id);
   }
 
   @Delete('clear')
   @ApiOperation({ summary: 'Limpar todo o carrinho' })
   @ApiResponse({ status: 200, description: 'Carrinho limpo com sucesso' })
-  clearCart(@Request() req) {
-    return this.cartService.clearCart(req.user.sub);
+  clearCart(@CurrentUser() user: JwtPayload) {
+    return this.cartService.clearCart(user.sub);
   }
 }

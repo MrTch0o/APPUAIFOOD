@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
   Query,
 } from '@nestjs/common';
 import {
@@ -23,6 +22,8 @@ import { UpdateOrderStatusDto } from './dto/update-order.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/decorators/current-user.decorator';
 import { UserRole, OrderStatus } from '@prisma/client';
 
 @ApiTags('orders')
@@ -46,8 +47,11 @@ export class OrdersController {
     status: 404,
     description: 'Endereço ou produto não encontrado',
   })
-  create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(req.user.sub, createOrderDto);
+  create(
+    @CurrentUser() user: JwtPayload,
+    @Body() createOrderDto: CreateOrderDto,
+  ) {
+    return this.ordersService.create(user.sub, createOrderDto);
   }
 
   @Get()
@@ -55,8 +59,11 @@ export class OrdersController {
   @ApiOperation({ summary: 'Listar pedidos do usuário' })
   @ApiQuery({ name: 'status', enum: OrderStatus, required: false })
   @ApiResponse({ status: 200, description: 'Lista de pedidos retornada' })
-  findUserOrders(@Request() req, @Query('status') status?: OrderStatus) {
-    return this.ordersService.findUserOrders(req.user.sub, status);
+  findUserOrders(
+    @CurrentUser() user: JwtPayload,
+    @Query('status') status?: OrderStatus,
+  ) {
+    return this.ordersService.findUserOrders(user.sub, status);
   }
 
   @Get('restaurant/:restaurantId')
@@ -80,8 +87,8 @@ export class OrdersController {
     status: 403,
     description: 'Sem permissão para ver este pedido',
   })
-  findOne(@Request() req, @Param('id') id: string) {
-    return this.ordersService.findOne(req.user.sub, id, req.user.role);
+  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.ordersService.findOne(user.sub, id, user.role);
   }
 
   @Patch(':id/status')
@@ -95,15 +102,15 @@ export class OrdersController {
   @ApiResponse({ status: 400, description: 'Transição de status inválida' })
   @ApiResponse({ status: 403, description: 'Sem permissão' })
   updateStatus(
-    @Request() req,
+    @CurrentUser() user: JwtPayload,
     @Param('id') id: string,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,
   ) {
     return this.ordersService.updateStatus(
-      req.user.sub,
+      user.sub,
       id,
       updateOrderStatusDto,
-      req.user.role,
+      user.role,
     );
   }
 

@@ -179,11 +179,10 @@ export class OrdersService {
    * Lista pedidos do usuário
    */
   async findUserOrders(userId: string, status?: OrderStatus) {
-    const where: any = { userId };
-
-    if (status) {
-      where.status = status;
-    }
+    const where = {
+      userId,
+      ...(status && { status }),
+    };
 
     return this.prisma.order.findMany({
       where,
@@ -220,11 +219,10 @@ export class OrdersService {
    * Lista pedidos de um restaurante (para o OWNER)
    */
   async findRestaurantOrders(restaurantId: string, status?: OrderStatus) {
-    const where: any = { restaurantId };
-
-    if (status) {
-      where.status = status;
-    }
+    const where = {
+      restaurantId,
+      ...(status && { status }),
+    };
 
     return this.prisma.order.findMany({
       where,

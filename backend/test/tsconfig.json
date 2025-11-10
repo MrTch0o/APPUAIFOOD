@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node16",
+    "types": ["jest", "node"]
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules"]
+}

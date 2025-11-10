@@ -11,6 +11,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { CartModule } from './modules/cart/cart.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AddressesModule } from './modules/addresses/addresses.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -26,6 +27,7 @@ import configuration from './config/configuration';
     OrdersModule,
     CartModule,
     AddressesModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [

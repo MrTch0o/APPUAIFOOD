@@ -26,7 +26,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator';
 import { UserRole, OrderStatus } from '@prisma/client';
 
-@ApiTags('orders')
+@ApiTags('Pedidos')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('orders')

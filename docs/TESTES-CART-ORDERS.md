@@ -104,7 +104,7 @@
 **✅ Resultado Esperado:**
 - Lista com 5 restaurantes
 - Pegue o `id` da **Pizzaria Bella Napoli** ou **Burger House**
-
+f7bde6d0-4d70-4759-99c2-82bd102a6c7b
 ---
 
 ### 3️⃣ VER PRODUTOS
@@ -116,7 +116,8 @@
 **✅ Resultado Esperado:**
 - Lista com pizzas (Margherita, Calabresa, Quatro Queijos, etc.)
 - Pegue alguns `productId` para adicionar ao carrinho
-
+efebb442-1754-4377-82c9-3a55f0de9d62
+00ae7a02-34cb-43dc-96d3-bc697ea06d95
 ---
 
 ### 4️⃣ ADICIONAR AO CARRINHO
@@ -428,7 +429,8 @@ PENDING → CONFIRMED → PREPARING → OUT_FOR_DELIVERY → DELIVERED
   "quantity": 1
 }
 ```
-
+89c632f1-81cd-427c-a699-9b2a0e42192a
+e0b27911-54f6-41ad-b350-50e498b44ea7
 **❌ Resultado Esperado:** `400 Bad Request`
 ```json
 {

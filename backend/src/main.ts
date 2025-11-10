@@ -58,6 +58,7 @@ async function bootstrap() {
     .addTag('Usuários', 'Gerenciamento de usuários')
     .addTag('Restaurantes', 'Gerenciamento de restaurantes')
     .addTag('Produtos', 'Gerenciamento de produtos')
+    .addTag('Carrinho', 'Gerenciamento do carrinho de compras')
     .addTag('Pedidos', 'Gerenciamento de pedidos')
     .addTag('Endereços', 'Gerenciamento de endereços')
     .addTag('Avaliações', 'Sistema de avaliações')

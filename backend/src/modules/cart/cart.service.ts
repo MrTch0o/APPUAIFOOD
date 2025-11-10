@@ -39,6 +39,25 @@ export class CartService {
       throw new BadRequestException('Restaurante indisponível no momento');
     }
 
+    // Verificar se o carrinho já tem produtos de outro restaurante
+    const existingCartItems = await this.prisma.cartItem.findMany({
+      where: { userId },
+      include: {
+        product: {
+          select: { restaurantId: true },
+        },
+      },
+    });
+
+    if (existingCartItems.length > 0) {
+      const firstRestaurantId = existingCartItems[0].product.restaurantId;
+      if (firstRestaurantId !== product.restaurantId) {
+        throw new BadRequestException(
+          'Você só pode adicionar produtos do mesmo restaurante. Limpe o carrinho para adicionar produtos de outro restaurante.',
+        );
+      }
+    }
+
     // Verificar se já existe no carrinho
     const existingCartItem = await this.prisma.cartItem.findUnique({
       where: {

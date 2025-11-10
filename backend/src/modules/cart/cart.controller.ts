@@ -21,7 +21,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator';
 
-@ApiTags('cart')
+@ApiTags('Carrinho')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('cart')

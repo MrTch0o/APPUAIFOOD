@@ -38,6 +38,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       },
     });
 
-    return user;
+    if (!user) {
+      return null;
+    }
+
+    // Retorna no formato esperado pelo CurrentUser decorator
+    return {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
   }
 }

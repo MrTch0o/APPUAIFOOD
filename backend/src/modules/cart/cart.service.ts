@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { AddToCartDto } from './dto/create-cart.dto';
@@ -9,6 +10,8 @@ import { UpdateCartItemDto } from './dto/update-cart.dto';
 
 @Injectable()
 export class CartService {
+  private readonly logger = new Logger(CartService.name);
+
   constructor(private prisma: PrismaService) {}
 
   /**

@@ -13,7 +13,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Servir arquivos estáticos da pasta uploads
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  // Em desenvolvimento: src/main.ts → dist/main.js, então uploads fica em ../../uploads
+  // Em produção: dist/main.js, então uploads fica em ../uploads
+  const uploadsPath = join(process.cwd(), 'uploads');
+  app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',
   });
 

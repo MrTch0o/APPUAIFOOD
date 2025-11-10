@@ -30,7 +30,8 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Public } from '../../common/decorators/public.decorator';
-import { GetUser } from '../../common/decorators/get-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('Restaurantes')
@@ -47,9 +48,9 @@ export class RestaurantsController {
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   create(
     @Body() createRestaurantDto: CreateRestaurantDto,
-    @GetUser('id') userId: string,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.restaurantsService.create(createRestaurantDto, userId);
+    return this.restaurantsService.create(createRestaurantDto, user.sub);
   }
 
   @Public()

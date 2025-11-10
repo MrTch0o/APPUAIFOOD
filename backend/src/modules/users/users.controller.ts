@@ -19,7 +19,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { GetUser } from '../../common/decorators/get-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('Usuários')
@@ -33,8 +34,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Ver perfil do usuário logado' })
   @ApiResponse({ status: 200, description: 'Perfil retornado com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  findMe(@GetUser('id') userId: string) {
-    return this.usersService.findOne(userId);
+  findMe(@CurrentUser() user: JwtPayload) {
+    return this.usersService.findOne(user.sub);
   }
 
   @Patch('me')
@@ -42,10 +43,10 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Perfil atualizado com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   updateMe(
-    @GetUser('id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.update(userId, updateUserDto);
+    return this.usersService.update(user.sub, updateUserDto);
   }
 
   @Delete('me')
@@ -53,8 +54,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Deletar conta do usuário logado' })
   @ApiResponse({ status: 200, description: 'Conta deletada com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  removeMe(@GetUser('id') userId: string) {
-    return this.usersService.remove(userId);
+  removeMe(@CurrentUser() user: JwtPayload) {
+    return this.usersService.remove(user.sub);
   }
 
   @Get()

@@ -4,8 +4,10 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
-  createdAt: string;
-  updatedAt: string;
+  role?: string;
+  is2FAEnabled?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface LoginRequest {
@@ -21,8 +23,13 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
-  access_token: string;
-  user: User;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    user: User;
+  };
+  success: boolean;
+  timestamp: string;
 }
 
 // Restaurant Types

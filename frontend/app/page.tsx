@@ -19,19 +19,24 @@ export default function Home() {
   const loadRestaurants = async () => {
     try {
       const data = await restaurantService.getAll();
-      setRestaurants(data);
+      setRestaurants(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao carregar restaurantes:", error);
+      setRestaurants([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredRestaurants = restaurants.filter(
-    (restaurant) =>
-      restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      restaurant.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRestaurants = Array.isArray(restaurants)
+    ? restaurants.filter(
+        (restaurant) =>
+          restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          restaurant.description
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
@@ -79,7 +84,7 @@ export default function Home() {
                 ) : (
                   <Link href="/login">
                     <button className="flex h-10 px-4 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#ee7c2b] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#ee7c2b]/90 transition-colors">
-                      Login
+                      Entrar
                     </button>
                   </Link>
                 )}
@@ -89,7 +94,7 @@ export default function Home() {
             {/* Page Title */}
             <div className="flex flex-wrap justify-between gap-3 p-4">
               <p className="text-[#1b130d] text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">
-                What are you craving today?
+                O que você está desejando hoje?
               </p>
             </div>
 
@@ -104,7 +109,7 @@ export default function Home() {
                   </div>
                   <input
                     className="form-input h-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-xl border-l-0 border-none bg-[#f3ece7] px-4 pl-2 text-base font-normal leading-normal text-[#1b130d] placeholder:text-[#9a6c4c] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 focus:border-none"
-                    placeholder="Search for restaurants or food..."
+                    placeholder="Buscar restaurantes ou comida..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -141,26 +146,32 @@ export default function Home() {
                 </div>
                 <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#f3ece7] pl-3 pr-4 hover:bg-[#ee7c2b]/20 transition-transform hover:scale-105">
                   <span className="material-symbols-outlined text-xl">eco</span>
-                  <p className="text-sm font-medium leading-normal">Healthy</p>
+                  <p className="text-sm font-medium leading-normal">Saudável</p>
                 </div>
                 <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#f3ece7] pl-3 pr-4 hover:bg-[#ee7c2b]/20 transition-transform hover:scale-105">
                   <span className="material-symbols-outlined text-xl">
                     icecream
                   </span>
-                  <p className="text-sm font-medium leading-normal">Desserts</p>
+                  <p className="text-sm font-medium leading-normal">
+                    Sobremesas
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Section Title */}
             <h2 className="text-[#1b130d] px-4 pb-3 pt-8 text-[22px] font-bold leading-tight tracking-[-0.015em]">
-              Featured Restaurants
+              Restaurantes em Destaque
             </h2>
 
             {/* Restaurant Grid */}
             {loading ? (
               <div className="flex justify-center items-center p-8">
                 <p className="text-[#9a6c4c]">Carregando restaurantes...</p>
+              </div>
+            ) : filteredRestaurants.length === 0 ? (
+              <div className="flex justify-center items-center p-8">
+                <p className="text-[#9a6c4c]">Nenhum restaurante encontrado.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 p-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -170,23 +181,23 @@ export default function Home() {
                     href={`/restaurante/${restaurant.id}`}
                   >
                     <div className="group flex cursor-pointer flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
-                      <div className="relative h-40 w-full">
+                      <div className="relative h-40 w-full overflow-hidden">
                         <img
                           alt={restaurant.name}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                           src={
                             restaurant.imageUrl ||
                             "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop"
                           }
                         />
                       </div>
-                      <div className="flex flex-col gap-2 p-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-base font-bold leading-tight text-[#1b130d]">
+                      <div className="flex flex-col gap-3 p-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-base font-bold leading-tight text-[#1b130d] truncate">
                             {restaurant.name}
                           </h3>
-                          <div className="flex items-center gap-1">
-                            <span className="material-symbols-outlined text-sm text-yellow-500">
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <span className="material-symbols-outlined text-base text-yellow-500">
                               star
                             </span>
                             <span className="text-sm font-medium text-[#1b130d]">
@@ -206,6 +217,7 @@ export default function Home() {
                               {restaurant.deliveryTime || "30-45 min"}
                             </span>
                           </div>
+                          <span>•</span>
                           <div className="flex items-center gap-1">
                             <span className="material-symbols-outlined text-base">
                               local_shipping
@@ -221,14 +233,42 @@ export default function Home() {
                 ))}
               </div>
             )}
-
-            {!loading && filteredRestaurants.length === 0 && (
-              <div className="flex justify-center items-center p-8">
-                <p className="text-[#9a6c4c]">Nenhum restaurante encontrado.</p>
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-12 border-t border-solid border-[#e7d9cf] px-4 py-8 bg-white">
+          <div className="flex w-full justify-center">
+            <div className="flex w-full max-w-6xl flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#1b130d]">UAIFOOD</h3>
+                <p className="text-sm text-[#9a6c4c]">
+                  © 2024. All Rights Reserved.
+                </p>
+              </div>
+              <div className="flex gap-6 text-sm">
+                <a
+                  className="text-[#9a6c4c] hover:text-[#ee7c2b] transition-colors"
+                  href="#"
+                >
+                  Sobre Nós
+                </a>
+                <a
+                  className="text-[#9a6c4c] hover:text-[#ee7c2b] transition-colors"
+                  href="#"
+                >
+                  Contato
+                </a>
+                <a
+                  className="text-[#9a6c4c] hover:text-[#ee7c2b] transition-colors"
+                  href="#"
+                >
+                  FAQ
+                </a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

@@ -29,16 +29,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
 
-      if (token && storedUser) {
+      if (
+        token &&
+        storedUser &&
+        storedUser !== "undefined" &&
+        storedUser !== "null"
+      ) {
         setUser(JSON.parse(storedUser));
         // Validar token com o backend
-        const profile = await authService.getProfile();
-        setUser(profile);
+        try {
+          const profile = await authService.getProfile();
+          setUser(profile);
+        } catch {
+          // Token inválido, limpar
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar usuário:", error);
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -46,16 +59,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(data: LoginRequest) {
     const response = await authService.login(data);
-    localStorage.setItem("token", response.access_token);
-    localStorage.setItem("user", JSON.stringify(response.user));
-    setUser(response.user);
+    localStorage.setItem("token", response.data.accessToken);
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+    setUser(response.data.user);
   }
 
   async function register(data: RegisterRequest) {
     const response = await authService.register(data);
-    localStorage.setItem("token", response.access_token);
-    localStorage.setItem("user", JSON.stringify(response.user));
-    setUser(response.user);
+    localStorage.setItem("token", response.data.accessToken);
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+    setUser(response.data.user);
   }
 
   function logout() {

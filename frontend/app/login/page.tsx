@@ -33,7 +33,10 @@ export default function LoginPage() {
 
     try {
       await login({ email: loginData.email, password: loginData.password });
-      router.push("/");
+      // Aguardar um pouco para o state ser atualizado antes de redirecionar
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "Erro ao fazer login");
@@ -54,7 +57,10 @@ export default function LoginPage() {
         password: registerData.password,
         phone: registerData.phone,
       });
-      router.push("/");
+      // Aguardar um pouco para o state ser atualizado antes de redirecionar
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "Erro ao criar conta");
@@ -97,10 +103,10 @@ export default function LoginPage() {
                 {/* Form Side */}
                 <div className="p-8 sm:p-10 flex flex-col">
                   <h1 className="text-[#1b130d] tracking-tight text-[32px] font-bold leading-tight text-left pb-3 pt-6">
-                    Welcome back!
+                    Bem-vindo de volta!
                   </h1>
                   <p className="text-slate-600 text-base mb-6">
-                    Your next meal is just a click away.
+                    Sua próxima refeição está a um clique de distância.
                   </p>
 
                   {/* Toggle */}
@@ -118,7 +124,7 @@ export default function LoginPage() {
                           checked={mode === "login"}
                           className="invisible w-0"
                           type="radio"
-                          value="Login"
+                          value="Entrar"
                           onChange={() => setMode("login")}
                         />
                       </label>
@@ -129,12 +135,12 @@ export default function LoginPage() {
                             : "text-[#9a6c4c]"
                         }`}
                       >
-                        <span className="truncate">Create Account</span>
+                        <span className="truncate">Criar Conta</span>
                         <input
                           checked={mode === "register"}
                           className="invisible w-0"
                           type="radio"
-                          value="Create Account"
+                          value="Criar Conta"
                           onChange={() => setMode("register")}
                         />
                       </label>
@@ -156,11 +162,11 @@ export default function LoginPage() {
                       <div className="flex max-w-full flex-wrap items-end gap-4 px-0 py-0">
                         <label className="flex flex-col min-w-40 flex-1">
                           <p className="text-[#1b130d] text-base font-medium leading-normal pb-2">
-                            Email
+                            E-mail
                           </p>
                           <input
                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-14 placeholder:text-[#9a6c4c] p-[15px] text-base font-normal leading-normal"
-                            placeholder="Enter your email"
+                            placeholder="Digite seu e-mail"
                             type="email"
                             value={loginData.email}
                             onChange={(e) =>
@@ -177,19 +183,19 @@ export default function LoginPage() {
                         <label className="flex flex-col min-w-40 flex-1">
                           <div className="flex justify-between items-center pb-2">
                             <p className="text-[#1b130d] text-base font-medium leading-normal">
-                              Password
+                              Senha
                             </p>
                             <a
                               className="text-sm text-[#ee7c2b] hover:underline"
                               href="#"
                             >
-                              Forgot Password?
+                              Esqueceu a senha?
                             </a>
                           </div>
                           <div className="relative flex w-full flex-1 items-stretch">
                             <input
                               className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-14 placeholder:text-[#9a6c4c] p-[15px] text-base font-normal leading-normal pr-12"
-                              placeholder="Enter your password"
+                              placeholder="Digite sua senha"
                               type={showPassword ? "text" : "password"}
                               value={loginData.password}
                               onChange={(e) =>
@@ -217,8 +223,8 @@ export default function LoginPage() {
                           shield
                         </span>
                         <p className="text-sm text-[#ee7c2b]/80">
-                          For your security, a verification code will be sent to
-                          your email.
+                          Para sua segurança, um código de verificação será
+                          enviado para seu e-mail.
                         </p>
                       </div>
                       <button
@@ -226,7 +232,7 @@ export default function LoginPage() {
                         type="submit"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Signing in..." : "Sign In"}
+                        {isLoading ? "Entrando..." : "Entrar"}
                       </button>
                     </form>
                   ) : (
@@ -237,11 +243,11 @@ export default function LoginPage() {
                       <div className="flex max-w-full flex-wrap items-end gap-4 px-0 py-0">
                         <label className="flex flex-col min-w-40 flex-1">
                           <p className="text-[#1b130d] text-base font-medium leading-normal pb-2">
-                            Full Name
+                            Nome Completo
                           </p>
                           <input
                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-14 placeholder:text-[#9a6c4c] p-[15px] text-base font-normal leading-normal"
-                            placeholder="Enter your full name"
+                            placeholder="Digite seu nome completo"
                             value={registerData.name}
                             onChange={(e) =>
                               setRegisterData({
@@ -256,11 +262,11 @@ export default function LoginPage() {
                       <div className="flex max-w-full flex-wrap items-end gap-4 px-0 py-0">
                         <label className="flex flex-col min-w-40 flex-1">
                           <p className="text-[#1b130d] text-base font-medium leading-normal pb-2">
-                            Email
+                            E-mail
                           </p>
                           <input
                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-14 placeholder:text-[#9a6c4c] p-[15px] text-base font-normal leading-normal"
-                            placeholder="Enter your email"
+                            placeholder="Digite seu e-mail"
                             type="email"
                             value={registerData.email}
                             onChange={(e) =>
@@ -276,11 +282,11 @@ export default function LoginPage() {
                       <div className="flex max-w-full flex-wrap items-end gap-4 px-0 py-0">
                         <label className="flex flex-col min-w-40 flex-1">
                           <p className="text-[#1b130d] text-base font-medium leading-normal pb-2">
-                            Phone
+                            Telefone
                           </p>
                           <input
                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-14 placeholder:text-[#9a6c4c] p-[15px] text-base font-normal leading-normal"
-                            placeholder="Enter your phone number"
+                            placeholder="Digite seu telefone"
                             type="tel"
                             value={registerData.phone}
                             onChange={(e) =>
@@ -295,12 +301,12 @@ export default function LoginPage() {
                       <div className="flex max-w-full flex-wrap items-end gap-4 px-0 py-0">
                         <label className="flex flex-col min-w-40 flex-1">
                           <p className="text-[#1b130d] text-base font-medium leading-normal pb-2">
-                            Password
+                            Senha
                           </p>
                           <div className="relative flex w-full flex-1 items-stretch">
                             <input
                               className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-14 placeholder:text-[#9a6c4c] p-[15px] text-base font-normal leading-normal pr-12"
-                              placeholder="Create a password"
+                              placeholder="Crie uma senha"
                               type={showPassword ? "text" : "password"}
                               value={registerData.password}
                               onChange={(e) =>
@@ -328,7 +334,7 @@ export default function LoginPage() {
                           shield
                         </span>
                         <p className="text-sm text-[#ee7c2b]/80">
-                          Your information is secure with us.
+                          Suas informações estão seguras conosco.
                         </p>
                       </div>
                       <button
@@ -336,7 +342,7 @@ export default function LoginPage() {
                         type="submit"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Creating Account..." : "Create Account"}
+                        {isLoading ? "Criando conta..." : "Criar Conta"}
                       </button>
                     </form>
                   )}

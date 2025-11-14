@@ -248,7 +248,7 @@ export default function Home() {
                           alt={restaurant.name}
                           className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                           src={
-                            restaurant.imageUrl ||
+                            restaurant.image ||
                             "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop"
                           }
                         />

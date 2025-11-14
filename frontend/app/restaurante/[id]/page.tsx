@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { restaurantService } from "@/services/restaurantService";
 import { productService } from "@/services/productService";
+import { logger } from "@/lib/logger";
 import { Restaurant, Product } from "@/types";
 
 export default function RestaurantDetailPage() {
@@ -28,20 +29,28 @@ export default function RestaurantDetailPage() {
         typeof params.id === "string" ? params.id : params.id?.[0];
 
       if (!restaurantId) {
+        logger.warn("ID do restaurante inválido");
         setError("ID do restaurante inválido");
         setLoading(false);
         return;
       }
+
+      logger.info("Carregando detalhes do restaurante", { restaurantId });
 
       const [restaurantData, productsData] = await Promise.all([
         restaurantService.getById(restaurantId),
         productService.getByRestaurantId(restaurantId),
       ]);
 
+      logger.info("Restaurante e produtos carregados com sucesso", {
+        restaurantName: restaurantData.name,
+        productCount: Array.isArray(productsData) ? productsData.length : 0,
+      });
+
       setRestaurant(restaurantData);
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch (err) {
-      console.error("Erro ao carregar restaurante:", err);
+      logger.error("Erro ao carregar restaurante", err);
       setError("Não foi possível carregar o restaurante");
     } finally {
       setLoading(false);

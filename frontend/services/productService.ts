@@ -7,13 +7,13 @@ export const productService = {
    * GET /products?restaurantId=:id&category=:category
    */
   async getAll(restaurantId?: string, category?: string): Promise<Product[]> {
-    const response = await api.get<Product[]>("/products", {
+    const response = await api.get<{ success: boolean; data: Product[]; timestamp: string }>("/products", {
       params: {
         ...(restaurantId && { restaurantId }),
         ...(category && { category }),
       },
     });
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -29,8 +29,8 @@ export const productService = {
    * GET /products/:id
    */
   async getById(id: string): Promise<Product> {
-    const response = await api.get<Product>(`/products/${id}`);
-    return response.data;
+    const response = await api.get<{ success: boolean; data: Product; timestamp: string }>(`/products/${id}`);
+    return response.data.data;
   },
 
   /**

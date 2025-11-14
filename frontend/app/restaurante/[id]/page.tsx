@@ -324,7 +324,7 @@ export default function RestaurantDetailPage() {
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-[#1b130d]">UAIFOOD</h3>
                 <p className="text-sm text-[#9a6c4c]">
-                  © 2024. All Rights Reserved.
+                  © 2025. All Rights Reserved.
                 </p>
               </div>
               <div className="flex gap-6 text-sm">

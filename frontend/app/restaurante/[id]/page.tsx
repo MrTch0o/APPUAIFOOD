@@ -70,7 +70,7 @@ export default function RestaurantDetailPage() {
           product.description?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
-
+  logger.info("Produtos filtrados", { filteredProducts });
   if (loading) {
     return (
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
@@ -276,7 +276,7 @@ export default function RestaurantDetailPage() {
                         alt={product.name}
                         className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                         src={
-                          product.imageUrl ||
+                          product.image ||
                           "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop"
                         }
                       />
@@ -307,7 +307,10 @@ export default function RestaurantDetailPage() {
                               router.push("/login");
                             } else {
                               // TODO: Adicionar ao carrinho
-                              console.log("Adicionar ao carrinho:", product.id);
+                              logger.info("Adicionar ao carrinho", {
+                                productId: product.id,
+                                productName: product.name,
+                              });
                             }
                           }}
                           disabled={!product.isAvailable}

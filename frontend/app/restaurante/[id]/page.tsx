@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +9,7 @@ import { productService } from "@/services/productService";
 import { Restaurant, Product } from "@/types";
 
 export default function RestaurantDetailPage() {
-  const { id } = useParams();
+  const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -19,18 +19,19 @@ export default function RestaurantDetailPage() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    if (id) {
-      loadRestaurantAndProducts();
-    }
-  }, [id]);
-
-  const loadRestaurantAndProducts = async () => {
+  const loadRestaurantAndProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
 
-      const restaurantId = Array.isArray(id) ? id[0] : id;
+      const restaurantId =
+        typeof params.id === "string" ? params.id : params.id?.[0];
+
+      if (!restaurantId) {
+        setError("ID do restaurante inválido");
+        setLoading(false);
+        return;
+      }
 
       const [restaurantData, productsData] = await Promise.all([
         restaurantService.getById(restaurantId),
@@ -45,7 +46,13 @@ export default function RestaurantDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    if (params?.id) {
+      loadRestaurantAndProducts();
+    }
+  }, [params?.id, loadRestaurantAndProducts]);
 
   const filteredProducts = Array.isArray(products)
     ? products.filter(

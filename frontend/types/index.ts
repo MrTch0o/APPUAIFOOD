@@ -39,8 +39,8 @@ export interface Restaurant {
   description: string;
   address: string;
   phone: string;
-  imageUrl?: string;
   image?: string;
+  imageUrl?: string;
   category?: string;
   rating?: number;
   deliveryTime?: string;
@@ -56,9 +56,11 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  image?: string | null;
   imageUrl?: string;
   category: string;
-  isAvailable: boolean;
+  available: boolean;
+  isAvailable?: boolean;
   restaurantId: string;
   restaurant?: Restaurant;
   createdAt: string;

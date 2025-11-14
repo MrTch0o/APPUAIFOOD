@@ -70,7 +70,7 @@ export default function RestaurantDetailPage() {
           product.description?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
-  logger.info("Produtos filtrados", { filteredProducts });
+
   if (loading) {
     return (
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
@@ -189,7 +189,7 @@ export default function RestaurantDetailPage() {
                   alt={restaurant.name}
                   className="h-full w-full object-cover"
                   src={
-                    restaurant.imageUrl ||
+                    restaurant.image ||
                     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&h=400&fit=crop"
                   }
                 />
@@ -280,7 +280,7 @@ export default function RestaurantDetailPage() {
                           "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop"
                         }
                       />
-                      {!product.isAvailable && (
+                      {!product.available && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                           <span className="text-white font-bold">
                             Indisponível
@@ -313,7 +313,7 @@ export default function RestaurantDetailPage() {
                               });
                             }
                           }}
-                          disabled={!product.isAvailable}
+                          disabled={!product.available}
                           className="flex h-10 px-4 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#ee7c2b] text-white text-sm font-bold hover:bg-[#ee7c2b]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <span className="material-symbols-outlined text-lg">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { restaurantService } from "@/services/restaurantService";
+import { logger } from "@/lib/logger";
 import { Restaurant } from "@/types";
 
 export default function Home() {
@@ -20,9 +21,13 @@ export default function Home() {
   const loadRestaurants = async () => {
     try {
       const data = await restaurantService.getAll();
+      logger.info("Restaurantes carregados com sucesso", {
+        count: Array.isArray(data) ? data.length : 0,
+        data,
+      });
       setRestaurants(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erro ao carregar restaurantes:", error);
+      logger.error("Erro ao carregar restaurantes", error);
       setRestaurants([]);
     } finally {
       setLoading(false);

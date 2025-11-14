@@ -7,7 +7,11 @@ export const restaurantService = {
    * GET /restaurants
    */
   async getAll(): Promise<Restaurant[]> {
-    const response = await api.get<{ success: boolean; data: Restaurant[]; timestamp: string }>("/restaurants");
+    const response = await api.get<{
+      success: boolean;
+      data: Restaurant[];
+      timestamp: string;
+    }>("/restaurants");
     return response.data.data;
   },
 
@@ -16,7 +20,11 @@ export const restaurantService = {
    * GET /restaurants/:id
    */
   async getById(id: string): Promise<Restaurant> {
-    const response = await api.get<{ success: boolean; data: Restaurant; timestamp: string }>(`/restaurants/${id}`);
+    const response = await api.get<{
+      success: boolean;
+      data: Restaurant;
+      timestamp: string;
+    }>(`/restaurants/${id}`);
     return response.data.data;
   },
 };

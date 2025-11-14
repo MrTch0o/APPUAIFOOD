@@ -40,6 +40,8 @@ export interface Restaurant {
   address: string;
   phone: string;
   imageUrl?: string;
+  image?: string;
+  category?: string;
   rating?: number;
   deliveryTime?: string;
   deliveryFee?: number;

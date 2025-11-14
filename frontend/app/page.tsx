@@ -11,6 +11,7 @@ export default function Home() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   useEffect(() => {
     loadRestaurants();
@@ -31,10 +32,11 @@ export default function Home() {
   const filteredRestaurants = Array.isArray(restaurants)
     ? restaurants.filter(
         (restaurant) =>
-          restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          restaurant.description
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
+          (restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            restaurant.description
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase())) &&
+          (selectedCategory === "" || restaurant.category === selectedCategory)
       )
     : [];
 
@@ -120,42 +122,97 @@ export default function Home() {
             {/* Category Chips */}
             <div className="w-full overflow-x-auto p-4">
               <div className="flex gap-3 whitespace-nowrap">
-                <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#ee7c2b] pl-3 pr-4 text-white transition-transform hover:scale-105">
+                <button
+                  onClick={() => setSelectedCategory("")}
+                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
+                    selectedCategory === ""
+                      ? "bg-[#ee7c2b] text-white"
+                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    all_inclusive
+                  </span>
+                  <p className="text-sm font-medium leading-normal">Todos</p>
+                </button>
+                <button
+                  onClick={() => setSelectedCategory("PIZZA")}
+                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
+                    selectedCategory === "PIZZA"
+                      ? "bg-[#ee7c2b] text-white"
+                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-xl">
                     local_pizza
                   </span>
                   <p className="text-sm font-medium leading-normal">Pizzas</p>
-                </div>
-                <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#f3ece7] pl-3 pr-4 hover:bg-[#ee7c2b]/20 transition-transform hover:scale-105">
+                </button>
+                <button
+                  onClick={() => setSelectedCategory("Hamburgueria")}
+                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
+                    selectedCategory === "Hamburgueria"
+                      ? "bg-[#ee7c2b] text-white"
+                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-xl">
                     lunch_dining
                   </span>
                   <p className="text-sm font-medium leading-normal">Burgers</p>
-                </div>
-                <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#f3ece7] pl-3 pr-4 hover:bg-[#ee7c2b]/20 transition-transform hover:scale-105">
+                </button>
+                <button
+                  onClick={() => setSelectedCategory("Marmitas")}
+                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
+                    selectedCategory === "Marmitas"
+                      ? "bg-[#ee7c2b] text-white"
+                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-xl">
                     restaurant
                   </span>
                   <p className="text-sm font-medium leading-normal">Marmitas</p>
-                </div>
-                <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#f3ece7] pl-3 pr-4 hover:bg-[#ee7c2b]/20 transition-transform hover:scale-105">
+                </button>
+                <button
+                  onClick={() => setSelectedCategory("Japonesa")}
+                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
+                    selectedCategory === "Japonesa"
+                      ? "bg-[#ee7c2b] text-white"
+                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-xl">
                     set_meal
                   </span>
                   <p className="text-sm font-medium leading-normal">Sushi</p>
-                </div>
-                <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#f3ece7] pl-3 pr-4 hover:bg-[#ee7c2b]/20 transition-transform hover:scale-105">
+                </button>
+                <button
+                  onClick={() => setSelectedCategory("Brasileira")}
+                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
+                    selectedCategory === "Brasileira"
+                      ? "bg-[#ee7c2b] text-white"
+                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-xl">eco</span>
                   <p className="text-sm font-medium leading-normal">Saudável</p>
-                </div>
-                <div className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#f3ece7] pl-3 pr-4 hover:bg-[#ee7c2b]/20 transition-transform hover:scale-105">
+                </button>
+                <button
+                  onClick={() => setSelectedCategory("Pizzaria")}
+                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
+                    selectedCategory === "Pizzaria"
+                      ? "bg-[#ee7c2b] text-white"
+                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-xl">
                     icecream
                   </span>
                   <p className="text-sm font-medium leading-normal">
                     Sobremesas
                   </p>
-                </div>
+                </button>
               </div>
             </div>
 

@@ -13,6 +13,7 @@ import {
   UploadedFile,
   BadRequestException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiTags,
   ApiOperation,
@@ -38,7 +39,10 @@ import { UserRole } from '@prisma/client';
 @Controller('restaurants')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class RestaurantsController {
-  constructor(private readonly restaurantsService: RestaurantsService) {}
+  constructor(
+    private readonly restaurantsService: RestaurantsService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post()
   @Roles(UserRole.ADMIN)
@@ -153,7 +157,9 @@ export class RestaurantsController {
       throw new BadRequestException('Nenhum arquivo foi enviado');
     }
 
-    const imageUrl = `/uploads/${file.filename}`;
+    // Construir URL completa da imagem
+    const baseUrl = this.configService.get<string>('baseUrl');
+    const imageUrl = `${baseUrl}/uploads/${file.filename}`;
     return this.restaurantsService.updateImage(id, imageUrl);
   }
 }

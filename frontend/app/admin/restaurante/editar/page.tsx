@@ -35,10 +35,6 @@ export default function EditarRestaurantePage() {
   });
 
   useEffect(() => {
-    // Debug: logar configuração de ambiente
-    logger.info("Configuração de API", {
-      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    });
     loadRestaurants();
   }, []);
 
@@ -87,23 +83,9 @@ export default function EditarRestaurantePage() {
       });
 
       if (data.image) {
-        // Construir URL completa da imagem se for caminho relativo
-        let imageUrl = data.image;
-        if (imageUrl.startsWith("/uploads/")) {
-          // Remover /api do final da URL base para obter o servidor raiz
-          const apiBaseUrl =
-            process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
-            "http://localhost:3000";
-          imageUrl = `${apiBaseUrl}${imageUrl}`;
-          logger.info("URL construída", {
-            originalPath: data.image,
-            apiBaseUrl: process.env.NEXT_PUBLIC_API_URL,
-            baseUrl: apiBaseUrl,
-            finalUrl: imageUrl,
-          });
-        }
-        setImagePreview(imageUrl);
-        logger.info("Imagem carregada", { imageUrl });
+        // Imagem já vem com URL completa do backend
+        setImagePreview(data.image);
+        logger.info("Imagem carregada", { imageUrl: data.image });
       }
 
       logger.info("Restaurante carregado com sucesso", { name: data.name });

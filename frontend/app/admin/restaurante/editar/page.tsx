@@ -35,6 +35,10 @@ export default function EditarRestaurantePage() {
   });
 
   useEffect(() => {
+    // Debug: logar configuração de ambiente
+    logger.info("Configuração de API", {
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    });
     loadRestaurants();
   }, []);
 
@@ -91,6 +95,12 @@ export default function EditarRestaurantePage() {
             process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
             "http://localhost:3000";
           imageUrl = `${apiBaseUrl}${imageUrl}`;
+          logger.info("URL construída", {
+            originalPath: data.image,
+            apiBaseUrl: process.env.NEXT_PUBLIC_API_URL,
+            baseUrl: apiBaseUrl,
+            finalUrl: imageUrl,
+          });
         }
         setImagePreview(imageUrl);
         logger.info("Imagem carregada", { imageUrl });

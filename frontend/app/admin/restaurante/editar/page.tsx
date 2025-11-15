@@ -86,8 +86,10 @@ export default function EditarRestaurantePage() {
         // Construir URL completa da imagem se for caminho relativo
         let imageUrl = data.image;
         if (imageUrl.startsWith("/uploads/")) {
+          // Remover /api do final da URL base para obter o servidor raiz
           const apiBaseUrl =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+            process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
+            "http://localhost:3000";
           imageUrl = `${apiBaseUrl}${imageUrl}`;
         }
         setImagePreview(imageUrl);

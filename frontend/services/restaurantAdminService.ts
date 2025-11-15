@@ -59,10 +59,13 @@ export const restaurantAdminService = {
   async getMyRestaurant(): Promise<Restaurant> {
     const response = await api.get<{
       success: boolean;
-      data: Restaurant;
+      data: {
+        message: string;
+        restaurant: Restaurant;
+      };
       timestamp: string;
     }>("/restaurants/me");
-    return response.data.data;
+    return response.data.data.restaurant;
   },
 
   /**

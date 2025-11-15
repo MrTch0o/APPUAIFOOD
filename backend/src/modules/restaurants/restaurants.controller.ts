@@ -61,6 +61,20 @@ export class RestaurantsController {
     return this.restaurantsService.findAll();
   }
 
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obter restaurante do usuário logado (ADMIN ou OWNER)',
+  })
+  @ApiResponse({ status: 200, description: 'Restaurante encontrado' })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não tem restaurante vinculado',
+  })
+  getMyRestaurant(@CurrentUser() user: JwtPayload) {
+    return this.restaurantsService.getByOwnerId(user.sub);
+  }
+
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Buscar detalhes de um restaurante' })

@@ -25,6 +25,7 @@ export class RestaurantsService {
         openingHours: true,
         deliveryFee: true,
         deliveryTime: true,
+        minimumOrder: true,
         category: true,
         image: true,
         isActive: true,
@@ -32,10 +33,7 @@ export class RestaurantsService {
       },
     });
 
-    return {
-      message: 'Restaurante criado com sucesso',
-      restaurant,
-    };
+    return restaurant;
   }
 
   /**
@@ -102,6 +100,42 @@ export class RestaurantsService {
   }
 
   /**
+   * Busca o restaurante do usuário logado (por ownerId)
+   */
+  async getByOwnerId(ownerId: string) {
+    const restaurant = await this.prisma.restaurant.findFirst({
+      where: { ownerId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        minimumOrder: true,
+        category: true,
+        image: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException(
+        'Nenhum restaurante encontrado para este usuário',
+      );
+    }
+
+    return {
+      message: 'Restaurante do usuário encontrado',
+      restaurant,
+    };
+  }
+
+  /**
    * Atualiza um restaurante
    */
   async update(id: string, updateRestaurantDto: UpdateRestaurantDto) {
@@ -120,6 +154,7 @@ export class RestaurantsService {
         openingHours: true,
         deliveryFee: true,
         deliveryTime: true,
+        minimumOrder: true,
         category: true,
         image: true,
         isActive: true,
@@ -127,10 +162,7 @@ export class RestaurantsService {
       },
     });
 
-    return {
-      message: 'Restaurante atualizado com sucesso',
-      restaurant,
-    };
+    return restaurant;
   }
 
   /**
@@ -162,14 +194,20 @@ export class RestaurantsService {
       select: {
         id: true,
         name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        minimumOrder: true,
+        category: true,
         image: true,
+        isActive: true,
         updatedAt: true,
       },
     });
 
-    return {
-      message: 'Imagem do restaurante atualizada com sucesso',
-      restaurant,
-    };
+    return restaurant;
   }
 }

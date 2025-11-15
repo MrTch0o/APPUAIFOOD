@@ -36,6 +36,7 @@ export default function EditarRestaurantePage() {
 
   useEffect(() => {
     loadRestaurants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadRestaurants = async () => {

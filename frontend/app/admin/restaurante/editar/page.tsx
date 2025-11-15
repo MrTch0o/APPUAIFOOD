@@ -83,7 +83,15 @@ export default function EditarRestaurantePage() {
       });
 
       if (data.image) {
-        setImagePreview(data.image);
+        // Construir URL completa da imagem se for caminho relativo
+        let imageUrl = data.image;
+        if (imageUrl.startsWith("/uploads/")) {
+          const apiBaseUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+          imageUrl = `${apiBaseUrl}${imageUrl}`;
+        }
+        setImagePreview(imageUrl);
+        logger.info("Imagem carregada", { imageUrl });
       }
 
       logger.info("Restaurante carregado com sucesso", { name: data.name });

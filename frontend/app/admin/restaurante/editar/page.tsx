@@ -7,6 +7,7 @@ import {
   restaurantAdminService,
   UpdateRestaurantRequest,
 } from "@/services/restaurantAdminService";
+import { restaurantService } from "@/services/restaurantService";
 import { logger } from "@/lib/logger";
 import { Restaurant } from "@/types";
 
@@ -66,19 +67,8 @@ export default function EditarRestaurantePage() {
       setLoading(true);
       logger.info("Carregando dados do restaurante", { restaurantId });
 
-      // Buscar restaurante específico
-      const response = await fetch(`/api/restaurants/${restaurantId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao carregar restaurante");
-      }
-
-      const json = await response.json();
-      const data = json.data;
+      // Buscar restaurante específico usando o serviço
+      const data = await restaurantService.getById(restaurantId);
 
       setRestaurant(data);
       setFormData({

@@ -45,6 +45,9 @@ export interface Restaurant {
   rating?: number;
   deliveryTime?: string;
   deliveryFee?: number;
+  minimumOrder?: number;
+  ownerId?: string;
+  openingHours?: Record<string, string> | string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

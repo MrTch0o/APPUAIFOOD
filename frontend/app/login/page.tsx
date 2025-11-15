@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/lib/logger";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,14 +33,21 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      logger.info("Iniciando login via formulário", {
+        email: loginData.email,
+      });
       await login({ email: loginData.email, password: loginData.password });
+      logger.info("Login bem-sucedido, redirecionando");
       // Aguardar um pouco para o state ser atualizado antes de redirecionar
       setTimeout(() => {
         router.push("/");
       }, 500);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || "Erro ao fazer login");
+      const errorMessage =
+        error.response?.data?.message || "Erro ao fazer login";
+      logger.error("Erro ao fazer login", { error: errorMessage });
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -51,19 +59,27 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      logger.info("Iniciando registro via formulário", {
+        name: registerData.name,
+        email: registerData.email,
+      });
       await register({
         name: registerData.name,
         email: registerData.email,
         password: registerData.password,
         phone: registerData.phone,
       });
+      logger.info("Registro bem-sucedido, redirecionando");
       // Aguardar um pouco para o state ser atualizado antes de redirecionar
       setTimeout(() => {
         router.push("/");
       }, 500);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || "Erro ao criar conta");
+      const errorMessage =
+        error.response?.data?.message || "Erro ao criar conta";
+      logger.error("Erro ao fazer registro", { error: errorMessage });
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

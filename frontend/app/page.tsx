@@ -109,7 +109,10 @@ export default function Home() {
                               </span>
                             )}
                           </div>
-                          <Link href="/perfil">
+                          <Link
+                            href="/perfil"
+                            onClick={() => setShowUserMenu(false)}
+                          >
                             <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors">
                               <span className="material-symbols-outlined text-lg">
                                 person
@@ -117,7 +120,10 @@ export default function Home() {
                               Meu Perfil
                             </button>
                           </Link>
-                          <Link href="/meus-pedidos">
+                          <Link
+                            href="/meus-pedidos"
+                            onClick={() => setShowUserMenu(false)}
+                          >
                             <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors">
                               <span className="material-symbols-outlined text-lg">
                                 history
@@ -126,7 +132,10 @@ export default function Home() {
                             </button>
                           </Link>
                           {user.role === "ADMIN" && (
-                            <Link href="/admin/restaurante">
+                            <Link
+                              href="/admin/restaurante"
+                              onClick={() => setShowUserMenu(false)}
+                            >
                               <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors border-t border-[#e7d9cf] border-b">
                                 <span className="material-symbols-outlined text-lg">
                                   storefront

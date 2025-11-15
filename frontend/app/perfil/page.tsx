@@ -138,7 +138,10 @@ export default function ProfilePage() {
       await userService.deleteAccount();
       logger.info("Conta deletada com sucesso");
       logout();
-      router.push("/");
+      // O logout agora não redireciona automaticamente, então fazemos manualmente
+      setTimeout(() => {
+        router.push("/login");
+      }, 500);
     } catch (error) {
       logger.error("Erro ao deletar conta", error);
       setErrorMessage("Erro ao deletar conta. Tente novamente.");

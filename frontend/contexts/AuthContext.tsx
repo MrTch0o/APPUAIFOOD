@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
+import { logger } from "@/lib/logger";
 import { User, LoginRequest, RegisterRequest } from "@/types";
 
 interface AuthContextData {
@@ -18,7 +18,6 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     loadUserFromStorage();
@@ -39,16 +38,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Validar token com o backend
         try {
           const profile = await authService.getProfile();
+          logger.info("Token validado com sucesso");
           setUser(profile);
         } catch {
           // Token inválido, limpar
+          logger.warn("Token inválido, removendo dados de sessão");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           setUser(null);
         }
       }
     } catch (error) {
-      console.error("Erro ao carregar usuário:", error);
+      logger.error("Erro ao carregar usuário do storage", error);
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       setUser(null);
@@ -58,24 +59,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function login(data: LoginRequest) {
-    const response = await authService.login(data);
-    localStorage.setItem("token", response.data.accessToken);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    setUser(response.data.user);
+    try {
+      logger.info("Iniciando login", { email: data.email });
+      const response = await authService.login(data);
+      localStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      setUser(response.data.user);
+      logger.info("Login realizado com sucesso", {
+        userName: response.data.user.name,
+      });
+    } catch (error) {
+      logger.error("Erro ao fazer login", error);
+      throw error;
+    }
   }
 
   async function register(data: RegisterRequest) {
-    const response = await authService.register(data);
-    localStorage.setItem("token", response.data.accessToken);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    setUser(response.data.user);
+    try {
+      logger.info("Iniciando registro", { name: data.name, email: data.email });
+      const response = await authService.register(data);
+      localStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      setUser(response.data.user);
+      logger.info("Registro realizado com sucesso", {
+        userName: response.data.user.name,
+      });
+    } catch (error) {
+      logger.error("Erro ao fazer registro", error);
+      throw error;
+    }
   }
 
   function logout() {
+    logger.info("Usuário fazendo logout");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    router.push("/login");
   }
 
   return (

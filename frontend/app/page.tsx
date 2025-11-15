@@ -8,11 +8,12 @@ import { logger } from "@/lib/logger";
 import { Restaurant } from "@/types";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     loadRestaurants();
@@ -51,8 +52,11 @@ export default function Home() {
         <div className="flex flex-1 justify-center py-5">
           <div className="flex w-full max-w-6xl flex-col px-4">
             {/* Header */}
-            <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7d9cf] px-2 md:px-6 lg:px-10 py-3 mb-6">
-              <div className="flex items-center gap-4">
+            <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7d9cf] px-2 md:px-6 lg:px-10 py-3 mb-6 bg-white">
+              <Link
+                href="/"
+                className="flex items-center gap-4 hover:opacity-80 transition-opacity"
+              >
                 <div className="size-6 text-[#ee7c2b]">
                   <svg
                     fill="currentColor"
@@ -69,17 +73,10 @@ export default function Home() {
                 <h2 className="text-[#1b130d] text-lg font-bold leading-tight tracking-[-0.015em]">
                   UAIFOOD
                 </h2>
-              </div>
-              <div className="flex gap-2">
+              </Link>
+              <div className="flex gap-2 items-center">
                 {user ? (
                   <>
-                    <Link href="/meus-pedidos">
-                      <button className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#ee7c2b]/20 transition-colors">
-                        <span className="material-symbols-outlined text-xl">
-                          person
-                        </span>
-                      </button>
-                    </Link>
                     <Link href="/carrinho">
                       <button className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#ee7c2b]/20 transition-colors">
                         <span className="material-symbols-outlined text-xl">
@@ -87,6 +84,72 @@ export default function Home() {
                         </span>
                       </button>
                     </Link>
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowUserMenu(!showUserMenu)}
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#ee7c2b] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#ee7c2b]/90 transition-colors"
+                        title={user.name}
+                      >
+                        <span className="material-symbols-outlined text-xl">
+                          account_circle
+                        </span>
+                      </button>
+                      {showUserMenu && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#e7d9cf] py-2 z-50">
+                          <div className="px-4 py-2 border-b border-[#e7d9cf]">
+                            <p className="font-semibold text-[#1b130d] truncate">
+                              {user.name}
+                            </p>
+                            <p className="text-xs text-[#9a6c4c] truncate">
+                              {user.email}
+                            </p>
+                            {user.role === "ADMIN" && (
+                              <span className="inline-block mt-2 text-xs font-semibold text-white bg-[#ee7c2b] px-2 py-1 rounded">
+                                Admin
+                              </span>
+                            )}
+                          </div>
+                          <Link href="/perfil">
+                            <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors">
+                              <span className="material-symbols-outlined text-lg">
+                                person
+                              </span>
+                              Meu Perfil
+                            </button>
+                          </Link>
+                          <Link href="/meus-pedidos">
+                            <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors">
+                              <span className="material-symbols-outlined text-lg">
+                                history
+                              </span>
+                              Meus Pedidos
+                            </button>
+                          </Link>
+                          {user.role === "ADMIN" && (
+                            <Link href="/admin/restaurante">
+                              <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors border-t border-[#e7d9cf] border-b">
+                                <span className="material-symbols-outlined text-lg">
+                                  storefront
+                                </span>
+                                Admin
+                              </button>
+                            </Link>
+                          )}
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              logout();
+                            }}
+                            className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-lg">
+                              logout
+                            </span>
+                            Sair
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <Link href="/login">

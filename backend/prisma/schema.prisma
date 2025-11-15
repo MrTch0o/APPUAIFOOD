@@ -27,6 +27,40 @@ enum OrderStatus {
 }
 
 // Models
+model RestaurantCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  icon        String?
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  restaurants Restaurant[]
+
+  @@index([isActive])
+  @@map("restaurant_categories")
+}
+
+model ProductCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  icon        String?
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  products    Product[]
+
+  @@index([isActive])
+  @@map("product_categories")
+}
+
 model User {
   id          String   @id @default(uuid())
   email       String   @unique
@@ -56,7 +90,6 @@ model Restaurant {
   name          String
   description   String?
   image         String?
-  category      String
   rating        Float   @default(0)
   deliveryTime  String  @map("delivery_time")
   deliveryFee   Float   @map("delivery_fee")
@@ -66,18 +99,21 @@ model Restaurant {
   phone         String
   openingHours  Json?   @map("opening_hours")
   
-  ownerId       String  @map("owner_id")
+  ownerId           String  @map("owner_id")
+  restaurantCategoryId String  @map("restaurant_category_id")
   
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
-  owner         User      @relation("RestaurantOwner", fields: [ownerId], references: [id])
+  owner         User                 @relation("RestaurantOwner", fields: [ownerId], references: [id])
+  category      RestaurantCategory   @relation(fields: [restaurantCategoryId], references: [id])
   products      Product[]
   orders        Order[]
   reviews       Review[]
 
   @@index([ownerId])
+  @@index([restaurantCategoryId])
   @@map("restaurants")
 }
 
@@ -87,21 +123,23 @@ model Product {
   description     String?
   price           Float
   image           String?
-  category        String
   available       Boolean @default(true)
   preparationTime Int?    @map("preparation_time")
   
-  restaurantId    String  @map("restaurant_id")
+  restaurantId     String  @map("restaurant_id")
+  productCategoryId String  @map("product_category_id")
   
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   // Relations
-  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  orderItems      OrderItem[]
-  cartItems       CartItem[]
+  restaurant       Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  category         ProductCategory   @relation(fields: [productCategoryId], references: [id])
+  orderItems       OrderItem[]
+  cartItems        CartItem[]
 
   @@index([restaurantId])
+  @@index([productCategoryId])
   @@map("products")
 }
 

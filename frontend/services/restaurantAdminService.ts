@@ -6,7 +6,7 @@ export interface CreateRestaurantRequest {
   description: string;
   address: string;
   phone: string;
-  category: string;
+  restaurantCategoryId: string;
   deliveryFee: number;
   deliveryTime: string;
   minimumOrder?: number;
@@ -18,7 +18,7 @@ export interface UpdateRestaurantRequest {
   description?: string;
   address?: string;
   phone?: string;
-  category?: string;
+  restaurantCategoryId?: string;
   deliveryFee?: number;
   deliveryTime?: string;
   minimumOrder?: number;

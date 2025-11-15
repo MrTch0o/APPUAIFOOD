@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   restaurantAdminService,
   CreateRestaurantRequest,
 } from "@/services/restaurantAdminService";
+import {
+  restaurantCategoryService,
+  RestaurantCategory,
+} from "@/services/categoryService";
 import { logger } from "@/lib/logger";
 
 export default function CadastroRestaurantePage() {
@@ -17,17 +22,36 @@ export default function CadastroRestaurantePage() {
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<RestaurantCategory[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   const [formData, setFormData] = useState<CreateRestaurantRequest>({
     name: "",
     description: "",
     address: "",
     phone: "",
-    category: "",
+    restaurantCategoryId: "",
     deliveryFee: 0,
     deliveryTime: "",
     minimumOrder: 0,
   });
+
+  // Carregar categorias ao montar o componente
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await restaurantCategoryService.getAll(true);
+        setCategories(data);
+      } catch (err) {
+        logger.error("Erro ao carregar categorias", err);
+        setError("Erro ao carregar categorias. Tente recarregar a página.");
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   if (!user || user.role !== "ADMIN") {
     return (
@@ -123,7 +147,7 @@ export default function CadastroRestaurantePage() {
       if (!formData.phone.trim()) {
         throw new Error("Telefone é obrigatório");
       }
-      if (!formData.category.trim()) {
+      if (!formData.restaurantCategoryId.trim()) {
         throw new Error("Categoria é obrigatória");
       }
       if (formData.deliveryFee <= 0) {
@@ -217,10 +241,12 @@ export default function CadastroRestaurantePage() {
                 <div className="flex flex-col gap-4">
                   {imagePreview && (
                     <div className="relative h-40 w-full overflow-hidden rounded-lg">
-                      <img
+                      <Image
                         alt="Preview"
                         className="h-full w-full object-cover"
                         src={imagePreview}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 100vw"
                       />
                     </div>
                   )}
@@ -301,20 +327,25 @@ export default function CadastroRestaurantePage() {
                 <label className="block text-[#1b130d] font-bold mb-2">
                   Categoria *
                 </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
-                >
-                  <option value="">Selecione uma categoria</option>
-                  <option value="PIZZA">Pizzaria</option>
-                  <option value="Hamburgueria">Hamburgueria</option>
-                  <option value="Brasileira">Brasileira</option>
-                  <option value="Japonesa">Japonesa</option>
-                  <option value="Marmitas">Marmitas</option>
-                  <option value="Pizzaria">Sobremesas</option>
-                </select>
+                {loadingCategories ? (
+                  <div className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d]">
+                    Carregando categorias...
+                  </div>
+                ) : (
+                  <select
+                    name="restaurantCategoryId"
+                    value={formData.restaurantCategoryId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Delivery Fee */}

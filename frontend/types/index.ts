@@ -42,6 +42,7 @@ export interface Restaurant {
   image?: string;
   imageUrl?: string;
   category?: string;
+  restaurantCategoryId?: string;
   rating?: number;
   deliveryTime?: string;
   deliveryFee?: number;

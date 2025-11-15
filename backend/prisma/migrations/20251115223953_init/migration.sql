@@ -5,6 +5,32 @@ CREATE TYPE "UserRole" AS ENUM ('CLIENT', 'RESTAURANT_OWNER', 'ADMIN');
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED');
 
 -- CreateTable
+CREATE TABLE "restaurant_categories" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "icon" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "restaurant_categories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "product_categories" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "icon" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "product_categories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -27,7 +53,6 @@ CREATE TABLE "restaurants" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "image" TEXT,
-    "category" TEXT NOT NULL,
     "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "delivery_time" TEXT NOT NULL,
     "delivery_fee" DOUBLE PRECISION NOT NULL,
@@ -37,6 +62,7 @@ CREATE TABLE "restaurants" (
     "phone" TEXT NOT NULL,
     "opening_hours" JSONB,
     "owner_id" TEXT NOT NULL,
+    "restaurant_category_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -50,10 +76,10 @@ CREATE TABLE "products" (
     "description" TEXT,
     "price" DOUBLE PRECISION NOT NULL,
     "image" TEXT,
-    "category" TEXT NOT NULL,
     "available" BOOLEAN NOT NULL DEFAULT true,
     "preparation_time" INTEGER,
     "restaurant_id" TEXT NOT NULL,
+    "product_category_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -125,6 +151,30 @@ CREATE TABLE "reviews" (
     CONSTRAINT "reviews_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "cart_items" (
+    "id" TEXT NOT NULL,
+    "quantity" INTEGER NOT NULL DEFAULT 1,
+    "user_id" TEXT NOT NULL,
+    "product_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "cart_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "restaurant_categories_name_key" ON "restaurant_categories"("name");
+
+-- CreateIndex
+CREATE INDEX "restaurant_categories_is_active_idx" ON "restaurant_categories"("is_active");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "product_categories_name_key" ON "product_categories"("name");
+
+-- CreateIndex
+CREATE INDEX "product_categories_is_active_idx" ON "product_categories"("is_active");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -132,7 +182,13 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE INDEX "restaurants_owner_id_idx" ON "restaurants"("owner_id");
 
 -- CreateIndex
+CREATE INDEX "restaurants_restaurant_category_id_idx" ON "restaurants"("restaurant_category_id");
+
+-- CreateIndex
 CREATE INDEX "products_restaurant_id_idx" ON "products"("restaurant_id");
+
+-- CreateIndex
+CREATE INDEX "products_product_category_id_idx" ON "products"("product_category_id");
 
 -- CreateIndex
 CREATE INDEX "orders_user_id_idx" ON "orders"("user_id");
@@ -158,11 +214,26 @@ CREATE UNIQUE INDEX "reviews_order_id_key" ON "reviews"("order_id");
 -- CreateIndex
 CREATE INDEX "reviews_restaurant_id_idx" ON "reviews"("restaurant_id");
 
+-- CreateIndex
+CREATE INDEX "cart_items_user_id_idx" ON "cart_items"("user_id");
+
+-- CreateIndex
+CREATE INDEX "cart_items_product_id_idx" ON "cart_items"("product_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "cart_items_user_id_product_id_key" ON "cart_items"("user_id", "product_id");
+
 -- AddForeignKey
 ALTER TABLE "restaurants" ADD CONSTRAINT "restaurants_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "restaurants" ADD CONSTRAINT "restaurants_restaurant_category_id_fkey" FOREIGN KEY ("restaurant_category_id") REFERENCES "restaurant_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "products" ADD CONSTRAINT "products_restaurant_id_fkey" FOREIGN KEY ("restaurant_id") REFERENCES "restaurants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "products" ADD CONSTRAINT "products_product_category_id_fkey" FOREIGN KEY ("product_category_id") REFERENCES "product_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -190,3 +261,9 @@ ALTER TABLE "reviews" ADD CONSTRAINT "reviews_restaurant_id_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "reviews" ADD CONSTRAINT "reviews_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;

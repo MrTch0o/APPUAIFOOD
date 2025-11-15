@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   restaurantAdminService,
   UpdateRestaurantRequest,
 } from "@/services/restaurantAdminService";
 import { restaurantService } from "@/services/restaurantService";
+import {
+  restaurantCategoryService,
+  RestaurantCategory,
+} from "@/services/categoryService";
 import { logger } from "@/lib/logger";
 import { Restaurant } from "@/types";
 
@@ -22,22 +27,36 @@ export default function EditarRestaurantePage() {
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<RestaurantCategory[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   const [formData, setFormData] = useState<UpdateRestaurantRequest>({
     name: "",
     description: "",
     address: "",
     phone: "",
-    category: "",
+    restaurantCategoryId: "",
     deliveryFee: 0,
     deliveryTime: "",
     minimumOrder: 0,
   });
 
   useEffect(() => {
+    loadCategories();
     loadRestaurants();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const data = await restaurantCategoryService.getAll(true);
+      setCategories(data);
+    } catch (err) {
+      logger.error("Erro ao carregar categorias", err);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const loadRestaurants = async () => {
     try {
@@ -77,7 +96,7 @@ export default function EditarRestaurantePage() {
         description: data.description,
         address: data.address,
         phone: data.phone,
-        category: data.category,
+        restaurantCategoryId: data.restaurantCategoryId || "",
         deliveryFee: data.deliveryFee || 0,
         deliveryTime: data.deliveryTime || "",
         minimumOrder: data.minimumOrder || 0,
@@ -316,10 +335,12 @@ export default function EditarRestaurantePage() {
                 <div className="flex flex-col gap-4">
                   {imagePreview && (
                     <div className="relative h-40 w-full overflow-hidden rounded-lg">
-                      <img
+                      <Image
                         alt="Preview"
                         className="h-full w-full object-cover"
                         src={imagePreview}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 100vw"
                       />
                     </div>
                   )}
@@ -400,20 +421,25 @@ export default function EditarRestaurantePage() {
                 <label className="block text-[#1b130d] font-bold mb-2">
                   Categoria
                 </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
-                >
-                  <option value="">Selecione uma categoria</option>
-                  <option value="PIZZA">Pizzaria</option>
-                  <option value="Hamburgueria">Hamburgueria</option>
-                  <option value="Brasileira">Brasileira</option>
-                  <option value="Japonesa">Japonesa</option>
-                  <option value="Marmitas">Marmitas</option>
-                  <option value="Pizzaria">Sobremesas</option>
-                </select>
+                {loadingCategories ? (
+                  <div className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d]">
+                    Carregando categorias...
+                  </div>
+                ) : (
+                  <select
+                    name="restaurantCategoryId"
+                    value={formData.restaurantCategoryId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Delivery Fee */}

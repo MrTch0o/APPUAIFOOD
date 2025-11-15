@@ -9,6 +9,7 @@ import {
   IsNumber,
   Min,
   Max,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateRestaurantDto {
@@ -93,14 +94,12 @@ export class CreateRestaurantDto {
   deliveryTime: string;
 
   @ApiProperty({
-    description: 'Categoria do restaurante',
-    example: 'Mineira',
-    maxLength: 50,
+    description: 'ID da categoria do restaurante',
+    example: 'uuid-aqui',
   })
-  @IsString()
+  @IsUUID()
   @IsNotEmpty({ message: 'A categoria é obrigatória' })
-  @MaxLength(50, { message: 'A categoria deve ter no máximo 50 caracteres' })
-  category: string;
+  restaurantCategoryId: string;
 
   @ApiProperty({
     description: 'Valor mínimo do pedido em reais',

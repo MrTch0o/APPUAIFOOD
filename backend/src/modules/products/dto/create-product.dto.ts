@@ -42,14 +42,12 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({
-    description: 'Categoria do produto',
-    example: 'Pratos Principais',
-    maxLength: 50,
+    description: 'ID da categoria do produto',
+    example: 'uuid-da-categoria',
   })
-  @IsString()
-  @IsNotEmpty({ message: 'A categoria é obrigatória' })
-  @MaxLength(50, { message: 'A categoria deve ter no máximo 50 caracteres' })
-  category: string;
+  @IsUUID('4', { message: 'ID da categoria inválido' })
+  @IsNotEmpty({ message: 'O ID da categoria é obrigatório' })
+  productCategoryId: string;
 
   @ApiProperty({
     description: 'ID do restaurante',

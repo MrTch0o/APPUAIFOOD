@@ -213,9 +213,9 @@ export default function Home() {
                   <p className="text-sm font-medium leading-normal">Todos</p>
                 </button>
                 <button
-                  onClick={() => setSelectedCategory("PIZZA")}
+                  onClick={() => setSelectedCategory("Pizzaria")}
                   className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "PIZZA"
+                    selectedCategory === "Pizzaria"
                       ? "bg-[#ee7c2b] text-white"
                       : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
                   }`}

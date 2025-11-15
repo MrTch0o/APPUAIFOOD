@@ -32,17 +32,17 @@ export class ProductsService {
   /**
    * Lista todos os produtos (com filtros opcionais)
    */
-  async findAll(restaurantId?: string, category?: string) {
+  async findAll(restaurantId?: string, productCategoryId?: string) {
     const where: {
       restaurantId?: string;
-      category?: string;
+      productCategoryId?: string;
       available?: boolean;
     } = {
       available: true,
     };
 
     if (restaurantId) where.restaurantId = restaurantId;
-    if (category) where.category = category;
+    if (productCategoryId) where.productCategoryId = productCategoryId;
 
     return this.prisma.product.findMany({
       where,
@@ -52,7 +52,7 @@ export class ProductsService {
         description: true,
         price: true,
         image: true,
-        category: true,
+        productCategoryId: true,
         available: true,
         preparationTime: true,
         restaurant: {

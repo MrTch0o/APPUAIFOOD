@@ -12,19 +12,175 @@ async function main() {
   };
 
   // Limpar banco (apenas em desenvolvimento)
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development' || process.env.PRISMA_RESET) {
     console.log('🗑️  Limpando banco de dados...');
-    await prisma.review.deleteMany();
-    await prisma.orderItem.deleteMany();
-    await prisma.order.deleteMany();
-    await prisma.address.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.restaurant.deleteMany();
-    await prisma.user.deleteMany();
+    try {
+      await prisma.review.deleteMany();
+      await prisma.orderItem.deleteMany();
+      await prisma.cartItem.deleteMany();
+      await prisma.order.deleteMany();
+      await prisma.address.deleteMany();
+      await prisma.product.deleteMany();
+      await prisma.restaurant.deleteMany();
+      await prisma.user.deleteMany();
+      await prisma.productCategory.deleteMany();
+      await prisma.restaurantCategory.deleteMany();
+    } catch (e) {
+      console.log('ℹ️  Tabelas ainda não existem ou já estão vazias');
+    }
   }
 
-  // ===== USUÁRIOS =====
-  console.log('👥 Criando usuários...');
+  // ===== CATEGORIAS DE RESTAURANTE =====
+  console.log('📂 Criando categorias de restaurante...');
+
+  const categoryPizzaria = await prisma.restaurantCategory.create({
+    data: {
+      name: 'Pizzaria',
+      description: 'Restaurantes especializados em pizzas',
+      icon: 'local_pizza',
+      isActive: true,
+    },
+  });
+
+  const categoryHamburgueria = await prisma.restaurantCategory.create({
+    data: {
+      name: 'Hamburgueria',
+      description: 'Restaurantes especializados em hambúrgueres',
+      icon: 'lunch_dining',
+      isActive: true,
+    },
+  });
+
+  const categoryJaponesa = await prisma.restaurantCategory.create({
+    data: {
+      name: 'Japonesa',
+      description: 'Culinária japonesa - sushi, sashimi, temaki',
+      icon: 'restaurant',
+      isActive: true,
+    },
+  });
+
+  const categoryMarmitas = await prisma.restaurantCategory.create({
+    data: {
+      name: 'Marmitas',
+      description: 'Marmitas prontas e saudáveis',
+      icon: 'fastfood',
+      isActive: true,
+    },
+  });
+
+  const categoryBrasileira = await prisma.restaurantCategory.create({
+    data: {
+      name: 'Brasileira',
+      description: 'Comida brasileira tradicional',
+      icon: 'restaurant',
+      isActive: true,
+    },
+  });
+
+  const categorySobremesas = await prisma.restaurantCategory.create({
+    data: {
+      name: 'Sobremesas',
+      description: 'Sobremesas e doces',
+      icon: 'cake',
+      isActive: true,
+    },
+  });
+
+  console.log('✅ Categorias de restaurante criadas!');
+
+  // ===== CATEGORIAS DE PRODUTO =====
+  console.log('📂 Criando categorias de produto...');
+
+  const productCategoryPizzas = await prisma.productCategory.create({
+    data: {
+      name: 'Pizzas Tradicionais',
+      description: 'Pizzas clássicas',
+      isActive: true,
+    },
+  });
+
+  const productCategoryBebidas = await prisma.productCategory.create({
+    data: {
+      name: 'Bebidas',
+      description: 'Bebidas diversas',
+      isActive: true,
+    },
+  });
+
+  const productCategoryHamburgueres = await prisma.productCategory.create({
+    data: {
+      name: 'Hambúrgueres',
+      description: 'Hambúrgueres artesanais',
+      isActive: true,
+    },
+  });
+
+  const productCategoryAcompanhamentos = await prisma.productCategory.create({
+    data: {
+      name: 'Acompanhamentos',
+      description: 'Acompanhamentos e extras',
+      isActive: true,
+    },
+  });
+
+  const productCategoryComboJapones = await prisma.productCategory.create({
+    data: {
+      name: 'Combinados',
+      description: 'Combos de sushi e sashimi',
+      isActive: true,
+    },
+  });
+
+  const productCategoryHotRolls = await prisma.productCategory.create({
+    data: {
+      name: 'Hot Rolls',
+      description: 'Hot rolls quentes',
+      isActive: true,
+    },
+  });
+
+  const productCategorySashimi = await prisma.productCategory.create({
+    data: {
+      name: 'Sashimi',
+      description: 'Sashimi fresco',
+      isActive: true,
+    },
+  });
+
+  const productCategoryTemaki = await prisma.productCategory.create({
+    data: {
+      name: 'Temaki',
+      description: 'Temaki hand roll',
+      isActive: true,
+    },
+  });
+
+  const productCategoryMarmitas = await prisma.productCategory.create({
+    data: {
+      name: 'Marmitas',
+      description: 'Marmitas diversas',
+      isActive: true,
+    },
+  });
+
+  const productCategoryPratosPrincipais = await prisma.productCategory.create({
+    data: {
+      name: 'Pratos Principais',
+      description: 'Pratos principais brasileiros',
+      isActive: true,
+    },
+  });
+
+  const productCategoryEntradas = await prisma.productCategory.create({
+    data: {
+      name: 'Entradas',
+      description: 'Entradas e petiscos',
+      isActive: true,
+    },
+  });
+
+  console.log('✅ Categorias de produto criadas!');
 
   const admin = await prisma.user.create({
     data: {
@@ -82,6 +238,36 @@ async function main() {
       password: await hashPassword('Burger@123'),
       name: 'Pedro Burguer',
       phone: '31922222222',
+      role: UserRole.RESTAURANT_OWNER,
+    },
+  });
+
+  const restaurantOwner3 = await prisma.user.create({
+    data: {
+      email: 'dono.japones@example.com',
+      password: await hashPassword('Japones@123'),
+      name: 'Yuki Tanaka',
+      phone: '31933333333',
+      role: UserRole.RESTAURANT_OWNER,
+    },
+  });
+
+  const restaurantOwner4 = await prisma.user.create({
+    data: {
+      email: 'dono.marmitas@example.com',
+      password: await hashPassword('Marmita@123'),
+      name: 'Ana Fitness',
+      phone: '31944444444',
+      role: UserRole.RESTAURANT_OWNER,
+    },
+  });
+
+  const restaurantOwner5 = await prisma.user.create({
+    data: {
+      email: 'dono.brasileira@example.com',
+      password: await hashPassword('Brasil@123'),
+      name: 'Jorge Mineiro',
+      phone: '31955555555',
       role: UserRole.RESTAURANT_OWNER,
     },
   });
@@ -145,7 +331,7 @@ async function main() {
       name: 'Pizzaria Bella Napoli',
       description: 'As melhores pizzas artesanais da cidade',
       image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38',
-      category: 'Pizzaria',
+      restaurantCategoryId: categoryPizzaria.id,
       rating: 4.8,
       deliveryTime: '30-45 min',
       deliveryFee: 5.0,
@@ -170,7 +356,7 @@ async function main() {
       name: 'Burger House',
       description: 'Hambúrgueres artesanais e suculentos',
       image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd',
-      category: 'Hamburgueria',
+      restaurantCategoryId: categoryHamburgueria.id,
       rating: 4.6,
       deliveryTime: '25-40 min',
       deliveryFee: 6.0,
@@ -195,72 +381,72 @@ async function main() {
       name: 'Sushi Zen',
       description: 'Culinária japonesa autêntica',
       image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351',
-      category: 'Japonesa',
+      restaurantCategoryId: categoryJaponesa.id,
       rating: 4.9,
       deliveryTime: '40-60 min',
       deliveryFee: 8.0,
-      minimumOrder: 40.0,
-      ownerId: restaurantOwner1.id,
-      address: 'Rua Pernambuco, 1000 - Savassi, Belo Horizonte - MG',
+      minimumOrder: 30.0,
+      ownerId: restaurantOwner3.id,
+      address: 'Rua Espírito Santo, 200 - Centro, Belo Horizonte - MG',
       phone: '31355555555',
       openingHours: {
-        seg: 'Fechado',
-        ter: '12:00-15:00, 18:00-23:00',
-        qua: '12:00-15:00, 18:00-23:00',
-        qui: '12:00-15:00, 18:00-23:00',
-        sex: '12:00-15:00, 18:00-00:00',
+        seg: '11:00-15:00, 18:00-23:00',
+        ter: '11:00-15:00, 18:00-23:00',
+        qua: '11:00-15:00, 18:00-23:00',
+        qui: '11:00-15:00, 18:00-23:00',
+        sex: '11:00-15:00, 18:00-00:00',
         sab: '12:00-00:00',
         dom: '12:00-23:00',
       },
     },
   });
 
-  const marmitaria = await prisma.restaurant.create({
+  const marmitas = await prisma.restaurant.create({
     data: {
-      name: 'Marmitex do Chefe',
-      description: 'Marmitas caseiras e saudáveis',
-      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-      category: 'Marmitas',
-      rating: 4.5,
+      name: 'Fit Marmitas',
+      description: 'Marmitas saudáveis e nutritivas',
+      image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd',
+      restaurantCategoryId: categoryMarmitas.id,
+      rating: 4.7,
       deliveryTime: '20-30 min',
-      deliveryFee: 3.0,
+      deliveryFee: 4.0,
       minimumOrder: 15.0,
-      ownerId: restaurantOwner2.id,
-      address: 'Rua São Paulo, 200 - Centro, Belo Horizonte - MG',
+      ownerId: restaurantOwner4.id,
+      address: 'Av. Getúlio Vargas, 300 - Funcionários, Belo Horizonte - MG',
       phone: '31366666666',
       openingHours: {
-        seg: '11:00-15:00',
-        ter: '11:00-15:00',
-        qua: '11:00-15:00',
-        qui: '11:00-15:00',
-        sex: '11:00-15:00',
-        sab: '11:00-14:00',
-        dom: 'Fechado',
+        seg: '11:00-20:00',
+        ter: '11:00-20:00',
+        qua: '11:00-20:00',
+        qui: '11:00-20:00',
+        sex: '11:00-20:00',
+        sab: '11:00-18:00',
+        dom: '11:00-18:00',
       },
     },
   });
 
   const brasileira = await prisma.restaurant.create({
     data: {
-      name: 'Sabor Mineiro',
-      description: 'Comida mineira tradicional',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1',
-      category: 'Brasileira',
-      rating: 4.7,
+      name: 'Casa do Mineiro',
+      description: 'Comida mineira de avó',
+      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
+      restaurantCategoryId: categoryBrasileira.id,
+      rating: 4.5,
       deliveryTime: '35-50 min',
-      deliveryFee: 7.0,
-      minimumOrder: 30.0,
-      ownerId: restaurantOwner1.id,
-      address: 'Av. Getúlio Vargas, 300 - Funcionários, Belo Horizonte - MG',
+      deliveryFee: 5.5,
+      minimumOrder: 22.0,
+      ownerId: restaurantOwner5.id,
+      address: 'Rua Santa Catarina, 150 - Centro, Belo Horizonte - MG',
       phone: '31377777777',
       openingHours: {
-        seg: '11:00-15:00, 18:00-22:00',
-        ter: '11:00-15:00, 18:00-22:00',
-        qua: '11:00-15:00, 18:00-22:00',
-        qui: '11:00-15:00, 18:00-22:00',
-        sex: '11:00-15:00, 18:00-23:00',
-        sab: '11:00-23:00',
-        dom: '11:00-22:00',
+        seg: '11:00-15:00, 18:00-23:00',
+        ter: '11:00-15:00, 18:00-23:00',
+        qua: '11:00-15:00, 18:00-23:00',
+        qui: '11:00-15:00, 18:00-23:00',
+        sex: '11:00-15:00, 18:00-00:00',
+        sab: '11:00-00:00',
+        dom: '11:00-23:00',
       },
     },
   });
@@ -276,51 +462,50 @@ async function main() {
       {
         name: 'Pizza Margherita',
         description: 'Molho de tomate, mussarela, manjericão e azeite',
-        price: 45.0,
-        category: 'Pizzas Tradicionais',
+        price: 35.0,
+        productCategoryId: productCategoryPizzas.id,
         restaurantId: pizzaria.id,
-        image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002',
-        preparationTime: 30,
+        available: true,
       },
       {
         name: 'Pizza Calabresa',
         description: 'Molho de tomate, mussarela, calabresa e cebola',
-        price: 48.0,
-        category: 'Pizzas Tradicionais',
+        price: 38.0,
+        productCategoryId: productCategoryPizzas.id,
         restaurantId: pizzaria.id,
-        preparationTime: 30,
+        available: true,
       },
       {
         name: 'Pizza Quatro Queijos',
-        description: 'Mussarela, gorgonzola, parmesão e provolone',
-        price: 52.0,
-        category: 'Pizzas Tradicionais',
+        description: 'Mussarela, gorgonzola, parmesão e brie',
+        price: 42.0,
+        productCategoryId: productCategoryPizzas.id,
         restaurantId: pizzaria.id,
-        preparationTime: 30,
+        available: true,
       },
       {
         name: 'Pizza Pepperoni',
-        description: 'Molho de tomate, mussarela e pepperoni',
-        price: 50.0,
-        category: 'Pizzas Tradicionais',
+        description: 'Molho de tomate, pepperoni e mussarela',
+        price: 39.0,
+        productCategoryId: productCategoryPizzas.id,
         restaurantId: pizzaria.id,
-        preparationTime: 30,
+        available: true,
       },
       {
         name: 'Pizza Portuguesa',
-        description: 'Molho, mussarela, presunto, ovo, cebola e azeitona',
-        price: 49.0,
-        category: 'Pizzas Tradicionais',
+        description: 'Ovos, presunto, cebola, azeitona e mussarela',
+        price: 40.0,
+        productCategoryId: productCategoryPizzas.id,
         restaurantId: pizzaria.id,
-        preparationTime: 30,
+        available: true,
       },
       {
-        name: 'Refrigerante Lata',
-        description: 'Coca-Cola, Guaraná, Sprite ou Fanta',
-        price: 5.0,
-        category: 'Bebidas',
+        name: 'Refrigerante 2L',
+        description: 'Coca-Cola, Guaraná ou Sprite',
+        price: 8.0,
+        productCategoryId: productCategoryBebidas.id,
         restaurantId: pizzaria.id,
-        preparationTime: 0,
+        available: true,
       },
     ],
   });
@@ -329,192 +514,190 @@ async function main() {
   await prisma.product.createMany({
     data: [
       {
-        name: 'Classic Burger',
-        description: 'Hambúrguer 180g, queijo, alface, tomate e molho especial',
+        name: 'X-Burguer',
+        description: 'Pão, hambúrguer, queijo e molho especial',
+        price: 18.0,
+        productCategoryId: productCategoryHamburgueres.id,
+        restaurantId: hamburgueria.id,
+        available: true,
+      },
+      {
+        name: 'X-Tudo',
+        description: 'Pão, hambúrguer, queijo, bacon, alface, tomate e molho',
+        price: 22.0,
+        productCategoryId: productCategoryHamburgueres.id,
+        restaurantId: hamburgueria.id,
+        available: true,
+      },
+      {
+        name: 'X-Bacon',
+        description: 'Pão, hambúrguer, queijo, bacon e molho especial',
+        price: 20.0,
+        productCategoryId: productCategoryHamburgueres.id,
+        restaurantId: hamburgueria.id,
+        available: true,
+      },
+      {
+        name: 'Double Burguer',
+        description: 'Pão, 2 hambúrgueres, 2 queijos e molho especial',
         price: 28.0,
-        category: 'Hambúrgueres',
+        productCategoryId: productCategoryHamburgueres.id,
         restaurantId: hamburgueria.id,
-        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd',
-        preparationTime: 25,
+        available: true,
       },
       {
-        name: 'Bacon Burger',
-        description: 'Hambúrguer 180g, queijo, bacon, cebola caramelizada',
-        price: 32.0,
-        category: 'Hambúrgueres',
+        name: 'Batata Frita',
+        description: 'Porção grande de batata frita',
+        price: 12.0,
+        productCategoryId: productCategoryAcompanhamentos.id,
         restaurantId: hamburgueria.id,
-        preparationTime: 25,
-      },
-      {
-        name: 'Double Burger',
-        description: 'Dois hambúrgueres 180g, queijo duplo, picles e molho',
-        price: 38.0,
-        category: 'Hambúrgueres',
-        restaurantId: hamburgueria.id,
-        preparationTime: 30,
-      },
-      {
-        name: 'Veggie Burger',
-        description: 'Hambúrguer vegetariano, queijo, cogumelos grelhados',
-        price: 30.0,
-        category: 'Hambúrgueres',
-        restaurantId: hamburgueria.id,
-        preparationTime: 25,
-      },
-      {
-        name: 'Batata Frita Grande',
-        description: 'Porção grande de batatas fritas crocantes',
-        price: 15.0,
-        category: 'Acompanhamentos',
-        restaurantId: hamburgueria.id,
-        preparationTime: 10,
+        available: true,
       },
       {
         name: 'Onion Rings',
-        description: 'Anéis de cebola empanados e fritos',
-        price: 18.0,
-        category: 'Acompanhamentos',
+        description: 'Cebola empanada crocante',
+        price: 13.0,
+        productCategoryId: productCategoryAcompanhamentos.id,
         restaurantId: hamburgueria.id,
-        preparationTime: 10,
+        available: true,
       },
       {
-        name: 'Milkshake',
-        description: 'Chocolate, Morango ou Baunilha',
-        price: 12.0,
-        category: 'Bebidas',
+        name: 'Refrigerante Lata',
+        description: 'Coca-Cola, Guaraná ou Sprite lata',
+        price: 5.0,
+        productCategoryId: productCategoryBebidas.id,
         restaurantId: hamburgueria.id,
-        preparationTime: 5,
+        available: true,
       },
     ],
   });
 
-  // Produtos do Sushi
+  // Produtos do Sushi Zen
   await prisma.product.createMany({
     data: [
       {
-        name: 'Combinado 20 peças',
-        description: '10 sashimis, 5 niguiris e 5 hot rolls',
-        price: 80.0,
-        category: 'Combinados',
+        name: 'Combo Sushi',
+        description: '30 peças de sushi variado',
+        price: 89.0,
+        productCategoryId: productCategoryComboJapones.id,
         restaurantId: japonesa.id,
-        image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351',
-        preparationTime: 40,
+        available: true,
       },
       {
-        name: 'Combinado 40 peças',
-        description: '20 sashimis, 10 niguiris, 10 hot rolls',
-        price: 140.0,
-        category: 'Combinados',
+        name: 'Hot Roll',
+        description: 'Arroz, salmão grelhado, cream cheese e maionese',
+        price: 26.0,
+        productCategoryId: productCategoryHotRolls.id,
         restaurantId: japonesa.id,
-        preparationTime: 50,
-      },
-      {
-        name: 'Hot Roll Salmão',
-        description: '8 peças empanadas com salmão e cream cheese',
-        price: 38.0,
-        category: 'Hot Rolls',
-        restaurantId: japonesa.id,
-        preparationTime: 20,
+        available: true,
       },
       {
         name: 'Sashimi Salmão',
-        description: '10 fatias de salmão fresco',
-        price: 42.0,
-        category: 'Sashimi',
+        description: '8 fatias de salmão fresco',
+        price: 45.0,
+        productCategoryId: productCategorySashimi.id,
         restaurantId: japonesa.id,
-        preparationTime: 15,
+        available: true,
       },
       {
         name: 'Temaki Salmão',
-        description: 'Cone de alga com salmão, arroz e gergelim',
+        description: 'Alga nori enrolada com salmão, cream cheese e abacate',
         price: 22.0,
-        category: 'Temaki',
+        productCategoryId: productCategoryTemaki.id,
         restaurantId: japonesa.id,
-        preparationTime: 10,
+        available: true,
+      },
+      {
+        name: 'Temaki Atum',
+        description: 'Alga nori enrolada com atum, cream cheese e pepino',
+        price: 21.0,
+        productCategoryId: productCategoryTemaki.id,
+        restaurantId: japonesa.id,
+        available: true,
       },
     ],
   });
 
-  // Produtos da Marmitaria
+  // Produtos da Fit Marmitas
   await prisma.product.createMany({
     data: [
       {
-        name: 'Marmita Fit',
-        description: 'Frango grelhado, arroz integral, legumes',
-        price: 18.0,
-        category: 'Marmitas',
-        restaurantId: marmitaria.id,
-        preparationTime: 15,
+        name: 'Marmita Frango com Batata Doce',
+        description: 'Frango grelhado, batata doce e brócolis',
+        price: 22.0,
+        productCategoryId: productCategoryMarmitas.id,
+        restaurantId: marmitas.id,
+        available: true,
       },
       {
-        name: 'Marmita Executiva',
-        description: 'Arroz, feijão, carne, salada e farofa',
-        price: 22.0,
-        category: 'Marmitas',
-        restaurantId: marmitaria.id,
-        preparationTime: 15,
+        name: 'Marmita Peixe com Legumes',
+        description: 'Filé de peixe, cenoura, abóbora e arroz integral',
+        price: 25.0,
+        productCategoryId: productCategoryMarmitas.id,
+        restaurantId: marmitas.id,
+        available: true,
+      },
+      {
+        name: 'Marmita Bife com Abóbora',
+        description: 'Bife magro, abóbora, brocólis e arroz',
+        price: 24.0,
+        productCategoryId: productCategoryMarmitas.id,
+        restaurantId: marmitas.id,
+        available: true,
       },
       {
         name: 'Marmita Vegetariana',
-        description: 'Arroz, feijão, legumes grelhados e salada',
-        price: 20.0,
-        category: 'Marmitas',
-        restaurantId: marmitaria.id,
-        preparationTime: 15,
-      },
-      {
-        name: 'Marmita Low Carb',
-        description: 'Frango, ovos, salada e legumes sem arroz',
-        price: 24.0,
-        category: 'Marmitas',
-        restaurantId: marmitaria.id,
-        preparationTime: 15,
+        description: 'Arroz integral, feijão, cenoura, abóbora e salada',
+        price: 18.0,
+        productCategoryId: productCategoryMarmitas.id,
+        restaurantId: marmitas.id,
+        available: true,
       },
     ],
   });
 
-  // Produtos do Sabor Mineiro
+  // Produtos da Casa do Mineiro
   await prisma.product.createMany({
     data: [
       {
-        name: 'Feijão Tropeiro',
-        description: 'Feijão com linguiça, bacon, couve e torresmo',
-        price: 35.0,
-        category: 'Pratos Principais',
-        restaurantId: brasileira.id,
-        preparationTime: 30,
-      },
-      {
         name: 'Frango com Quiabo',
-        description: 'Frango caipira refogado com quiabo',
-        price: 32.0,
-        category: 'Pratos Principais',
+        description: 'Frango caipira cozido com quiabo',
+        price: 35.0,
+        productCategoryId: productCategoryPratosPrincipais.id,
         restaurantId: brasileira.id,
-        preparationTime: 35,
+        available: true,
       },
       {
-        name: 'Tutu à Mineira',
-        description: 'Tutu de feijão com costelinha e linguiça',
-        price: 38.0,
-        category: 'Pratos Principais',
+        name: 'Feijoada Completa',
+        description: 'Feijoada com farofa, couve e linguiça',
+        price: 42.0,
+        productCategoryId: productCategoryPratosPrincipais.id,
         restaurantId: brasileira.id,
-        preparationTime: 30,
+        available: true,
       },
       {
-        name: 'Pão de Queijo (6 unid)',
-        description: 'Autêntico pão de queijo mineiro',
-        price: 12.0,
-        category: 'Entradas',
+        name: 'Caldo de Cana',
+        description: 'Caldo de cana fresco',
+        price: 6.0,
+        productCategoryId: productCategoryBebidas.id,
         restaurantId: brasileira.id,
-        preparationTime: 10,
+        available: true,
       },
       {
-        name: 'Torresmo',
-        description: 'Porção de torresmo crocante',
-        price: 18.0,
-        category: 'Entradas',
+        name: 'Pão de Queijo',
+        description: 'Pão de queijo caseiro',
+        price: 8.0,
+        productCategoryId: productCategoryEntradas.id,
         restaurantId: brasileira.id,
-        preparationTime: 10,
+        available: true,
+      },
+      {
+        name: 'Pamonha',
+        description: 'Pamonha doce caseira',
+        price: 5.0,
+        productCategoryId: productCategoryEntradas.id,
+        restaurantId: brasileira.id,
+        available: true,
       },
     ],
   });
@@ -538,23 +721,23 @@ async function main() {
       restaurantId: pizzaria.id,
       addressId: endereco1.id,
       status: OrderStatus.DELIVERED,
-      subtotal: 93.0,
+      subtotal: 73.0,
       deliveryFee: 5.0,
-      total: 98.0,
+      total: 78.0,
       paymentMethod: 'Cartão de Crédito',
       items: {
         create: [
           {
             productId: pizzaMargherita!.id,
             quantity: 1,
-            price: 45.0,
-            subtotal: 45.0,
+            price: 35.0,
+            subtotal: 35.0,
           },
           {
             productId: pizzaCalabresa!.id,
             quantity: 1,
-            price: 48.0,
-            subtotal: 48.0,
+            price: 38.0,
+            subtotal: 38.0,
           },
         ],
       },
@@ -562,36 +745,36 @@ async function main() {
   });
 
   // Pedido 2 - Em preparo
-  const baconBurger = await prisma.product.findFirst({
-    where: { name: 'Bacon Burger' },
+  const xTudo = await prisma.product.findFirst({
+    where: { name: 'X-Tudo' },
   });
   const batataFrita = await prisma.product.findFirst({
-    where: { name: 'Batata Frita Grande' },
+    where: { name: 'Batata Frita' },
   });
 
-  await prisma.order.create({
+  const order2 = await prisma.order.create({
     data: {
       userId: cliente2.id,
       restaurantId: hamburgueria.id,
       addressId: endereco2.id,
       status: OrderStatus.PREPARING,
-      subtotal: 60.0,
+      subtotal: 50.0,
       deliveryFee: 6.0,
-      total: 66.0,
+      total: 56.0,
       paymentMethod: 'Pix',
       items: {
         create: [
           {
-            productId: baconBurger!.id,
+            productId: xTudo!.id,
             quantity: 2,
-            price: 32.0,
-            subtotal: 64.0,
+            price: 22.0,
+            subtotal: 44.0,
           },
           {
             productId: batataFrita!.id,
             quantity: 1,
-            price: 15.0,
-            subtotal: 15.0,
+            price: 12.0,
+            subtotal: 12.0,
           },
         ],
       },
@@ -609,7 +792,17 @@ async function main() {
       restaurantId: pizzaria.id,
       orderId: order1.id,
       rating: 5,
-      comment: 'Pizza maravilhosa! Massa fininha e ingredientes de qualidade.',
+      comment: 'Excelente pizza! Chegou quente e saborosa.',
+    },
+  });
+
+  await prisma.review.create({
+    data: {
+      userId: cliente2.id,
+      restaurantId: hamburgueria.id,
+      orderId: order2.id,
+      rating: 4,
+      comment: 'Muito bom! Hambúrguer suculento. Entrega rápida.',
     },
   });
 
@@ -619,7 +812,11 @@ async function main() {
   console.log('📧 Credenciais de teste:');
   console.log('   Admin: admin@uaifood.com / Admin@123');
   console.log('   Cliente: maria@example.com / Maria@123');
-  console.log('   Dono: dono.pizzaria@example.com / Pizza@123\n');
+  console.log('   Dono Pizzaria: dono.pizzaria@example.com / Pizza@123');
+  console.log('   Dono Burger: dono.burger@example.com / Burger@123');
+  console.log('   Dono Japonês: dono.japones@example.com / Japones@123');
+  console.log('   Dono Marmitas: dono.marmitas@example.com / Marmita@123');
+  console.log('   Dono Brasileira: dono.brasileira@example.com / Brasil@123\n');
 }
 
 main()

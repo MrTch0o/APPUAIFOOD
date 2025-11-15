@@ -12,6 +12,8 @@ import { CartModule } from './modules/cart/cart.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { RestaurantCategoriesModule } from './modules/restaurant-categories/restaurant-categories.module';
+import { ProductCategoriesModule } from './modules/product-categories/product-categories.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -28,6 +30,8 @@ import configuration from './config/configuration';
     CartModule,
     AddressesModule,
     ReviewsModule,
+    RestaurantCategoriesModule,
+    ProductCategoriesModule,
   ],
   controllers: [AppController],
   providers: [

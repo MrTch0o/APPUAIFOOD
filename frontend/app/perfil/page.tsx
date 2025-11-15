@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { userService } from "@/services/userService";
+import { userService, UpdateUserRequest } from "@/services/userService";
 import { logger } from "@/lib/logger";
 import { User } from "@/types";
 import { useRouter } from "next/navigation";
@@ -92,7 +92,7 @@ export default function ProfilePage() {
         email: formData.email,
       });
 
-      const updateData: any = {
+      const updateData: UpdateUserRequest = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,

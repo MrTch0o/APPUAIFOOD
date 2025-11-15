@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   restaurantAdminService,
@@ -12,7 +11,6 @@ import { logger } from "@/lib/logger";
 import { Restaurant } from "@/types";
 
 export default function EditarRestaurantePage() {
-  const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

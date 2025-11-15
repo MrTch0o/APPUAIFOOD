@@ -75,6 +75,16 @@ export class RestaurantsController {
     return this.restaurantsService.getByOwnerId(user.sub);
   }
 
+  @Get('admin/list')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar todos os restaurantes (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Lista de todos os restaurantes' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  getAllRestaurants() {
+    return this.restaurantsService.findAllAdmin();
+  }
+
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Buscar detalhes de um restaurante' })

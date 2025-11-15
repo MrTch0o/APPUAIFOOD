@@ -53,6 +53,7 @@ export class RestaurantsService {
         openingHours: true,
         deliveryFee: true,
         deliveryTime: true,
+        minimumOrder: true,
         category: true,
         image: true,
         isActive: true,
@@ -63,6 +64,33 @@ export class RestaurantsService {
             products: true,
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Lista todos os restaurantes para admin (ativo ou inativo)
+   */
+  async findAllAdmin() {
+    return this.prisma.restaurant.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        minimumOrder: true,
+        category: true,
+        image: true,
+        isActive: true,
+        rating: true,
+        createdAt: true,
       },
       orderBy: {
         createdAt: 'desc',

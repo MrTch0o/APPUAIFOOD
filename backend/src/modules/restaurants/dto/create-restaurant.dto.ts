@@ -101,4 +101,17 @@ export class CreateRestaurantDto {
   @IsNotEmpty({ message: 'A categoria é obrigatória' })
   @MaxLength(50, { message: 'A categoria deve ter no máximo 50 caracteres' })
   category: string;
+
+  @ApiProperty({
+    description: 'Valor mínimo do pedido em reais',
+    example: 15.0,
+    minimum: 0,
+    maximum: 1000,
+    required: false,
+  })
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsOptional()
+  @Min(0, { message: 'O pedido mínimo não pode ser negativo' })
+  @Max(1000, { message: 'O pedido mínimo não pode ser maior que R$ 1000' })
+  minimumOrder?: number;
 }

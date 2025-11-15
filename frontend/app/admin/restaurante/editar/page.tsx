@@ -16,7 +16,9 @@ export default function EditarRestaurantePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -32,17 +34,53 @@ export default function EditarRestaurantePage() {
   });
 
   useEffect(() => {
-    loadRestaurant();
+    loadRestaurants();
   }, []);
 
-  const loadRestaurant = async () => {
+  const loadRestaurants = async () => {
     try {
       setLoading(true);
-      logger.info("Carregando dados do restaurante");
+      logger.info("Carregando lista de restaurantes");
 
-      const data = await restaurantAdminService.getMyRestaurant();
+      const data = await restaurantAdminService.getAllRestaurants();
+      setRestaurants(data);
+
+      if (data.length > 0) {
+        // Seleciona o primeiro restaurante por padrão
+        setSelectedRestaurantId(data[0].id);
+        loadRestaurantData(data[0].id);
+      }
+
+      logger.info("Restaurantes carregados com sucesso", {
+        count: data.length,
+      });
+    } catch (err) {
+      logger.error("Erro ao carregar restaurantes", err);
+      setError("Erro ao carregar lista de restaurantes");
+      setLoading(false);
+    }
+  };
+
+  const loadRestaurantData = async (restaurantId: string) => {
+    try {
+      setLoading(true);
+      logger.info("Carregando dados do restaurante", { restaurantId });
+
+      // Buscar restaurante específico
+      const response = await fetch(`/api/restaurants/${restaurantId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao carregar restaurante");
+      }
+
+      const json = await response.json();
+      const data = json.data;
+
       setRestaurant(data);
-
       setFormData({
         name: data.name,
         description: data.description,
@@ -65,6 +103,14 @@ export default function EditarRestaurantePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const restaurantId = e.target.value;
+    setSelectedRestaurantId(restaurantId);
+    setImagePreview("");
+    setSelectedFile(null);
+    loadRestaurantData(restaurantId);
   };
 
   if (!user || user.role !== "ADMIN") {
@@ -157,22 +203,25 @@ export default function EditarRestaurantePage() {
     setSaving(true);
 
     try {
-      if (!restaurant) {
-        throw new Error("Restaurante não encontrado");
+      if (!restaurant || !selectedRestaurantId) {
+        throw new Error("Restaurante não selecionado");
       }
 
       logger.info("Atualizando restaurante", { restaurantId: restaurant.id });
 
       // Atualizar dados
-      await restaurantAdminService.update(restaurant.id, formData);
+      await restaurantAdminService.update(selectedRestaurantId, formData);
       logger.info("Restaurante atualizado com sucesso");
 
       // Upload de imagem se fornecida
       if (selectedFile) {
         logger.info("Fazendo upload de imagem", {
-          restaurantId: restaurant.id,
+          restaurantId: selectedRestaurantId,
         });
-        await restaurantAdminService.uploadImage(restaurant.id, selectedFile);
+        await restaurantAdminService.uploadImage(
+          selectedRestaurantId,
+          selectedFile
+        );
         logger.info("Imagem enviada com sucesso");
         setSelectedFile(null);
       }
@@ -181,7 +230,7 @@ export default function EditarRestaurantePage() {
       setTimeout(() => setSuccess(""), 3000);
 
       // Recarregar dados
-      await loadRestaurant();
+      await loadRestaurantData(selectedRestaurantId);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Erro ao atualizar restaurante";
@@ -221,9 +270,29 @@ export default function EditarRestaurantePage() {
 
             {/* Page Title */}
             <div className="mb-6">
-              <h1 className="text-4xl font-bold text-[#1b130d] mb-2">
+              <h1 className="text-4xl font-bold text-[#1b130d] mb-4">
                 Editar Restaurante
               </h1>
+
+              {/* Restaurant Selector */}
+              <div className="mb-6">
+                <label className="block text-[#1b130d] font-bold mb-2">
+                  Selecionar Restaurante
+                </label>
+                <select
+                  value={selectedRestaurantId}
+                  onChange={handleRestaurantChange}
+                  className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                >
+                  <option value="">Selecione um restaurante</option>
+                  {restaurants.map((rest) => (
+                    <option key={rest.id} value={rest.id}>
+                      {rest.name} {rest.isActive ? "✓" : "(inativo)"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <p className="text-[#9a6c4c]">{restaurant?.name}</p>
             </div>
 

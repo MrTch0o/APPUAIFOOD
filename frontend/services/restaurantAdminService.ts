@@ -53,6 +53,19 @@ export const restaurantAdminService = {
   },
 
   /**
+   * Listar todos os restaurantes (apenas ADMIN)
+   * GET /restaurants/admin/list
+   */
+  async getAllRestaurants(): Promise<Restaurant[]> {
+    const response = await api.get<{
+      success: boolean;
+      data: Restaurant[];
+      timestamp: string;
+    }>("/restaurants/admin/list");
+    return response.data.data;
+  },
+
+  /**
    * Obter restaurante do usuário logado
    * GET /restaurants/me
    */

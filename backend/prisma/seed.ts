@@ -26,7 +26,7 @@ async function main() {
   // ===== USUÁRIOS =====
   console.log('👥 Criando usuários...');
 
-  await prisma.user.create({
+  const admin = await prisma.user.create({
     data: {
       email: 'admin@uaifood.com',
       password: await hashPassword('Admin@123'),

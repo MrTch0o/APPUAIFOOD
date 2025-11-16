@@ -9,7 +9,9 @@ import {
   Min,
   Max,
   IsBoolean,
+  Validate,
 } from 'class-validator';
+import { IsValidOpeningHoursConstraint } from '../validators/opening-hours.validator';
 
 export { RestaurantCategory } from '../constants/categories';
 
@@ -62,6 +64,7 @@ export class UpdateRestaurantDto {
     example: { seg: '11:00-23:00', ter: '11:00-23:00' },
   })
   @IsOptional()
+  @Validate(IsValidOpeningHoursConstraint)
   openingHours?: Record<string, string> | string | null;
 
   @ApiPropertyOptional({

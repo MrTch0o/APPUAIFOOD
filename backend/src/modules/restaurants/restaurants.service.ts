@@ -13,7 +13,7 @@ export class RestaurantsService {
   async create(createRestaurantDto: CreateRestaurantDto, ownerId: string) {
     // Remover openingHours se for null ou undefined (outros campos são obrigatórios)
     const { openingHours, ...requiredFields } = createRestaurantDto;
-    
+
     const createData: any = {
       ...requiredFields,
       ownerId,

@@ -10,10 +10,10 @@ import {
   Min,
   Max,
   IsUUID,
-  ValidateIf,
-  IsJSON,
+  Validate,
 } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { Type } from 'class-transformer';
+import { IsValidOpeningHoursConstraint } from '../validators/opening-hours.validator';
 
 export class CreateRestaurantDto {
   @ApiProperty({
@@ -65,6 +65,7 @@ export class CreateRestaurantDto {
     required: false,
   })
   @IsOptional()
+  @Validate(IsValidOpeningHoursConstraint)
   openingHours?: Record<string, string> | string;
 
   @ApiProperty({

@@ -11,18 +11,21 @@ export class RestaurantsService {
    * Cria um novo restaurante
    */
   async create(createRestaurantDto: CreateRestaurantDto, ownerId: string) {
-    // Filtrar campos null/undefined para evitar erro de tipo do Prisma
-    const createData = Object.fromEntries(
-      Object.entries(createRestaurantDto).filter(
-        ([, value]) => value !== null && value !== undefined,
-      ),
-    );
+    // Remover openingHours se for null ou undefined (outros campos são obrigatórios)
+    const { openingHours, ...requiredFields } = createRestaurantDto;
+    
+    const createData: any = {
+      ...requiredFields,
+      ownerId,
+    };
+
+    // Adicionar openingHours apenas se estiver definido
+    if (openingHours !== null && openingHours !== undefined) {
+      createData.openingHours = openingHours;
+    }
 
     const restaurant = await this.prisma.restaurant.create({
-      data: {
-        ...createData,
-        ownerId,
-      },
+      data: createData,
       select: {
         id: true,
         name: true,
@@ -205,16 +208,16 @@ export class RestaurantsService {
     // Verificar se restaurante existe
     await this.findOne(id);
 
-    // Filtrar campos null/undefined para evitar erro de tipo do Prisma
-    const updateData = Object.fromEntries(
+    // Filtrar apenas campos undefined (null é válido para alguns campos)
+    const updateData: any = Object.fromEntries(
       Object.entries(updateRestaurantDto).filter(
-        ([, value]) => value !== null && value !== undefined,
+        ([, value]) => value !== undefined,
       ),
     );
 
     const restaurant = await this.prisma.restaurant.update({
       where: { id },
-      data: updateData as any,
+      data: updateData,
       select: {
         id: true,
         name: true,

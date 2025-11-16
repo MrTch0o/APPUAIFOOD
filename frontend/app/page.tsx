@@ -110,6 +110,11 @@ export default function Home() {
                                 Admin
                               </span>
                             )}
+                            {user.role === "RESTAURANT_OWNER" && (
+                              <span className="inline-block mt-2 text-xs font-semibold text-white bg-[#ee7c2b] px-2 py-1 rounded">
+                                Proprietário
+                              </span>
+                            )}
                           </div>
                           <Link
                             href="/perfil"
@@ -142,7 +147,20 @@ export default function Home() {
                                 <span className="material-symbols-outlined text-lg">
                                   storefront
                                 </span>
-                                Admin
+                                Painel Admin
+                              </button>
+                            </Link>
+                          )}
+                          {user.role === "RESTAURANT_OWNER" && (
+                            <Link
+                              href="/owner"
+                              onClick={() => setShowUserMenu(false)}
+                            >
+                              <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors border-t border-[#e7d9cf] border-b">
+                                <span className="material-symbols-outlined text-lg">
+                                  storefront
+                                </span>
+                                Meu Painel
                               </button>
                             </Link>
                           )}

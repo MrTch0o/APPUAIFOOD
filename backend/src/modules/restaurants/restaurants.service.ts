@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { PrismaService } from '../../database/prisma.service';
@@ -213,6 +213,7 @@ export class RestaurantsService {
         deliveryFee: true,
         deliveryTime: true,
         minimumOrder: true,
+        restaurantCategoryId: true,
         category: true,
         image: true,
         isActive: true,
@@ -240,6 +241,54 @@ export class RestaurantsService {
       message: 'Restaurante do usuário encontrado',
       restaurant,
     };
+  }
+
+  /**
+   * Busca um restaurante específico verificando se pertence ao proprietário
+   */
+  async findOneByIdAndOwner(id: string, ownerId: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        minimumOrder: true,
+        restaurantCategoryId: true,
+        category: true,
+        image: true,
+        isActive: true,
+        rating: true,
+        ownerId: true,
+        createdAt: true,
+        updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException('Restaurante não encontrado');
+    }
+
+    if (restaurant.ownerId !== ownerId) {
+      throw new BadRequestException(
+        'Você não tem permissão para acessar este restaurante',
+      );
+    }
+
+    return restaurant;
   }
 
   /**

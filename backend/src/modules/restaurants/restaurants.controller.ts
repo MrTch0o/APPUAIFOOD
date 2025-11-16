@@ -79,6 +79,30 @@ export class RestaurantsController {
     return this.restaurantsService.getByOwnerId(user.sub);
   }
 
+  @Get('owner/my-restaurants')
+  @Roles(UserRole.RESTAURANT_OWNER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar meus restaurantes (OWNER)' })
+  @ApiResponse({ status: 200, description: 'Lista de meus restaurantes' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer OWNER' })
+  getMyRestaurants(@CurrentUser() user: JwtPayload) {
+    return this.restaurantsService.getByOwnerId(user.sub);
+  }
+
+  @Get('owner/:id')
+  @Roles(UserRole.RESTAURANT_OWNER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obter detalhes de meu restaurante (OWNER)' })
+  @ApiResponse({ status: 200, description: 'Detalhes do restaurante' })
+  @ApiResponse({ status: 403, description: 'Sem permissão' })
+  @ApiResponse({ status: 404, description: 'Restaurante não encontrado' })
+  getMyRestaurantById(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.restaurantsService.findOneByIdAndOwner(id, user.sub);
+  }
+
   @Get('admin/list')
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()

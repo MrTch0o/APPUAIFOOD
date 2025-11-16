@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { restaurantService } from "@/services/restaurantService";
 import { logger } from "@/lib/logger";
 import { Restaurant } from "@/types";
+import { CategoryFilter } from "@/components/CategoryFilter";
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -43,7 +44,7 @@ export default function Home() {
               ?.toLowerCase()
               .includes(searchTerm.toLowerCase())) &&
           (selectedCategory === "" ||
-            restaurant.category?.name === selectedCategory)
+            restaurant.restaurantCategoryId === selectedCategory)
       )
     : [];
 
@@ -197,102 +198,11 @@ export default function Home() {
               </label>
             </div>
 
-            {/* Category Chips */}
-            <div className="w-full overflow-x-auto p-4">
-              <div className="flex gap-3 whitespace-nowrap">
-                <button
-                  onClick={() => setSelectedCategory("")}
-                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === ""
-                      ? "bg-[#ee7c2b] text-white"
-                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    all_inclusive
-                  </span>
-                  <p className="text-sm font-medium leading-normal">Todos</p>
-                </button>
-                <button
-                  onClick={() => setSelectedCategory("Pizzaria")}
-                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "Pizzaria"
-                      ? "bg-[#ee7c2b] text-white"
-                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    local_pizza
-                  </span>
-                  <p className="text-sm font-medium leading-normal">Pizzas</p>
-                </button>
-                <button
-                  onClick={() => setSelectedCategory("Hamburgueria")}
-                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "Hamburgueria"
-                      ? "bg-[#ee7c2b] text-white"
-                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    lunch_dining
-                  </span>
-                  <p className="text-sm font-medium leading-normal">Burgers</p>
-                </button>
-                <button
-                  onClick={() => setSelectedCategory("Marmitas")}
-                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "Marmitas"
-                      ? "bg-[#ee7c2b] text-white"
-                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    restaurant
-                  </span>
-                  <p className="text-sm font-medium leading-normal">Marmitas</p>
-                </button>
-                <button
-                  onClick={() => setSelectedCategory("Japonesa")}
-                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "Japonesa"
-                      ? "bg-[#ee7c2b] text-white"
-                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    set_meal
-                  </span>
-                  <p className="text-sm font-medium leading-normal">Sushi</p>
-                </button>
-                <button
-                  onClick={() => setSelectedCategory("Brasileira")}
-                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "Brasileira"
-                      ? "bg-[#ee7c2b] text-white"
-                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xl">eco</span>
-                  <p className="text-sm font-medium leading-normal">Saudável</p>
-                </button>
-                <button
-                  onClick={() => setSelectedCategory("Sobremesas")}
-                  className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "Sobremesas"
-                      ? "bg-[#ee7c2b] text-white"
-                      : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    icecream
-                  </span>
-                  <p className="text-sm font-medium leading-normal">
-                    Sobremesas
-                  </p>
-                </button>
-              </div>
-            </div>
+            {/* Category Chips - Componente Dinâmico */}
+            <CategoryFilter
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
 
             {/* Section Title */}
             <h2 className="text-[#1b130d] px-4 pb-3 pt-8 text-[22px] font-bold leading-tight tracking-[-0.015em]">

@@ -159,6 +159,8 @@ export default function NovoRestaurantePage() {
         throw new Error("Tempo de entrega é obrigatório");
       }
 
+      console.log("Sending create data:", formData);
+
       // Criar restaurante
       const restaurant = await restaurantAdminService.create(formData);
       logger.info("Restaurante criado com sucesso", {

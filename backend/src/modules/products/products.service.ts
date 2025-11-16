@@ -30,6 +30,101 @@ export class ProductsService {
   }
 
   /**
+   * Lista todos os produtos para admin
+   */
+  async findAllAdmin() {
+    return this.prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        image: true,
+        productCategoryId: true,
+        restaurantId: true,
+        isActive: true,
+        preparationTime: true,
+        createdAt: true,
+        updatedAt: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Lista produtos de um restaurante (admin)
+   */
+  async findByRestaurantIdAdmin(restaurantId: string) {
+    return this.prisma.product.findMany({
+      where: { restaurantId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        image: true,
+        productCategoryId: true,
+        restaurantId: true,
+        isActive: true,
+        preparationTime: true,
+        createdAt: true,
+        updatedAt: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  /**
+   * Busca um produto específico (admin)
+   */
+  async findOneAdmin(id: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        image: true,
+        productCategoryId: true,
+        restaurantId: true,
+        isActive: true,
+        preparationTime: true,
+        createdAt: true,
+        updatedAt: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Produto não encontrado');
+    }
+
+    return product;
+  }
+
+  /**
    * Lista todos os produtos (com filtros opcionais)
    */
   async findAll(restaurantId?: string, productCategoryId?: string) {

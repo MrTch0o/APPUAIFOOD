@@ -5,52 +5,36 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  productService,
-  CreateProductRequest,
-} from "@/services/productService";
+  productAdminService,
+  AdminProductResponse,
+} from "@/services/productAdminService";
 import {
-  productCategoryService,
-  ProductCategory,
-} from "@/services/categoryService";
-import { restaurantService } from "@/services/restaurantService";
-import { Product, Restaurant } from "@/types";
+  restaurantAdminService,
+  AdminRestaurantResponse,
+} from "@/services/restaurantAdminService";
 import { logger } from "@/lib/logger";
 
 export default function ProductsAdminPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [products, setProducts] = useState<AdminProductResponse[]>([]);
+  const [restaurants, setRestaurants] = useState<AdminRestaurantResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showForm, setShowForm] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<string>("");
-
-  const [formData, setFormData] = useState<CreateProductRequest>({
-    name: "",
-    description: "",
-    price: 0,
-    restaurantId: "",
-    productCategoryId: "",
-  });
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [productsData, restaurantsData, categoriesData] = await Promise.all(
-        [
-          selectedRestaurant
-            ? productService.getByRestaurantId(selectedRestaurant)
-            : productService.getAll(),
-          restaurantService.getAll(),
-          productCategoryService.getAll(),
-        ]
-      );
+      const [productsData, restaurantsData] = await Promise.all([
+        selectedRestaurant
+          ? productAdminService.getProductsByRestaurant(selectedRestaurant)
+          : productAdminService.getAllProducts(),
+        restaurantAdminService.getAllRestaurants(),
+      ]);
       setProducts(productsData);
       setRestaurants(restaurantsData);
-      setCategories(categoriesData);
       setError("");
     } catch (err) {
       logger.error("Erro ao carregar dados", err);
@@ -67,41 +51,11 @@ export default function ProductsAdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedRestaurant]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.restaurantId) {
-      setError("Selecione um restaurante");
-      return;
-    }
-    if (!formData.productCategoryId) {
-      setError("Selecione uma categoria");
-      return;
-    }
-
-    try {
-      await productService.create(formData);
-      setSuccess("Produto criado com sucesso!");
-      setFormData({
-        name: "",
-        description: "",
-        price: 0,
-        restaurantId: "",
-        productCategoryId: "",
-      });
-      setShowForm(false);
-      loadData();
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      logger.error("Erro ao criar produto", err);
-      setError("Erro ao criar produto");
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja deletar este produto?")) return;
 
     try {
-      await productService.delete(id);
+      await productAdminService.deleteProduct(id);
       setSuccess("Produto deletado com sucesso!");
       loadData();
       setTimeout(() => setSuccess(""), 3000);
@@ -111,13 +65,39 @@ export default function ProductsAdminPage() {
     }
   };
 
+  if (!user || user.role !== "ADMIN") {
+    return (
+      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
+        <div className="flex h-full grow flex-col">
+          <div className="flex flex-1 justify-center py-5">
+            <div className="flex w-full max-w-6xl flex-col px-4">
+              <div className="flex justify-center items-center p-8">
+                <div className="text-center">
+                  <p className="text-[#9a6c4c] mb-4">
+                    Acesso negado. Apenas administradores podem gerenciar
+                    produtos.
+                  </p>
+                  <Link href="/">
+                    <button className="px-6 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90">
+                      Voltar
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
       <div className="flex h-full grow flex-col">
         <div className="flex flex-1 justify-center py-5">
           <div className="flex w-full max-w-6xl flex-col px-4">
             {/* Header */}
-            <header className="flex items-center justify-between border-b border-solid border-[#e7d9cf] px-2 md:px-6 lg:px-10 py-3 mb-6 bg-white rounded-lg">
+            <header className="flex items-center justify-between border-b border-solid border-[#e7d9cf] px-2 md:px-6 lg:px-10 py-3 mb-6">
               <Link href="/" className="flex items-center gap-4 text-[#1b130d]">
                 <div className="size-6 text-[#ee7c2b]">
                   <svg
@@ -134,6 +114,13 @@ export default function ProductsAdminPage() {
                 </div>
                 <h2 className="text-[#1b130d] text-lg font-bold">UAIFOOD</h2>
               </Link>
+              <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 px-4 py-2 bg-[#f3ece7] text-[#1b130d] rounded-lg hover:bg-[#e7d9cf] transition-colors font-medium"
+              >
+                <span className="material-symbols-outlined">arrow_back</span>
+                Voltar
+              </button>
             </header>
 
             {/* Title */}
@@ -148,17 +135,17 @@ export default function ProductsAdminPage() {
 
             {/* Messages */}
             {error && (
-              <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-                {error}
+              <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
+                <p className="text-red-800">{error}</p>
               </div>
             )}
             {success && (
-              <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
-                {success}
+              <div className="mb-4 p-4 bg-green-100 border border-green-300 rounded-lg">
+                <p className="text-green-800">{success}</p>
               </div>
             )}
 
-            {/* Filter and Buttons */}
+            {/* Filter Section */}
             <div className="mb-6 flex gap-3 flex-wrap items-end">
               <div className="flex-1 min-w-[200px]">
                 <label className="block text-[#1b130d] font-medium mb-2">
@@ -167,7 +154,7 @@ export default function ProductsAdminPage() {
                 <select
                   value={selectedRestaurant}
                   onChange={(e) => setSelectedRestaurant(e.target.value)}
-                  className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
+                  className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg bg-white text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
                 >
                   <option value="">Todos os restaurantes</option>
                   {restaurants.map((r) => (
@@ -178,154 +165,15 @@ export default function ProductsAdminPage() {
                 </select>
               </div>
 
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90 transition-colors font-medium"
-              >
-                <span className="material-symbols-outlined">add</span>
-                Novo Produto
-              </button>
-
-              <button
-                onClick={() => router.back()}
-                className="flex items-center gap-2 px-4 py-2 bg-[#f3ece7] text-[#1b130d] rounded-lg hover:bg-[#e7d9cf] transition-colors font-medium"
-              >
-                <span className="material-symbols-outlined">arrow_back</span>
-                Voltar
-              </button>
+              <Link href="/admin/produtos/novo">
+                <button className="flex items-center gap-2 px-4 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90 transition-colors font-medium">
+                  <span className="material-symbols-outlined">add</span>
+                  Novo Produto
+                </button>
+              </Link>
             </div>
 
-            {/* Form */}
-            {showForm && (
-              <div className="mb-6 p-6 bg-white rounded-lg border border-[#e7d9cf]">
-                <h2 className="text-[#1b130d] text-xl font-bold mb-4">
-                  Novo Produto
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[#1b130d] font-medium mb-2">
-                        Nome *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
-                        placeholder="Ex: Margherita"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[#1b130d] font-medium mb-2">
-                        Preço *
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={formData.price}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            price: parseFloat(e.target.value),
-                          })
-                        }
-                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
-                        placeholder="0.00"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[#1b130d] font-medium mb-2">
-                        Restaurante *
-                      </label>
-                      <select
-                        value={formData.restaurantId}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            restaurantId: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
-                        required
-                      >
-                        <option value="">Selecione um restaurante</option>
-                        {restaurants.map((r) => (
-                          <option key={r.id} value={r.id}>
-                            {r.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[#1b130d] font-medium mb-2">
-                        Categoria *
-                      </label>
-                      <select
-                        value={formData.productCategoryId}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            productCategoryId: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
-                        required
-                      >
-                        <option value="">Selecione uma categoria</option>
-                        {categories.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[#1b130d] font-medium mb-2">
-                      Descrição
-                    </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
-                      placeholder="Descrição do produto"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="submit"
-                      className="px-6 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90 transition-colors font-medium"
-                    >
-                      Criar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowForm(false)}
-                      className="px-6 py-2 bg-[#f3ece7] text-[#1b130d] rounded-lg hover:bg-[#e7d9cf] transition-colors font-medium"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* Products List */}
+            {/* Products Table */}
             <div className="bg-white rounded-lg border border-[#e7d9cf]">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -338,10 +186,13 @@ export default function ProductsAdminPage() {
                         Restaurante
                       </th>
                       <th className="px-6 py-4 text-left text-[#1b130d] font-bold">
-                        Categoria
+                        Preço
                       </th>
                       <th className="px-6 py-4 text-left text-[#1b130d] font-bold">
-                        Preço
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-[#1b130d] font-bold">
+                        Criado em
                       </th>
                       <th className="px-6 py-4 text-center text-[#1b130d] font-bold">
                         Ações
@@ -352,7 +203,7 @@ export default function ProductsAdminPage() {
                     {loading ? (
                       <tr>
                         <td
-                          colSpan={5}
+                          colSpan={6}
                           className="px-6 py-8 text-center text-[#9a6c4c]"
                         >
                           Carregando...
@@ -361,7 +212,7 @@ export default function ProductsAdminPage() {
                     ) : products.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={5}
+                          colSpan={6}
                           className="px-6 py-8 text-center text-[#9a6c4c]"
                         >
                           Nenhum produto encontrado
@@ -379,19 +230,41 @@ export default function ProductsAdminPage() {
                           <td className="px-6 py-4 text-[#9a6c4c]">
                             {product.restaurant?.name || "N/A"}
                           </td>
-                          <td className="px-6 py-4 text-[#9a6c4c]">
-                            {product.category || "N/A"}
-                          </td>
                           <td className="px-6 py-4 text-[#1b130d] font-medium">
                             R$ {product.price.toFixed(2)}
                           </td>
-                          <td className="px-6 py-4 text-center">
-                            <button
-                              onClick={() => handleDelete(product.id)}
-                              className="text-red-600 hover:text-red-700 font-medium text-sm"
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                product.isActive
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}
                             >
-                              Deletar
-                            </button>
+                              {product.isActive ? "Ativo" : "Inativo"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-[#9a6c4c] text-sm">
+                            {new Date(product.createdAt).toLocaleDateString(
+                              "pt-BR"
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <Link
+                                href={`/admin/produtos/editar?id=${product.id}`}
+                              >
+                                <button className="text-[#ee7c2b] hover:text-[#ee7c2b]/80 font-medium text-sm">
+                                  Editar
+                                </button>
+                              </Link>
+                              <button
+                                onClick={() => handleDelete(product.id)}
+                                className="text-red-600 hover:text-red-700 font-medium text-sm"
+                              >
+                                Deletar
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))

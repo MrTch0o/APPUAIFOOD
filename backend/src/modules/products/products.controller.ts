@@ -50,6 +50,37 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
+  @Get('admin/list')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar todos os produtos (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Lista de todos os produtos' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  getAllProducts() {
+    return this.productsService.findAllAdmin();
+  }
+
+  @Get('admin/restaurant/:restaurantId')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar produtos por restaurante (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  getProductsByRestaurant(@Param('restaurantId') restaurantId: string) {
+    return this.productsService.findByRestaurantIdAdmin(restaurantId);
+  }
+
+  @Get('admin/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Buscar detalhes de produto (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Produto encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  @ApiResponse({ status: 404, description: 'Produto não encontrado' })
+  findOneAdmin(@Param('id') id: string) {
+    return this.productsService.findOneAdmin(id);
+  }
+
   @Public()
   @Get()
   @ApiOperation({ summary: 'Listar produtos disponíveis' })

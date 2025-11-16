@@ -68,7 +68,8 @@ export const ownerService = {
       data: OwnerRestaurantResponse[];
       timestamp: string;
     }>("/restaurants/owner/my-restaurants");
-    return response.data.data;
+    const data = response.data.data;
+    return Array.isArray(data) ? data : [];
   },
 
   /**

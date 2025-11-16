@@ -205,7 +205,7 @@ export class RestaurantsService {
    * Busca o restaurante do usuário logado (por ownerId)
    */
   async getByOwnerId(ownerId: string) {
-    const restaurant = await this.prisma.restaurant.findFirst({
+    const restaurants = await this.prisma.restaurant.findMany({
       where: { ownerId },
       select: {
         id: true,
@@ -235,16 +235,7 @@ export class RestaurantsService {
       },
     });
 
-    if (!restaurant) {
-      throw new NotFoundException(
-        'Nenhum restaurante encontrado para este usuário',
-      );
-    }
-
-    return {
-      message: 'Restaurante do usuário encontrado',
-      restaurant,
-    };
+    return restaurants;
   }
 
   /**

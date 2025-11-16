@@ -85,8 +85,13 @@ export class RestaurantsController {
   @ApiOperation({ summary: 'Listar todos os restaurantes (apenas ADMIN)' })
   @ApiResponse({ status: 200, description: 'Lista de todos os restaurantes' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
-  getAllRestaurants() {
-    return this.restaurantsService.findAllAdmin();
+  async getAllRestaurants() {
+    const restaurants = await this.restaurantsService.findAllAdmin();
+    return {
+      success: true,
+      data: restaurants,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   @Public()
@@ -161,5 +166,32 @@ export class RestaurantsController {
     const baseUrl = this.configService.get<string>('baseUrl');
     const imageUrl = `${baseUrl}/uploads/${file.filename}`;
     return this.restaurantsService.updateImage(id, imageUrl);
+  }
+
+  @Patch(':id/deactivate')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Desativar restaurante (apenas ADMIN)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Restaurante desativado com sucesso',
+  })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  @ApiResponse({ status: 404, description: 'Restaurante não encontrado' })
+  deactivate(@Param('id') id: string) {
+    return this.restaurantsService.deactivate(id);
+  }
+
+  @Patch(':id/activate')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Ativar restaurante (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Restaurante ativado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  @ApiResponse({ status: 404, description: 'Restaurante não encontrado' })
+  activate(@Param('id') id: string) {
+    return this.restaurantsService.activate(id);
   }
 }

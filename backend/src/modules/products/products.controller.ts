@@ -135,4 +135,28 @@ export class ProductsController {
     const imageUrl = `/uploads/${file.filename}`;
     return this.productsService.updateImage(id, imageUrl);
   }
+
+  @Patch(':id/deactivate')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Desativar produto (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Produto desativado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  @ApiResponse({ status: 404, description: 'Produto não encontrado' })
+  deactivate(@Param('id') id: string) {
+    return this.productsService.deactivate(id);
+  }
+
+  @Patch(':id/activate')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Ativar produto (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Produto ativado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  @ApiResponse({ status: 404, description: 'Produto não encontrado' })
+  activate(@Param('id') id: string) {
+    return this.productsService.activate(id);
+  }
 }

@@ -103,7 +103,7 @@ export default function AdminDashboard() {
             {/* Admin Options Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {/* Restaurantes */}
-              <Link href="/admin/restaurante">
+              <Link href="/admin/restaurantes">
                 <div
                   className={`cursor-pointer p-6 bg-white rounded-lg border-2 border-[#e7d9cf] transition-all hover:border-[#ee7c2b] hover:shadow-lg ${
                     hoveredCard === "restaurante"

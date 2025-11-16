@@ -71,8 +71,10 @@ export class AuthService {
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
-      user,
-      ...tokens,
+      data: {
+        user,
+        ...tokens,
+      },
     };
   }
 
@@ -90,9 +92,11 @@ export class AuthService {
     if (user.is2FAEnabled) {
       // Retornar flag indicando que 2FA é necessário
       return {
-        requires2FA: true,
-        userId: user.id,
-        message: 'Por favor, forneça o código 2FA para completar o login',
+        data: {
+          requires2FA: true,
+          userId: user.id,
+          message: 'Por favor, forneça o código 2FA para completar o login',
+        },
       };
     }
 
@@ -101,15 +105,17 @@ export class AuthService {
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        is2FAEnabled: user.is2FAEnabled,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          role: user.role,
+          is2FAEnabled: user.is2FAEnabled,
+        },
+        ...tokens,
       },
-      ...tokens,
     };
   }
 
@@ -120,6 +126,12 @@ export class AuthService {
 
     if (!user) {
       return null;
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException(
+        'Usuário desativado. Entre em contato com o administrador.',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -158,7 +170,9 @@ export class AuthService {
       const tokens = await this.generateTokens(user.id, user.email, user.role);
       await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-      return tokens;
+      return {
+        data: tokens,
+      };
     } catch {
       throw new UnauthorizedException('Refresh token inválido');
     }
@@ -170,7 +184,11 @@ export class AuthService {
       data: { refreshToken: null },
     });
 
-    return { message: 'Logout realizado com sucesso' };
+    return {
+      data: {
+        message: 'Logout realizado com sucesso',
+      },
+    };
   }
 
   private async generateTokens(userId: string, email: string, role: UserRole) {
@@ -232,10 +250,12 @@ export class AuthService {
     });
 
     return {
-      secret,
-      qrCode,
-      message:
-        'Escaneie o QR code com seu app autenticador (Google Authenticator, Authy, etc.)',
+      data: {
+        secret,
+        qrCode,
+        message:
+          'Escaneie o QR code com seu app autenticador (Google Authenticator, Authy, etc.)',
+      },
     };
   }
 
@@ -270,8 +290,10 @@ export class AuthService {
     });
 
     return {
-      message: '2FA ativado com sucesso!',
-      is2FAEnabled: true,
+      data: {
+        message: '2FA ativado com sucesso!',
+        is2FAEnabled: true,
+      },
     };
   }
 
@@ -305,8 +327,10 @@ export class AuthService {
     });
 
     return {
-      message: '2FA desativado com sucesso!',
-      is2FAEnabled: false,
+      data: {
+        message: '2FA desativado com sucesso!',
+        is2FAEnabled: false,
+      },
     };
   }
 
@@ -343,15 +367,17 @@ export class AuthService {
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        is2FAEnabled: user.is2FAEnabled,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          role: user.role,
+          is2FAEnabled: user.is2FAEnabled,
+        },
+        ...tokens,
       },
-      ...tokens,
     };
   }
 }

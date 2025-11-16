@@ -1,6 +1,30 @@
 import api from "@/lib/api";
 import { Restaurant } from "@/types";
 
+export interface AdminRestaurantResponse {
+  id: string;
+  name: string;
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  description?: string;
+  address?: string;
+  phone?: string;
+  openingHours?: string;
+  deliveryFee?: number;
+  deliveryTime?: number;
+  minimumOrder?: number;
+  category?: string;
+  image?: string;
+  isActive: boolean;
+  rating?: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 export interface CreateRestaurantRequest {
   name: string;
   description: string;
@@ -30,10 +54,12 @@ export const restaurantAdminService = {
    * Criar novo restaurante (apenas ADMIN)
    * POST /restaurants
    */
-  async create(data: CreateRestaurantRequest): Promise<Restaurant> {
+  async create(
+    data: CreateRestaurantRequest
+  ): Promise<AdminRestaurantResponse> {
     const response = await api.post<{
       success: boolean;
-      data: Restaurant;
+      data: AdminRestaurantResponse;
       timestamp: string;
     }>("/restaurants", data);
     return response.data.data;
@@ -43,10 +69,13 @@ export const restaurantAdminService = {
    * Atualizar restaurante do usuário logado
    * PATCH /restaurants/:id
    */
-  async update(id: string, data: UpdateRestaurantRequest): Promise<Restaurant> {
+  async update(
+    id: string,
+    data: UpdateRestaurantRequest
+  ): Promise<AdminRestaurantResponse> {
     const response = await api.patch<{
       success: boolean;
-      data: Restaurant;
+      data: AdminRestaurantResponse;
       timestamp: string;
     }>(`/restaurants/${id}`, data);
     return response.data.data;
@@ -56,12 +85,41 @@ export const restaurantAdminService = {
    * Listar todos os restaurantes (apenas ADMIN)
    * GET /restaurants/admin/list
    */
-  async getAllRestaurants(): Promise<Restaurant[]> {
+  async getAllRestaurants(): Promise<AdminRestaurantResponse[]> {
     const response = await api.get<{
       success: boolean;
-      data: Restaurant[];
+      data: AdminRestaurantResponse[];
       timestamp: string;
     }>("/restaurants/admin/list");
+    return response.data.data;
+  },
+
+  /**
+   * Buscar restaurante por ID (apenas ADMIN)
+   * GET /restaurants/:id
+   */
+  async getRestaurantById(id: string): Promise<AdminRestaurantResponse> {
+    const response = await api.get<{
+      success: boolean;
+      data: AdminRestaurantResponse;
+      timestamp: string;
+    }>(`/restaurants/${id}`);
+    return response.data.data;
+  },
+
+  /**
+   * Atualizar restaurante (apenas ADMIN)
+   * PATCH /restaurants/:id
+   */
+  async updateRestaurant(
+    id: string,
+    data: UpdateRestaurantRequest
+  ): Promise<AdminRestaurantResponse> {
+    const response = await api.patch<{
+      success: boolean;
+      data: AdminRestaurantResponse;
+      timestamp: string;
+    }>(`/restaurants/${id}`, data);
     return response.data.data;
   },
 
@@ -85,13 +143,13 @@ export const restaurantAdminService = {
    * Upload de imagem do restaurante
    * POST /restaurants/:id/image
    */
-  async uploadImage(id: string, file: File): Promise<Restaurant> {
+  async uploadImage(id: string, file: File): Promise<AdminRestaurantResponse> {
     const formData = new FormData();
     formData.append("image", file);
 
     const response = await api.post<{
       success: boolean;
-      data: Restaurant;
+      data: AdminRestaurantResponse;
       timestamp: string;
     }>(`/restaurants/${id}/image`, formData, {
       headers: {
@@ -99,5 +157,43 @@ export const restaurantAdminService = {
       },
     });
     return response.data.data;
+  },
+
+  /**
+   * Desativar restaurante (apenas ADMIN)
+   * PATCH /restaurants/:id/deactivate
+   */
+  async deactivateRestaurant(id: string): Promise<{
+    message: string;
+    restaurant: AdminRestaurantResponse;
+  }> {
+    const response = await api.patch<{
+      success: boolean;
+      data: AdminRestaurantResponse;
+      timestamp: string;
+    }>(`/restaurants/${id}/deactivate`, {});
+    return {
+      message: "Restaurante desativado com sucesso",
+      restaurant: response.data.data,
+    };
+  },
+
+  /**
+   * Ativar restaurante (apenas ADMIN)
+   * PATCH /restaurants/:id/activate
+   */
+  async activateRestaurant(id: string): Promise<{
+    message: string;
+    restaurant: AdminRestaurantResponse;
+  }> {
+    const response = await api.patch<{
+      success: boolean;
+      data: AdminRestaurantResponse;
+      timestamp: string;
+    }>(`/restaurants/${id}/activate`, {});
+    return {
+      message: "Restaurante ativado com sucesso",
+      restaurant: response.data.data,
+    };
   },
 };

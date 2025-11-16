@@ -35,14 +35,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         storedUser !== "null"
       ) {
         setUser(JSON.parse(storedUser));
-        // Validar token com o backend
+
+        // Validar token com o backend com timeout de 5 segundos
         try {
-          const profile = await authService.getProfile();
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Timeout na validação de token")),
+              5000
+            )
+          );
+
+          const profile = await Promise.race([
+            authService.getProfile(),
+            timeoutPromise,
+          ]);
+
           logger.info("Token validado com sucesso");
           setUser(profile);
-        } catch {
-          // Token inválido, limpar
-          logger.warn("Token inválido, removendo dados de sessão");
+        } catch (error) {
+          // Token inválido ou backend indisponível, limpar
+          logger.warn(
+            "Token inválido ou servidor indisponível, removendo dados de sessão"
+          );
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           setUser(null);

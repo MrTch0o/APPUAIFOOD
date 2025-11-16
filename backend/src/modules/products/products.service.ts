@@ -160,4 +160,57 @@ export class ProductsService {
       product,
     };
   }
+
+  /**
+   * Desativa um produto (soft delete)
+   */
+  async deactivate(id: string) {
+    // Verificar se produto existe
+    await this.findOne(id);
+
+    const product = await this.prisma.product.update({
+      where: { id },
+      data: { isActive: false },
+      select: {
+        id: true,
+        name: true,
+        isActive: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'Produto desativado com sucesso',
+      product,
+    };
+  }
+
+  /**
+   * Ativa um produto
+   */
+  async activate(id: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Produto não encontrado');
+    }
+
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        isActive: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'Produto ativado com sucesso',
+      product: updated,
+    };
+  }
 }

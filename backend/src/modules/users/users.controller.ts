@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Body,
   Patch,
   Delete,
@@ -17,6 +18,8 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -68,6 +71,42 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Buscar usuário por ID (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Usuário encontrado' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  findById(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
+  @Post()
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Criar um novo usuário (apenas ADMIN)' })
+  @ApiResponse({ status: 201, description: 'Usuário criado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  createUser(
+    @Body()
+    body: {
+      email: string;
+      password: string;
+      name: string;
+      phone?: string;
+      role?: UserRole;
+    },
+  ) {
+    return this.usersService.create(
+      body.email,
+      body.password,
+      body.name,
+      body.phone,
+      body.role,
+    );
+  }
+
   @Patch(':id/role')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Mudar a role de um usuário (apenas ADMIN)' })
@@ -97,5 +136,43 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   deactivateUser(@Param('id') id: string) {
     return this.usersService.deactivate(id);
+  }
+
+  @Patch(':id/activate')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Ativar um usuário (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Usuário ativado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  activateUser(@Param('id') id: string) {
+    return this.usersService.activate(id);
+  }
+
+  @Patch('me/change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Mudar a senha do usuário logado' })
+  @ApiResponse({ status: 200, description: 'Senha alterada com sucesso' })
+  @ApiResponse({ status: 401, description: 'Senha atual inválida' })
+  @ApiResponse({ status: 400, description: 'Nova senha deve ser diferente' })
+  changePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.usersService.changePassword(user.sub, changePasswordDto);
+  }
+
+  @Patch(':id/reset-password')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resetar a senha de um usuário (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Senha resetada com sucesso' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  resetPassword(
+    @Param('id') id: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    return this.usersService.resetPassword(id, resetPasswordDto);
   }
 }

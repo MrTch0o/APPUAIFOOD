@@ -126,6 +126,7 @@ model Product {
   image           String?
   available       Boolean @default(true)
   preparationTime Int?    @map("preparation_time")
+  isActive        Boolean @default(true) @map("is_active")
   
   restaurantId     String  @map("restaurant_id")
   productCategoryId String  @map("product_category_id")

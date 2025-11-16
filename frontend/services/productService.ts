@@ -119,4 +119,30 @@ export const productService = {
     });
     return response.data.data.imageUrl;
   },
+
+  /**
+   * Desativar produto (ADMIN)
+   * PATCH /products/:id/deactivate
+   */
+  async deactivateProduct(id: string): Promise<Product> {
+    const response = await api.patch<{
+      success: boolean;
+      data: Product;
+      timestamp: string;
+    }>(`/products/${id}/deactivate`, {});
+    return response.data.data;
+  },
+
+  /**
+   * Ativar produto (ADMIN)
+   * PATCH /products/:id/activate
+   */
+  async activateProduct(id: string): Promise<Product> {
+    const response = await api.patch<{
+      success: boolean;
+      data: Product;
+      timestamp: string;
+    }>(`/products/${id}/activate`, {});
+    return response.data.data;
+  },
 };

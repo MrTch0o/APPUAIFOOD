@@ -146,13 +146,13 @@ export class ProductCategoriesService {
     const productsCount = await this.prisma.product.count({
       where: {
         productCategoryId: id,
-        available: true,
+        isActive: true,
       },
     });
 
     if (productsCount > 0) {
       throw new BadRequestException(
-        `Não é possível desativar a categoria. Existem ${productsCount} produto(s) disponível(is) usando-a`,
+        `Não é possível desativar a categoria. Existem ${productsCount} produto(s) ativo(s) usando-a`,
       );
     }
 

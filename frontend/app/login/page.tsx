@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"login" | "register">("login");
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -26,6 +27,32 @@ export default function LoginPage() {
     password: "",
     phone: "",
   });
+
+  // Cleanup timeout quando componente desmontar
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        const timeoutId = errorTimeoutRef.current;
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  // Quando o erro muda, zera o timeout anterior e seta um novo
+  useEffect(() => {
+    if (error) {
+      // Limpar timeout anterior se existir
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+
+      // Seta novo timeout de 30 segundos
+      errorTimeoutRef.current = setTimeout(() => {
+        setError("");
+        errorTimeoutRef.current = null;
+      }, 30000);
+    }
+  }, [error]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +75,6 @@ export default function LoginPage() {
         error.response?.data?.message || "Erro ao fazer login";
       logger.error("Erro ao fazer login", { error: errorMessage });
       setError(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -80,7 +106,6 @@ export default function LoginPage() {
         error.response?.data?.message || "Erro ao criar conta";
       logger.error("Erro ao fazer registro", { error: errorMessage });
       setError(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -164,8 +189,17 @@ export default function LoginPage() {
                   </div>
 
                   {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
-                      {error}
+                    <div className="bg-red-100 border-2 border-red-600 text-red-700 p-4 rounded-lg text-base font-medium mb-4 flex items-start justify-between gap-3">
+                      <span>{error}</span>
+                      <button
+                        type="button"
+                        onClick={() => setError("")}
+                        className="text-red-600 hover:text-red-800 flex-shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-lg">
+                          close
+                        </span>
+                      </button>
                     </div>
                   )}
 
@@ -185,12 +219,13 @@ export default function LoginPage() {
                             placeholder="Digite seu e-mail"
                             type="email"
                             value={loginData.email}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setLoginData({
                                 ...loginData,
                                 email: e.target.value,
-                              })
-                            }
+                              });
+                              setError("");
+                            }}
                             required
                           />
                         </label>
@@ -214,12 +249,13 @@ export default function LoginPage() {
                               placeholder="Digite sua senha"
                               type={showPassword ? "text" : "password"}
                               value={loginData.password}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 setLoginData({
                                   ...loginData,
                                   password: e.target.value,
-                                })
-                              }
+                                });
+                                setError("");
+                              }}
                               required
                             />
                             <button
@@ -265,12 +301,13 @@ export default function LoginPage() {
                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-14 placeholder:text-[#9a6c4c] p-[15px] text-base font-normal leading-normal"
                             placeholder="Digite seu nome completo"
                             value={registerData.name}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setRegisterData({
                                 ...registerData,
                                 name: e.target.value,
-                              })
-                            }
+                              });
+                              setError("");
+                            }}
                             required
                           />
                         </label>
@@ -285,12 +322,13 @@ export default function LoginPage() {
                             placeholder="Digite seu e-mail"
                             type="email"
                             value={registerData.email}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setRegisterData({
                                 ...registerData,
                                 email: e.target.value,
-                              })
-                            }
+                              });
+                              setError("");
+                            }}
                             required
                           />
                         </label>
@@ -305,12 +343,13 @@ export default function LoginPage() {
                             placeholder="Digite seu telefone"
                             type="tel"
                             value={registerData.phone}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setRegisterData({
                                 ...registerData,
                                 phone: e.target.value,
-                              })
-                            }
+                              });
+                              setError("");
+                            }}
                           />
                         </label>
                       </div>
@@ -325,12 +364,13 @@ export default function LoginPage() {
                               placeholder="Crie uma senha"
                               type={showPassword ? "text" : "password"}
                               value={registerData.password}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 setRegisterData({
                                   ...registerData,
                                   password: e.target.value,
-                                })
-                              }
+                                });
+                                setError("");
+                              }}
                               required
                             />
                             <button

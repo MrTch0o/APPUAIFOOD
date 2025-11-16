@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
+  IsEmail,
   IsOptional,
   MinLength,
   MaxLength,
@@ -19,6 +20,14 @@ export class UpdateUserDto {
   @MinLength(3, { message: 'O nome deve ter pelo menos 3 caracteres' })
   @MaxLength(100, { message: 'O nome deve ter no máximo 100 caracteres' })
   name?: string;
+
+  @ApiPropertyOptional({
+    description: 'Email do usuário',
+    example: 'joao@example.com',
+  })
+  @IsEmail({}, { message: 'Email inválido' })
+  @IsOptional()
+  email?: string;
 
   @ApiPropertyOptional({
     description: 'Telefone do usuário',

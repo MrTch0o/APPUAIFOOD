@@ -15,6 +15,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -25,6 +26,12 @@ export default function ProfilePage() {
     phone: "",
     password: "",
     confirmPassword: "",
+  });
+
+  const [changePasswordData, setChangePasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
   });
 
   useEffect(() => {
@@ -148,6 +155,67 @@ export default function ProfilePage() {
     }
   };
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    // Validações
+    if (
+      !changePasswordData.currentPassword ||
+      !changePasswordData.newPassword ||
+      !changePasswordData.confirmNewPassword
+    ) {
+      setErrorMessage("Todos os campos são obrigatórios");
+      return;
+    }
+
+    if (
+      changePasswordData.newPassword !== changePasswordData.confirmNewPassword
+    ) {
+      setErrorMessage("As novas senhas não correspondem");
+      return;
+    }
+
+    if (changePasswordData.newPassword.length < 6) {
+      setErrorMessage("A nova senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    if (changePasswordData.currentPassword === changePasswordData.newPassword) {
+      setErrorMessage("A nova senha deve ser diferente da atual");
+      return;
+    }
+
+    try {
+      logger.info("Alterando senha do usuário");
+      const result = await userService.changePassword(
+        changePasswordData.currentPassword,
+        changePasswordData.newPassword
+      );
+
+      logger.info("Senha alterada com sucesso");
+      setSuccessMessage("Senha alterada com sucesso!");
+      setChangePasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+      setShowChangePassword(false);
+
+      // Limpar mensagem após 3 segundos
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+    } catch (error) {
+      logger.error("Erro ao alterar senha", error);
+      const errorMsg =
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Erro ao alterar senha. Verifique a senha atual.";
+      setErrorMessage(errorMsg);
+    }
+  };
+
   if (loading) {
     return (
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
@@ -174,6 +242,15 @@ export default function ProfilePage() {
         {/* Header */}
         <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7d9cf] px-2 md:px-6 lg:px-10 py-3 bg-white">
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#ee7c2b]/20 transition-colors"
+              title="Voltar"
+            >
+              <span className="material-symbols-outlined text-xl">
+                arrow_back
+              </span>
+            </button>
             <Link
               href="/"
               className="flex items-center gap-4 hover:opacity-80 transition-opacity"
@@ -456,30 +533,128 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Admin Section */}
-            {profile.role === "ADMIN" && (
-              <div className="mt-6 bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-bold text-[#1b130d] mb-4">
-                  Painel Administrativo
-                </h2>
-                <div className="grid grid-cols-2 gap-3">
-                  <Link href="/admin/restaurante">
-                    <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#f3ece7] text-[#1b130d] font-semibold rounded-lg hover:bg-[#ee7c2b]/20 transition-colors">
-                      <span className="material-symbols-outlined">
-                        storefront
-                      </span>
-                      Restaurante
-                    </button>
-                  </Link>
-                  <Link href="/admin/restaurante/editar">
-                    <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#f3ece7] text-[#1b130d] font-semibold rounded-lg hover:bg-[#ee7c2b]/20 transition-colors">
-                      <span className="material-symbols-outlined">edit</span>
-                      Editar Restaurante
-                    </button>
-                  </Link>
-                </div>
+            {/* Change Password Section */}
+            <div className="mt-6 bg-white rounded-xl shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-bold text-[#1b130d]">Segurança</h2>
+                {!showChangePassword && (
+                  <button
+                    onClick={() => setShowChangePassword(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      lock
+                    </span>
+                    Mudar Senha
+                  </button>
+                )}
               </div>
-            )}
+
+              {showChangePassword ? (
+                <form onSubmit={handleChangePassword} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#1b130d] mb-2">
+                      Senha Atual
+                    </label>
+                    <div className="relative flex w-full flex-1 items-stretch">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="currentPassword"
+                        placeholder="Digite sua senha atual"
+                        value={changePasswordData.currentPassword}
+                        onChange={(e) =>
+                          setChangePasswordData({
+                            ...changePasswordData,
+                            currentPassword: e.target.value,
+                          })
+                        }
+                        className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-12 placeholder:text-[#9a6c4c] p-[12px] text-base font-normal leading-normal pr-12"
+                      />
+                      <button
+                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#9a6c4c] hover:text-[#1b130d]"
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <span className="material-symbols-outlined">
+                          visibility
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#1b130d] mb-2">
+                      Nova Senha
+                    </label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="newPassword"
+                      placeholder="Digite sua nova senha"
+                      value={changePasswordData.newPassword}
+                      onChange={(e) =>
+                        setChangePasswordData({
+                          ...changePasswordData,
+                          newPassword: e.target.value,
+                        })
+                      }
+                      className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-12 placeholder:text-[#9a6c4c] p-[12px] text-base font-normal leading-normal"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#1b130d] mb-2">
+                      Confirmar Nova Senha
+                    </label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="confirmNewPassword"
+                      placeholder="Confirme sua nova senha"
+                      value={changePasswordData.confirmNewPassword}
+                      onChange={(e) =>
+                        setChangePasswordData({
+                          ...changePasswordData,
+                          confirmNewPassword: e.target.value,
+                        })
+                      }
+                      className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50 border border-[#e7d9cf] bg-[#fcfaf8] focus:border-[#ee7c2b] h-12 placeholder:text-[#9a6c4c] p-[12px] text-base font-normal leading-normal"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-[#ee7c2b] text-white font-semibold rounded-lg hover:bg-[#ee7c2b]/90 transition-colors"
+                    >
+                      Salvar Nova Senha
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowChangePassword(false);
+                        setChangePasswordData({
+                          currentPassword: "",
+                          newPassword: "",
+                          confirmNewPassword: "",
+                        });
+                        setErrorMessage("");
+                      }}
+                      className="flex-1 px-4 py-2 bg-[#f3ece7] text-[#1b130d] font-semibold rounded-lg hover:bg-[#e7d9cf] transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="text-[#9a6c4c]">
+                  <p className="mb-2 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg">
+                      lock
+                    </span>
+                    Você pode alterar sua senha a qualquer momento
+                  </p>
+                </div>
+              )}
+            </div>
 
             {/* Danger Zone */}
             <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-6">

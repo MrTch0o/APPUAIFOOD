@@ -23,6 +23,9 @@ export default function EditUserPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [formData, setFormData] = useState<UpdateUserRequest>({
     name: "",
@@ -122,6 +125,57 @@ export default function EditUserPage() {
     }
   };
 
+  const handleActivate = async () => {
+    if (!userId) return;
+
+    try {
+      setSaving(true);
+      const result = await userService.activateUser(userId);
+      setUser(result.user);
+      setSuccess("Usuário ativado com sucesso!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      logger.error("Erro ao ativar usuário", err);
+      setError("Erro ao ativar usuário");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!userId || !newPassword || !confirmPassword) {
+      setError("Preencha todos os campos");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("As senhas não correspondem");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError("A senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const result = await userService.resetPassword(userId, newPassword);
+      setUser(result.user);
+      setSuccess("Senha resetada com sucesso!");
+      setShowResetPassword(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      setError("");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      logger.error("Erro ao resetar senha", err);
+      setError("Erro ao resetar senha");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!authUser || authUser.role !== "ADMIN") {
     return (
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
@@ -202,6 +256,69 @@ export default function EditUserPage() {
 
             {user && (
               <div className="space-y-6">
+                {/* User Metadata Card */}
+                <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
+                  <h2 className="text-blue-900 text-lg font-bold mb-4">
+                    Informações do Sistema
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-blue-900 font-medium mb-2">
+                        ID do Usuário
+                      </label>
+                      <p className="text-blue-700 font-mono text-sm break-all">
+                        {user.id}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-blue-900 font-medium mb-2">
+                        Status
+                      </label>
+                      <p className="text-blue-700">
+                        {user.isActive ? (
+                          <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                            Ativo
+                          </span>
+                        ) : (
+                          <span className="inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                            Inativo
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-blue-900 font-medium mb-2">
+                        Criado em
+                      </label>
+                      <p className="text-blue-700">
+                        {new Date(user.createdAt).toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-blue-900 font-medium mb-2">
+                        Atualizado em
+                      </label>
+                      <p className="text-blue-700">
+                        {new Date(user.updatedAt).toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* User Info Card */}
                 <div className="bg-white rounded-lg border border-[#e7d9cf] p-6">
                   <h2 className="text-[#1b130d] text-lg font-bold mb-4">
@@ -217,7 +334,7 @@ export default function EditUserPage() {
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
+                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b] placeholder-[#9a6c4c] text-[#1b130d]"
                         placeholder="Nome do usuário"
                       />
                     </div>
@@ -231,7 +348,7 @@ export default function EditUserPage() {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
+                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b] placeholder-[#9a6c4c] text-[#1b130d]"
                         placeholder="Email do usuário"
                       />
                     </div>
@@ -245,7 +362,7 @@ export default function EditUserPage() {
                         name="phone"
                         value={formData.phone || ""}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b]"
+                        className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b] placeholder-[#9a6c4c] text-[#1b130d]"
                         placeholder="Telefone (opcional)"
                       />
                     </div>
@@ -317,44 +434,143 @@ export default function EditUserPage() {
                   </div>
                 </div>
 
-                {/* Deactivate Account */}
-                <div className="bg-white rounded-lg border border-red-200 p-6">
-                  <h2 className="text-red-600 text-lg font-bold mb-4">
-                    Zona de Perigo
+                {/* Reset Password */}
+                <div className="bg-white rounded-lg border border-[#e7d9cf] p-6">
+                  <h2 className="text-[#1b130d] text-lg font-bold mb-4">
+                    Segurança
                   </h2>
                   <p className="text-[#9a6c4c] mb-4">
-                    Desativar a conta do usuário. O usuário não poderá mais
-                    acessar o sistema, mas os dados serão preservados.
+                    Defina uma nova senha para o usuário
                   </p>
 
-                  {!showDeleteConfirm ? (
+                  {!showResetPassword ? (
                     <button
-                      onClick={() => setShowDeleteConfirm(true)}
-                      className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium"
+                      onClick={() => setShowResetPassword(true)}
+                      className="px-4 py-2 bg-[#ee7c2b]/20 text-[#ee7c2b] rounded-lg hover:bg-[#ee7c2b]/30 transition-colors font-medium flex items-center gap-2"
                     >
-                      Desativar Usuário
+                      <span className="material-symbols-outlined">lock</span>
+                      Resetar Senha
                     </button>
                   ) : (
-                    <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                      <p className="text-red-700 font-medium mb-4">
-                        Tem certeza? Esta ação desativará a conta do usuário.
-                      </p>
-                      <div className="flex gap-3">
+                    <div className="space-y-4 p-4 bg-[#f3ece7] rounded-lg">
+                      <div>
+                        <label className="block text-[#1b130d] font-medium mb-2">
+                          Nova Senha
+                        </label>
+                        <input
+                          type="password"
+                          placeholder="Digite a nova senha (mínimo 6 caracteres)"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b] placeholder:text-[#9a6c4c] text-[#1b130d]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[#1b130d] font-medium mb-2">
+                          Confirmar Nova Senha
+                        </label>
+                        <input
+                          type="password"
+                          placeholder="Confirme a nova senha"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full px-4 py-2 border border-[#e7d9cf] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ee7c2b] placeholder:text-[#9a6c4c] text-[#1b130d]"
+                        />
+                      </div>
+
+                      <div className="flex gap-3 pt-4 border-t border-[#e7d9cf]">
                         <button
-                          onClick={handleDeactivate}
-                          disabled={saving}
-                          className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors font-medium"
+                          onClick={handleResetPassword}
+                          disabled={saving || !newPassword || !confirmPassword}
+                          className="flex-1 px-4 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90 disabled:opacity-50 transition-colors font-medium"
                         >
-                          {saving ? "Desativando..." : "Confirmar Desativação"}
+                          {saving ? "Resetando..." : "Confirmar Reset"}
                         </button>
                         <button
-                          onClick={() => setShowDeleteConfirm(false)}
-                          className="flex-1 px-4 py-2 bg-[#f3ece7] text-[#1b130d] rounded-lg hover:bg-[#e7d9cf] transition-colors font-medium"
+                          onClick={() => {
+                            setShowResetPassword(false);
+                            setNewPassword("");
+                            setConfirmPassword("");
+                          }}
+                          className="flex-1 px-4 py-2 bg-[#e7d9cf] text-[#1b130d] rounded-lg hover:bg-[#d9cbbf] transition-colors font-medium"
                         >
                           Cancelar
                         </button>
                       </div>
                     </div>
+                  )}
+                </div>
+
+                {/* Deactivate/Activate Account */}
+                <div
+                  className={`bg-white rounded-lg border p-6 ${
+                    user.isActive ? "border-red-200" : "border-green-200"
+                  }`}
+                >
+                  <h2
+                    className={`text-lg font-bold mb-4 ${
+                      user.isActive ? "text-red-600" : "text-green-600"
+                    }`}
+                  >
+                    {user.isActive ? "Zona de Perigo" : "Reativar Usuário"}
+                  </h2>
+
+                  {user.isActive ? (
+                    <>
+                      <p className="text-[#9a6c4c] mb-4">
+                        Desativar a conta do usuário. O usuário não poderá mais
+                        acessar o sistema, mas os dados serão preservados.
+                      </p>
+
+                      {!showDeleteConfirm ? (
+                        <button
+                          onClick={() => setShowDeleteConfirm(true)}
+                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium"
+                        >
+                          Desativar Usuário
+                        </button>
+                      ) : (
+                        <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                          <p className="text-red-700 font-medium mb-4">
+                            Tem certeza? Esta ação desativará a conta do
+                            usuário.
+                          </p>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={handleDeactivate}
+                              disabled={saving}
+                              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors font-medium"
+                            >
+                              {saving
+                                ? "Desativando..."
+                                : "Confirmar Desativação"}
+                            </button>
+                            <button
+                              onClick={() => setShowDeleteConfirm(false)}
+                              className="flex-1 px-4 py-2 bg-[#f3ece7] text-[#1b130d] rounded-lg hover:bg-[#e7d9cf] transition-colors font-medium"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[#9a6c4c] mb-4">
+                        Este usuário está desativado. Clique no botão abaixo
+                        para reativá-lo e permitir que ele acesse o sistema
+                        novamente.
+                      </p>
+                      <button
+                        onClick={handleActivate}
+                        disabled={saving}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
+                      >
+                        {saving ? "Ativando..." : "Ativar Usuário"}
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

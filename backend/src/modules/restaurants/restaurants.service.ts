@@ -29,7 +29,17 @@ export class RestaurantsService {
         category: true,
         image: true,
         isActive: true,
+        rating: true,
         createdAt: true,
+        updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
       },
     });
 
@@ -91,6 +101,15 @@ export class RestaurantsService {
         isActive: true,
         rating: true,
         createdAt: true,
+        updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -146,8 +165,17 @@ export class RestaurantsService {
         category: true,
         image: true,
         isActive: true,
+        rating: true,
         createdAt: true,
         updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
       },
     });
 
@@ -186,7 +214,17 @@ export class RestaurantsService {
         category: true,
         image: true,
         isActive: true,
+        rating: true,
+        createdAt: true,
         updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
       },
     });
 
@@ -232,10 +270,105 @@ export class RestaurantsService {
         category: true,
         image: true,
         isActive: true,
+        rating: true,
+        createdAt: true,
         updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
       },
     });
 
     return restaurant;
+  }
+
+  /**
+   * Desativa um restaurante (soft delete)
+   */
+  async deactivate(id: string) {
+    // Verificar se restaurante existe
+    await this.findOne(id);
+
+    const restaurant = await this.prisma.restaurant.update({
+      where: { id },
+      data: { isActive: false },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        minimumOrder: true,
+        category: true,
+        image: true,
+        isActive: true,
+        rating: true,
+        createdAt: true,
+        updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    return restaurant;
+  }
+
+  /**
+   * Ativa um restaurante
+   */
+  async activate(id: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException('Restaurante não encontrado');
+    }
+
+    const updated = await this.prisma.restaurant.update({
+      where: { id },
+      data: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        minimumOrder: true,
+        category: true,
+        image: true,
+        isActive: true,
+        rating: true,
+        createdAt: true,
+        updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    return updated;
   }
 }

@@ -4,46 +4,61 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { userService, AdminUserResponse } from "@/services/userService";
+import {
+  restaurantAdminService,
+  AdminRestaurantResponse,
+} from "@/services/restaurantAdminService";
 import { logger } from "@/lib/logger";
 
-export default function UsersManagementPage() {
+export default function RestaurantsManagementPage() {
   const router = useRouter();
   const { user: authUser } = useAuth();
-  const [users, setUsers] = useState<AdminUserResponse[]>([]);
+  const [restaurants, setRestaurants] = useState<AdminRestaurantResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (authUser && authUser.role === "ADMIN") {
-      loadUsers();
+      loadRestaurants();
     }
   }, [authUser]);
 
-  const loadUsers = async () => {
+  const loadRestaurants = async () => {
     try {
       setLoading(true);
-      const data = await userService.getAllUsers();
-      setUsers(data);
+      const data = await restaurantAdminService.getAllRestaurants();
+      console.log("Restaurants loaded:", data);
+      if (!Array.isArray(data)) {
+        throw new Error(`Expected array but got ${typeof data}`);
+      }
+      setRestaurants(data);
       setError("");
     } catch (err) {
-      logger.error("Erro ao carregar usuários", err);
-      setError("Erro ao carregar usuários");
+      logger.error("Erro ao carregar restaurantes", err);
+      setError(
+        `Erro ao carregar restaurantes: ${
+          err instanceof Error ? err.message : "Erro desconhecido"
+        }`
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case "ADMIN":
-        return "bg-purple-100 text-purple-700";
-      case "RESTAURANT_OWNER":
-        return "bg-blue-100 text-blue-700";
-      case "CLIENT":
-        return "bg-gray-100 text-gray-700";
-      default:
-        return "bg-gray-100 text-gray-700";
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return "-";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "-";
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    } catch {
+      return "-";
     }
   };
 
@@ -75,10 +90,10 @@ export default function UsersManagementPage() {
             {/* Title */}
             <div className="mb-6">
               <h1 className="text-[#1b130d] text-3xl font-bold">
-                Gerenciar Usuários
+                Gerenciar Restaurantes
               </h1>
               <p className="text-[#9a6c4c] mt-1">
-                Visualizar e gerenciar papéis de usuários
+                Visualizar e gerenciar restaurantes cadastrados
               </p>
             </div>
 
@@ -99,15 +114,15 @@ export default function UsersManagementPage() {
                 Voltar
               </button>
               <button
-                onClick={() => router.push("/admin/usuarios/novo")}
+                onClick={() => router.push("/admin/restaurantes/novo")}
                 className="flex items-center gap-2 px-4 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90 transition-colors font-medium"
               >
                 <span className="material-symbols-outlined">add</span>
-                Adicionar Novo Usuário
+                Adicionar Novo Restaurante
               </button>
             </div>
 
-            {/* Users List */}
+            {/* Restaurants List */}
             <div className="bg-white rounded-lg border border-[#e7d9cf]">
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
@@ -117,13 +132,10 @@ export default function UsersManagementPage() {
                         Nome
                       </th>
                       <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
-                        Email
+                        Proprietário
                       </th>
                       <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
                         Telefone
-                      </th>
-                      <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
-                        Papel
                       </th>
                       <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
                         Status
@@ -143,86 +155,72 @@ export default function UsersManagementPage() {
                     {loading ? (
                       <tr>
                         <td
-                          colSpan={8}
+                          colSpan={7}
                           className="px-4 py-8 text-center text-[#9a6c4c]"
                         >
-                          Carregando usuários...
+                          Carregando restaurantes...
                         </td>
                       </tr>
-                    ) : users.length === 0 ? (
+                    ) : restaurants.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={8}
+                          colSpan={7}
                           className="px-4 py-8 text-center text-[#9a6c4c]"
                         >
-                          Nenhum usuário encontrado
+                          Nenhum restaurante encontrado
                         </td>
                       </tr>
                     ) : (
-                      users.map((u) => (
+                      restaurants.map((restaurant) => (
                         <tr
-                          key={u.id}
-                          className="border-b border-[#e7d9cf] hover:bg-[#f8f7f6]"
+                          key={restaurant.id}
+                          className="border-b border-[#e7d9cf] hover:bg-[#f8f7f6] transition-colors"
                         >
-                          <td className="px-4 py-3 text-[#1b130d] font-medium text-sm">
-                            {u.name}
-                          </td>
-                          <td className="px-4 py-3 text-[#9a6c4c] text-sm">
-                            {u.email}
-                          </td>
-                          <td className="px-4 py-3 text-[#9a6c4c] text-sm">
-                            {u.phone || "-"}
+                          <td className="px-4 py-3">
+                            <span className="text-[#1b130d] font-medium">
+                              {restaurant.name}
+                            </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getRoleBadgeColor(
-                                u.role
-                              )}`}
-                            >
-                              {u.role === "ADMIN"
-                                ? "Administrador"
-                                : u.role === "RESTAURANT_OWNER"
-                                ? "Proprietário"
-                                : "Cliente"}
+                            <span className="text-[#1b130d] text-sm">
+                              {restaurant.owner?.name || "-"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-[#1b130d] text-sm">
+                              {restaurant.phone ||
+                                restaurant.owner?.phone ||
+                                "-"}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                                u.isActive
+                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                restaurant.isActive
                                   ? "bg-green-100 text-green-700"
                                   : "bg-red-100 text-red-700"
                               }`}
                             >
-                              {u.isActive ? "Ativo" : "Inativo"}
+                              {restaurant.isActive ? "Ativo" : "Inativo"}
                             </span>
                           </td>
-                          <td className="px-3 py-3 text-[#9a6c4c] text-xs whitespace-nowrap">
-                            {new Date(u.createdAt).toLocaleDateString("pt-BR", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                            })}
+                          <td className="px-3 py-3 text-xs text-[#9a6c4c]">
+                            {formatDate(restaurant.createdAt)}
                           </td>
-                          <td className="px-3 py-3 text-[#9a6c4c] text-xs whitespace-nowrap">
-                            {new Date(u.updatedAt).toLocaleDateString("pt-BR", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                            })}
+                          <td className="px-3 py-3 text-xs text-[#9a6c4c]">
+                            {formatDate(restaurant.updatedAt)}
                           </td>
                           <td className="px-4 py-3 text-center">
-                            <Link href={`/admin/usuarios/editar?id=${u.id}`}>
-                              <button className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded hover:bg-cyan-200 text-xs font-medium whitespace-nowrap">
-                                Editar
-                              </button>
-                            </Link>
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/admin/restaurantes/editar?id=${restaurant.id}`
+                                )
+                              }
+                              className="px-3 py-1 text-[#ee7c2b] font-medium hover:text-[#ee7c2b]/80 transition-colors"
+                            >
+                              Editar
+                            </button>
                           </td>
                         </tr>
                       ))

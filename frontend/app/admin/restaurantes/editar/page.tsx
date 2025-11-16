@@ -87,7 +87,24 @@ export default function EditRestaurantePage() {
 
     try {
       setSaving(true);
-      await restaurantAdminService.updateRestaurant(restaurantId, formData);
+      // Filtrar apenas os campos que foram modificados
+      const updateData: UpdateRestaurantRequest = {};
+      if (formData.name) updateData.name = formData.name;
+      if (formData.description) updateData.description = formData.description;
+      if (formData.address) updateData.address = formData.address;
+      if (formData.phone) updateData.phone = formData.phone;
+      if (formData.deliveryFee !== undefined && formData.deliveryFee !== null) {
+        updateData.deliveryFee = formData.deliveryFee;
+      }
+      if (formData.deliveryTime) updateData.deliveryTime = formData.deliveryTime;
+      if (formData.minimumOrder !== undefined && formData.minimumOrder !== null) {
+        updateData.minimumOrder = formData.minimumOrder;
+      }
+      if (formData.openingHours) {
+        updateData.openingHours = formData.openingHours;
+      }
+
+      await restaurantAdminService.updateRestaurant(restaurantId, updateData);
       setSuccess("Restaurante atualizado com sucesso!");
       setTimeout(() => router.back(), 2000);
     } catch (err) {
@@ -445,6 +462,16 @@ export default function EditRestaurantePage() {
                 </div>
               </div>
 
+              {/* Opening Hours */}
+              <div className="mb-6 bg-[#f8f7f6] rounded-lg border border-[#e7d9cf] p-6">
+                <OpeningHoursInput
+                  value={formData.openingHours}
+                  onChange={(hours) =>
+                    setFormData((prev) => ({ ...prev, openingHours: hours }))
+                  }
+                />
+              </div>
+
               <button
                 type="submit"
                 disabled={saving}
@@ -453,14 +480,6 @@ export default function EditRestaurantePage() {
                 {saving ? "Salvando..." : "Salvar Alterações"}
               </button>
             </form>
-
-            {/* Opening Hours */}
-            <OpeningHoursInput
-              value={formData.openingHours}
-              onChange={(hours) =>
-                setFormData((prev) => ({ ...prev, openingHours: hours }))
-              }
-            />
 
             {/* Status Management */}
             <div className="bg-white rounded-lg border border-[#e7d9cf] p-6 mt-6">

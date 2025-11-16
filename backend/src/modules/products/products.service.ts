@@ -109,6 +109,14 @@ export class ProductsService {
       throw new NotFoundException('Restaurante não encontrado');
     }
 
+    // Debug: log para entender o problema
+    console.log('DEBUG findByRestaurantIdOwner:', {
+      restaurantId,
+      userId,
+      restaurantOwnerId: restaurant.ownerId,
+      isMatch: restaurant.ownerId === userId,
+    });
+
     // Se o restaurante tem um ownerId definido, verificar se o usuário é o proprietário
     if (restaurant.ownerId && restaurant.ownerId !== userId) {
       throw new NotFoundException(

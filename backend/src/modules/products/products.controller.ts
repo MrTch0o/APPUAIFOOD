@@ -23,6 +23,7 @@ import {
   ApiConsumes,
   ApiBody,
 } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../../common/config/multer.config';
 import { ProductsService } from './products.service';
@@ -38,7 +39,10 @@ import { UserRole } from '@prisma/client';
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post()
   @Roles(UserRole.ADMIN, UserRole.RESTAURANT_OWNER)
@@ -163,7 +167,9 @@ export class ProductsController {
       throw new BadRequestException('Nenhum arquivo foi enviado');
     }
 
-    const imageUrl = `/uploads/${file.filename}`;
+    // Construir URL completa da imagem
+    const baseUrl = this.configService.get<string>('baseUrl');
+    const imageUrl = `${baseUrl}/uploads/${file.filename}`;
     return this.productsService.updateImage(id, imageUrl);
   }
 

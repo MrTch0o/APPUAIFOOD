@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ownerService } from "@/services/ownerService";
 import { productAdminService } from "@/services/productAdminService";
 import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
 
 interface Restaurant {
   id: string;
@@ -114,15 +115,7 @@ export default function OwnerProductsPage() {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
-          </div>
+          <PageHeader title="Produtos" backHref="/owner" />
           <div className="flex justify-center items-center min-h-[400px]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
           </div>
@@ -135,25 +128,20 @@ export default function OwnerProductsPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
-          </div>
-          {selectedRestaurantId && (
-            <Link
-              href={`/admin/produtos/criar?restaurantId=${selectedRestaurantId}`}
-              className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
-            >
-              + Novo Produto
-            </Link>
-          )}
-        </div>
+        <PageHeader
+          title="Produtos"
+          backHref="/owner"
+          action={
+            selectedRestaurantId && (
+              <Link
+                href={`/admin/produtos/criar?restaurantId=${selectedRestaurantId}`}
+                className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
+              >
+                + Novo Produto
+              </Link>
+            )
+          }
+        />
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">

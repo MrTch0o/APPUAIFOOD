@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { ownerService } from "@/services/ownerService";
 import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
 
 interface Restaurant {
   id: string;
@@ -68,17 +69,10 @@ export default function RestaurantDetailsPage() {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Detalhes do Restaurante
-            </h1>
-          </div>
+          <PageHeader
+            title="Detalhes do Restaurante"
+            backHref="/owner/restaurantes"
+          />
           <div className="flex justify-center items-center min-h-[400px]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
           </div>
@@ -91,17 +85,10 @@ export default function RestaurantDetailsPage() {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Detalhes do Restaurante
-            </h1>
-          </div>
+          <PageHeader
+            title="Detalhes do Restaurante"
+            backHref="/owner/restaurantes"
+          />
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
             {error || "Restaurante não encontrado"}
           </div>
@@ -113,26 +100,18 @@ export default function RestaurantDetailsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900"
+        <PageHeader
+          title="Detalhes do Restaurante"
+          action={
+            <Link
+              href={`/owner/restaurantes/editar?id=${restaurant.id}`}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
-              ← Voltar
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Detalhes do Restaurante
-            </h1>
-          </div>
-          <Link
-            href={`/owner/restaurantes/editar?id=${restaurant.id}`}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Editar
-          </Link>
-        </div>
+              Editar
+            </Link>
+          }
+          backHref="/owner/restaurantes"
+        />
 
         {/* Main Card */}
         <div className="bg-white rounded-lg shadow-md p-8 space-y-6">

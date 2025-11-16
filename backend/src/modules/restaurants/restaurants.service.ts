@@ -157,6 +157,46 @@ export class RestaurantsService {
   }
 
   /**
+   * Busca um restaurante específico para admin (com owner)
+   */
+  async findOneAdmin(id: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        address: true,
+        phone: true,
+        openingHours: true,
+        deliveryFee: true,
+        deliveryTime: true,
+        minimumOrder: true,
+        category: true,
+        image: true,
+        isActive: true,
+        rating: true,
+        createdAt: true,
+        updatedAt: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException('Restaurante não encontrado');
+    }
+
+    return restaurant;
+  }
+
+  /**
    * Busca o restaurante do usuário logado (por ownerId)
    */
   async getByOwnerId(ownerId: string) {

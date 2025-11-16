@@ -98,14 +98,14 @@ export const restaurantAdminService = {
 
   /**
    * Buscar restaurante por ID (apenas ADMIN)
-   * GET /restaurants/:id
+   * GET /restaurants/admin/:id
    */
   async getRestaurantById(id: string): Promise<AdminRestaurantResponse> {
     const response = await api.get<{
       success: boolean;
       data: AdminRestaurantResponse;
       timestamp: string;
-    }>(`/restaurants/${id}`);
+    }>(`/restaurants/admin/${id}`);
     return response.data.data;
   },
 

@@ -89,6 +89,17 @@ export class RestaurantsController {
     return this.restaurantsService.findAllAdmin();
   }
 
+  @Get('admin/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Buscar detalhes de restaurante (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Restaurante encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  @ApiResponse({ status: 404, description: 'Restaurante não encontrado' })
+  findOneAdmin(@Param('id') id: string) {
+    return this.restaurantsService.findOneAdmin(id);
+  }
+
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Buscar detalhes de um restaurante' })

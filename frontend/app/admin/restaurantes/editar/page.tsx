@@ -96,14 +96,21 @@ export default function EditRestaurantePage() {
       if (formData.deliveryFee !== undefined && formData.deliveryFee !== null) {
         updateData.deliveryFee = formData.deliveryFee;
       }
-      if (formData.deliveryTime) updateData.deliveryTime = formData.deliveryTime;
-      if (formData.minimumOrder !== undefined && formData.minimumOrder !== null) {
+      if (formData.deliveryTime) {
+        updateData.deliveryTime = formData.deliveryTime;
+      }
+      if (
+        formData.minimumOrder !== undefined &&
+        formData.minimumOrder !== null
+      ) {
         updateData.minimumOrder = formData.minimumOrder;
       }
-      if (formData.openingHours) {
+      // Incluir openingHours sempre que estiver definido (mesmo que vazio)
+      if (formData.openingHours !== undefined) {
         updateData.openingHours = formData.openingHours;
       }
 
+      console.log("Sending update data:", updateData);
       await restaurantAdminService.updateRestaurant(restaurantId, updateData);
       setSuccess("Restaurante atualizado com sucesso!");
       setTimeout(() => router.back(), 2000);

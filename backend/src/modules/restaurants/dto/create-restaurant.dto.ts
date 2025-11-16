@@ -10,6 +10,7 @@ import {
   Min,
   Max,
   IsUUID,
+  IsObject,
 } from 'class-validator';
 
 export class CreateRestaurantDto {
@@ -57,17 +58,12 @@ export class CreateRestaurantDto {
   phone: string;
 
   @ApiProperty({
-    description: 'Horário de funcionamento',
-    example: 'Seg-Sex: 11h-23h | Sáb-Dom: 12h-00h',
-    maxLength: 200,
+    description: 'Horário de funcionamento (objeto JSON ou string)',
+    example: { seg: '11:00-23:00', ter: '11:00-23:00' },
     required: false,
   })
-  @IsString()
   @IsOptional()
-  @MaxLength(200, {
-    message: 'O horário de funcionamento deve ter no máximo 200 caracteres',
-  })
-  openingHours?: string;
+  openingHours?: Record<string, string> | string | null;
 
   @ApiProperty({
     description: 'Taxa de entrega em reais',

@@ -132,8 +132,10 @@ export class ProductsService {
       restaurantId?: string;
       productCategoryId?: string;
       available?: boolean;
+      isActive?: boolean;
     } = {
       available: true,
+      isActive: true,
     };
 
     if (restaurantId) where.restaurantId = restaurantId;
@@ -185,6 +187,11 @@ export class ProductsService {
 
     if (!product) {
       throw new NotFoundException('Produto não encontrado');
+    }
+
+    // Verificar se o produto está ativo
+    if (!product.isActive) {
+      throw new NotFoundException('Produto não disponível');
     }
 
     return product;

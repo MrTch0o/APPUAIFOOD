@@ -62,29 +62,6 @@ export default function RestaurantsManagementPage() {
     }
   };
 
-  const formatOpeningHours = (
-    hours?: Record<string, string> | null
-  ): string => {
-    if (!hours || typeof hours !== "object") return "-";
-    const daysMap: { [key: string]: string } = {
-      seg: "Seg",
-      ter: "Ter",
-      qua: "Qua",
-      qui: "Qui",
-      sex: "Sex",
-      sab: "Sáb",
-      dom: "Dom",
-    };
-    const formatted = Object.entries(hours)
-      .map(([day, time]) => {
-        if (!time) return null;
-        return `${daysMap[day]}: ${time}`;
-      })
-      .filter(Boolean)
-      .join(" | ");
-    return formatted || "-";
-  };
-
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#f8f7f6]">
       <div className="flex h-full grow flex-col">
@@ -164,9 +141,6 @@ export default function RestaurantsManagementPage() {
                         Taxa Entrega
                       </th>
                       <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
-                        Horário
-                      </th>
-                      <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
                         Status
                       </th>
                       <th className="px-3 py-3 text-left text-[#1b130d] font-bold text-xs">
@@ -184,7 +158,7 @@ export default function RestaurantsManagementPage() {
                     {loading ? (
                       <tr>
                         <td
-                          colSpan={9}
+                          colSpan={8}
                           className="px-4 py-8 text-center text-[#9a6c4c]"
                         >
                           Carregando restaurantes...
@@ -193,7 +167,7 @@ export default function RestaurantsManagementPage() {
                     ) : restaurants.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={9}
+                          colSpan={8}
                           className="px-4 py-8 text-center text-[#9a6c4c]"
                         >
                           Nenhum restaurante encontrado
@@ -225,11 +199,6 @@ export default function RestaurantsManagementPage() {
                           <td className="px-4 py-3">
                             <span className="text-[#1b130d] text-sm">
                               R$ {restaurant.deliveryFee?.toFixed(2) || "-"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="text-[#1b130d] text-sm max-w-xs truncate">
-                              {formatOpeningHours(restaurant.openingHours)}
                             </span>
                           </td>
                           <td className="px-4 py-3">

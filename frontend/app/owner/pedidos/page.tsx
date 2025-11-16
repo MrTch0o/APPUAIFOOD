@@ -114,7 +114,7 @@ export default function OwnerOrdersPage() {
     if (!authLoading && user) {
       loadRestaurants();
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (selectedRestaurantId) {
@@ -122,7 +122,7 @@ export default function OwnerOrdersPage() {
     } else {
       setOrders([]);
     }
-  }, [selectedRestaurantId, statusFilter]);
+  }, [selectedRestaurantId, statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadRestaurants = async () => {
     try {

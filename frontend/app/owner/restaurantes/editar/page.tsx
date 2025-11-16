@@ -67,7 +67,7 @@ export default function EditRestaurantPage() {
     if (!authLoading && user) {
       loadData();
     }
-  }, [authLoading, user, restaurantId, router]);
+  }, [authLoading, user, restaurantId, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     try {

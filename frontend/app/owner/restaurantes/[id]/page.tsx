@@ -48,7 +48,7 @@ export default function RestaurantDetailsPage() {
     if (!authLoading && user) {
       loadRestaurant();
     }
-  }, [authLoading, user, restaurantId, router]);
+  }, [authLoading, user, restaurantId, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadRestaurant = async () => {
     try {

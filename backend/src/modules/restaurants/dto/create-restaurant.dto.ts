@@ -10,8 +10,10 @@ import {
   Min,
   Max,
   IsUUID,
-  IsObject,
+  ValidateIf,
+  IsJSON,
 } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 
 export class CreateRestaurantDto {
   @ApiProperty({

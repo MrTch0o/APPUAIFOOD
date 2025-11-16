@@ -41,7 +41,8 @@ export default function OwnerDashboard() {
               <div className="flex justify-center items-center p-8">
                 <div className="text-center">
                   <p className="text-[#9a6c4c] mb-4">
-                    Acesso negado. Apenas proprietários de restaurantes podem acessar.
+                    Acesso negado. Apenas proprietários de restaurantes podem
+                    acessar.
                   </p>
                   <Link href="/">
                     <button className="px-6 py-2 bg-[#ee7c2b] text-white rounded-lg hover:bg-[#ee7c2b]/90">

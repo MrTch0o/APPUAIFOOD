@@ -6,8 +6,11 @@ import {
 /**
  * Validador customizado para horário de funcionamento
  * Formatos aceitos:
- * - Record<string, string> com dias (seg, ter, qua, qui, sex, sab, dom) e horários no formato HH:MM-HH:MM
- * - Exemplos válidos: "11:00-23:00", "09:30-22:15"
+ * - Record<string, string> com dias e horários no formato HH:MM-HH:MM
+ * - Record<string, string[]> com dias e array de horários
+ * - Exemplos válidos:
+ *   - "11:00-23:00"
+ *   - ["11:00-14:00", "18:00-23:00"]
  */
 @ValidatorConstraint({ name: 'isValidOpeningHours', async: false })
 export class IsValidOpeningHoursConstraint
@@ -35,13 +38,24 @@ export class IsValidOpeningHoursConstraint
           return false;
         }
 
-        // Se tem valor, deve ser string com formato válido
-        if (typeof hours !== 'string') {
-          return false;
+        // Se é string, valida o formato
+        if (typeof hours === 'string') {
+          if (hours && !this.validateTimeFormat(hours)) {
+            return false;
+          }
         }
-
-        // Valida o formato da hora
-        if (hours && !this.validateTimeFormat(hours)) {
+        // Se é array, valida cada horário
+        else if (Array.isArray(hours)) {
+          for (const timeSlot of hours) {
+            if (typeof timeSlot !== 'string') {
+              return false;
+            }
+            if (timeSlot && !this.validateTimeFormat(timeSlot)) {
+              return false;
+            }
+          }
+        } else if (hours !== null && hours !== undefined && hours !== '') {
+          // Se não é string, array, null, undefined ou string vazia, é inválido
           return false;
         }
       }
@@ -81,6 +95,6 @@ export class IsValidOpeningHoursConstraint
   }
 
   defaultMessage(): string {
-    return `O formato do horário de funcionamento é inválido. Use HH:MM-HH:MM (ex: 11:00-23:00). Para múltiplos dias, envie um objeto JSON com chaves seg, ter, qua, qui, sex, sab, dom`;
+    return `O formato do horário de funcionamento é inválido. Use HH:MM-HH:MM (ex: 11:00-23:00). Para múltiplos períodos no mesmo dia, use um array (ex: ["11:00-14:00", "18:00-23:00"]). Para múltiplos dias, envie um objeto JSON com chaves seg, ter, qua, qui, sex, sab, dom`;
   }
 }

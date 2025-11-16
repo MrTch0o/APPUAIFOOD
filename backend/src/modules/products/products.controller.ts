@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -74,6 +75,19 @@ export class ProductsController {
     @Param('restaurantId') restaurantId: string,
   ): Promise<unknown[]> {
     return this.productsService.findByRestaurantIdAdmin(restaurantId);
+  }
+
+  @Get('owner/:restaurantId')
+  @Roles(UserRole.RESTAURANT_OWNER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar produtos de um restaurante (RESTAURANT_OWNER)' })
+  @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ou restaurante não é seu' })
+  getProductsByRestaurantOwner(
+    @Param('restaurantId') restaurantId: string,
+    @Request() req: any,
+  ): Promise<unknown[]> {
+    return this.productsService.findByRestaurantIdOwner(restaurantId, req.user.id);
   }
 
   @Get('admin/:id')

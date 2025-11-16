@@ -91,6 +91,53 @@ export class ProductsService {
   }
 
   /**
+   * Lista produtos de um restaurante (restaurant owner)
+   * Verifica se o usuário é proprietário do restaurante
+   */
+  async findByRestaurantIdOwner(
+    restaurantId: string,
+    userId: string,
+  ): Promise<unknown[]> {
+    // Primeiro verificar se o restaurante pertence ao usuário
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+      select: { ownerId: true },
+    });
+
+    if (!restaurant || restaurant.ownerId !== userId) {
+      throw new NotFoundException(
+        'Restaurante não encontrado ou você não tem permissão para acessar',
+      );
+    }
+
+    return this.prisma.product.findMany({
+      where: { restaurantId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        image: true,
+        productCategoryId: true,
+        restaurantId: true,
+        isActive: true,
+        preparationTime: true,
+        createdAt: true,
+        updatedAt: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  /**
    * Busca um produto específico (admin)
    */
   async findOneAdmin(id: string): Promise<unknown> {

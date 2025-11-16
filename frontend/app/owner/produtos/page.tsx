@@ -87,7 +87,7 @@ export default function OwnerProductsPage() {
 
     try {
       setError(null);
-      const data = await productAdminService.getProductsByRestaurant(
+      const data = await ownerService.getRestaurantProducts(
         selectedRestaurantId
       );
       setProducts(data);

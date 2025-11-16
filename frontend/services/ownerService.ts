@@ -58,6 +58,20 @@ export interface OwnerOrderResponse {
   updatedAt: string;
 }
 
+export interface OwnerProductResponse {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  image?: string;
+  productCategoryId: string;
+  restaurantId: string;
+  isActive: boolean;
+  preparationTime?: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 export const ownerService = {
   /**
    * Obter todos os restaurantes do proprietário logado
@@ -114,5 +128,20 @@ export const ownerService = {
       timestamp: string;
     }>(`/orders/${orderId}/status`, { status });
     return response.data.data;
+  },
+
+  /**
+   * Obter produtos de um restaurante do proprietário
+   */
+  async getRestaurantProducts(
+    restaurantId: string
+  ): Promise<OwnerProductResponse[]> {
+    const response = await api.get<{
+      success: boolean;
+      data: OwnerProductResponse[];
+      timestamp: string;
+    }>(`/products/owner/${restaurantId}`);
+    const data = response.data.data;
+    return Array.isArray(data) ? data : [];
   },
 };

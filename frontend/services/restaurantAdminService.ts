@@ -13,7 +13,7 @@ export interface AdminRestaurantResponse {
   description?: string;
   address?: string;
   phone?: string;
-  openingHours?: string;
+  openingHours?: Record<string, string> | null;
   deliveryFee?: number;
   deliveryTime?: number;
   minimumOrder?: number;
@@ -34,7 +34,7 @@ export interface CreateRestaurantRequest {
   deliveryFee: number;
   deliveryTime: string;
   minimumOrder?: number;
-  openingHours?: string;
+  openingHours?: Record<string, string>;
 }
 
 export interface UpdateRestaurantRequest {
@@ -46,7 +46,7 @@ export interface UpdateRestaurantRequest {
   deliveryFee?: number;
   deliveryTime?: string;
   minimumOrder?: number;
-  openingHours?: string;
+  openingHours?: Record<string, string>;
 }
 
 export const restaurantAdminService = {

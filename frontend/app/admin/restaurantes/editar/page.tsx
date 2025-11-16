@@ -10,6 +10,7 @@ import {
   UpdateRestaurantRequest,
 } from "@/services/restaurantAdminService";
 import { logger } from "@/lib/logger";
+import { OpeningHoursInput } from "@/components/OpeningHoursInput";
 
 export default function EditRestaurantePage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function EditRestaurantePage() {
         deliveryFee: data.deliveryFee,
         deliveryTime: data.deliveryTime?.toString(),
         minimumOrder: data.minimumOrder,
-        openingHours: data.openingHours,
+        openingHours: data.openingHours || undefined,
       });
       setError("");
     } catch (err) {
@@ -401,28 +402,6 @@ export default function EditRestaurantePage() {
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="block text-[#1b130d] font-bold mb-2">
-                  Horário de Funcionamento
-                </label>
-                <textarea
-                  name="openingHours"
-                  value={
-                    typeof formData.openingHours === "string"
-                      ? formData.openingHours
-                      : ""
-                  }
-                  onChange={handleInputChange}
-                  placeholder="Ex: Seg-Sex: 11h-23h | Sáb-Dom: 12h-00h"
-                  rows={2}
-                  className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] placeholder-[#9a6c4c] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
-                />
-                <p className="text-[#9a6c4c] text-xs mt-1">
-                  Insira os horários de funcionamento. Use pipe (|) para separar
-                  diferentes períodos.
-                </p>
-              </div>
-
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
                   <label className="block text-[#1b130d] font-bold mb-2">
@@ -475,8 +454,16 @@ export default function EditRestaurantePage() {
               </button>
             </form>
 
+            {/* Opening Hours */}
+            <OpeningHoursInput
+              value={formData.openingHours}
+              onChange={(hours) =>
+                setFormData((prev) => ({ ...prev, openingHours: hours }))
+              }
+            />
+
             {/* Status Management */}
-            <div className="bg-white rounded-lg border border-[#e7d9cf] p-6">
+            <div className="bg-white rounded-lg border border-[#e7d9cf] p-6 mt-6">
               <h3 className="text-lg font-bold text-[#1b130d] mb-4">
                 Gerenciar Status
               </h3>

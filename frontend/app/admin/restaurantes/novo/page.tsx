@@ -14,6 +14,7 @@ import {
   RestaurantCategory,
 } from "@/services/categoryService";
 import { logger } from "@/lib/logger";
+import { OpeningHoursInput } from "@/components/OpeningHoursInput";
 
 export default function NovoRestaurantePage() {
   const router = useRouter();
@@ -398,7 +399,7 @@ export default function NovoRestaurantePage() {
               </div>
 
               {/* Minimum Order */}
-              <div className="mb-6">
+              <div className="mb-8">
                 <label className="block text-[#1b130d] font-bold mb-2">
                   Pedido Mínimo (R$)
                 </label>
@@ -411,6 +412,19 @@ export default function NovoRestaurantePage() {
                   min="0"
                   className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] placeholder-[#9a6c4c] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
                   placeholder="0.00"
+                />
+              </div>
+
+              {/* Opening Hours Section */}
+              <div className="bg-[#f8f7f6] rounded-lg border border-[#e7d9cf] p-6 mb-8">
+                <h3 className="text-lg font-bold text-[#1b130d] mb-4">
+                  Horário de Funcionamento (Opcional)
+                </h3>
+                <OpeningHoursInput
+                  value={formData.openingHours}
+                  onChange={(hours) =>
+                    setFormData((prev) => ({ ...prev, openingHours: hours }))
+                  }
                 />
               </div>
 

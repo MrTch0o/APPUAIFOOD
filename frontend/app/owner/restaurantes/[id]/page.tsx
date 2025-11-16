@@ -1,8 +1,8 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { AuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { ownerService } from "@/services/ownerService";
 import Link from "next/link";
 
@@ -12,7 +12,7 @@ interface Restaurant {
   description?: string;
   address?: string;
   phone?: string;
-  openingHours?: string;
+  openingHours?: string | Record<string, string | string[]>;
   deliveryFee?: number;
   deliveryTime?: number;
   minimumOrder?: number;
@@ -21,13 +21,13 @@ interface Restaurant {
   isActive: boolean;
   rating?: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
 export default function RestaurantDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const authContext = useContext(AuthContext);
+  const { user, loading: authLoading } = useAuth();
   const restaurantId = params.id as string;
 
   const [loading, setLoading] = useState(true);
@@ -35,18 +35,20 @@ export default function RestaurantDetailsPage() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
 
   useEffect(() => {
-    if (!authContext?.user) {
+    if (!authLoading && !user) {
       router.push("/login");
       return;
     }
 
-    if (authContext.user.role !== "RESTAURANT_OWNER") {
+    if (!authLoading && user?.role !== "RESTAURANT_OWNER") {
       router.push("/");
       return;
     }
 
-    loadRestaurant();
-  }, [authContext, restaurantId, router]);
+    if (!authLoading && user) {
+      loadRestaurant();
+    }
+  }, [authLoading, user, restaurantId, router]);
 
   const loadRestaurant = async () => {
     try {

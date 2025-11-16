@@ -1,10 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { ownerService } from "@/services/ownerService";
-import { restaurantService } from "@/services/restaurantService";
+import { restaurantCategoryService } from "@/services/categoryService";
+import { restaurantAdminService } from "@/services/restaurantAdminService";
 
 interface RestaurantForm {
   name: string;
@@ -27,7 +28,7 @@ interface Category {
 export default function EditRestaurantPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const authContext = useContext(AuthContext);
+  const { user, loading: authLoading } = useAuth();
   const restaurantId = searchParams.get("id");
 
   const [loading, setLoading] = useState(true);
@@ -48,12 +49,12 @@ export default function EditRestaurantPage() {
   });
 
   useEffect(() => {
-    if (!authContext?.user) {
+    if (!authLoading && !user) {
       router.push("/login");
       return;
     }
 
-    if (authContext.user.role !== "RESTAURANT_OWNER") {
+    if (!authLoading && user?.role !== "RESTAURANT_OWNER") {
       router.push("/");
       return;
     }
@@ -63,8 +64,10 @@ export default function EditRestaurantPage() {
       return;
     }
 
-    loadData();
-  }, [authContext, restaurantId, router]);
+    if (!authLoading && user) {
+      loadData();
+    }
+  }, [authLoading, user, restaurantId, router]);
 
   const loadData = async () => {
     try {
@@ -72,7 +75,7 @@ export default function EditRestaurantPage() {
       setError(null);
 
       // Carregar categorias
-      const categoriesData = await restaurantService.getCategories();
+      const categoriesData = await restaurantCategoryService.getAll();
       setCategories(categoriesData);
 
       // Carregar dados do restaurante
@@ -82,7 +85,10 @@ export default function EditRestaurantPage() {
         description: restaurant.description || "",
         address: restaurant.address || "",
         phone: restaurant.phone || "",
-        openingHours: restaurant.openingHours || "",
+        openingHours:
+          typeof restaurant.openingHours === "string"
+            ? restaurant.openingHours
+            : "",
         deliveryFee: restaurant.deliveryFee || 0,
         deliveryTime: restaurant.deliveryTime || 30,
         minimumOrder: restaurant.minimumOrder || 0,
@@ -135,7 +141,16 @@ export default function EditRestaurantPage() {
       setSaving(true);
       setError(null);
 
-      await restaurantService.updateRestaurant(restaurantId!, formData);
+      await restaurantAdminService.update(restaurantId!, {
+        name: formData.name,
+        description: formData.description,
+        address: formData.address,
+        phone: formData.phone,
+        deliveryFee: formData.deliveryFee,
+        deliveryTime: String(formData.deliveryTime),
+        minimumOrder: formData.minimumOrder,
+        restaurantCategoryId: formData.restaurantCategoryId,
+      });
       router.push("/owner/restaurantes");
     } catch (err) {
       console.error("Erro ao salvar:", err);

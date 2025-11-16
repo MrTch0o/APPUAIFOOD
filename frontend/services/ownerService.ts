@@ -1,5 +1,4 @@
 import api from "@/lib/api";
-import { Order, Restaurant } from "@/types";
 
 export interface OwnerRestaurantResponse {
   id: string;

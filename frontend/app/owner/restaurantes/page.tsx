@@ -1,8 +1,8 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { ownerService } from "@/services/ownerService";
 import { useRouter } from "next/navigation";
 
@@ -16,29 +16,31 @@ interface Restaurant {
   isActive: boolean;
   rating?: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
 export default function OwnerRestaurantsPage() {
   const router = useRouter();
-  const authContext = useContext(AuthContext);
+  const { user, loading: authLoading } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authContext?.user) {
+    if (!authLoading && !user) {
       router.push("/login");
       return;
     }
 
-    if (authContext.user.role !== "RESTAURANT_OWNER") {
+    if (!authLoading && user?.role !== "RESTAURANT_OWNER") {
       router.push("/");
       return;
     }
 
-    loadRestaurants();
-  }, [authContext, router]);
+    if (!authLoading && user) {
+      loadRestaurants();
+    }
+  }, [authLoading, user, router]);
 
   const loadRestaurants = async () => {
     try {

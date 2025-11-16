@@ -1,8 +1,8 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { ownerService } from '@/services/ownerService';
 
 interface Restaurant {
@@ -24,7 +24,13 @@ interface OrderItem {
 
 interface Order {
   id: string;
-  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED';
+  status:
+    | "PENDING"
+    | "CONFIRMED"
+    | "PREPARING"
+    | "OUT_FOR_DELIVERY"
+    | "DELIVERED"
+    | "CANCELLED";
   subtotal: number;
   deliveryFee: number;
   total: number;
@@ -51,29 +57,29 @@ interface Order {
   updatedAt: string;
 }
 
-const STATUS_COLORS: Record<Order['status'], string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  CONFIRMED: 'bg-blue-100 text-blue-800',
-  PREPARING: 'bg-purple-100 text-purple-800',
-  OUT_FOR_DELIVERY: 'bg-orange-100 text-orange-800',
-  DELIVERED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
+const STATUS_COLORS: Record<Order["status"], string> = {
+  PENDING: "bg-yellow-100 text-yellow-800",
+  CONFIRMED: "bg-blue-100 text-blue-800",
+  PREPARING: "bg-purple-100 text-purple-800",
+  OUT_FOR_DELIVERY: "bg-orange-100 text-orange-800",
+  DELIVERED: "bg-green-100 text-green-800",
+  CANCELLED: "bg-red-100 text-red-800",
 };
 
-const STATUS_LABELS: Record<Order['status'], string> = {
-  PENDING: 'Pendente',
-  CONFIRMED: 'Confirmado',
-  PREPARING: 'Preparando',
-  OUT_FOR_DELIVERY: 'Saindo para Entrega',
-  DELIVERED: 'Entregue',
-  CANCELLED: 'Cancelado',
+const STATUS_LABELS: Record<Order["status"], string> = {
+  PENDING: "Pendente",
+  CONFIRMED: "Confirmado",
+  PREPARING: "Preparando",
+  OUT_FOR_DELIVERY: "Saindo para Entrega",
+  DELIVERED: "Entregue",
+  CANCELLED: "Cancelado",
 };
 
-const STATUS_PROGRESSION: Record<Order['status'], Order['status'][]> = {
-  PENDING: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['PREPARING', 'CANCELLED'],
-  PREPARING: ['OUT_FOR_DELIVERY', 'CANCELLED'],
-  OUT_FOR_DELIVERY: ['DELIVERED', 'CANCELLED'],
+const STATUS_PROGRESSION: Record<Order["status"], Order["status"][]> = {
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["PREPARING", "CANCELLED"],
+  PREPARING: ["OUT_FOR_DELIVERY", "CANCELLED"],
+  OUT_FOR_DELIVERY: ["DELIVERED", "CANCELLED"],
   DELIVERED: [],
   CANCELLED: [],
 };
@@ -81,32 +87,34 @@ const STATUS_PROGRESSION: Record<Order['status'], Order['status'][]> = {
 export default function OwnerOrdersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const authContext = useContext(AuthContext);
+  const { user, loading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>(
-    searchParams.get('restaurantId') || ''
+    searchParams.get("restaurantId") || ""
   );
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authContext?.user) {
-      router.push('/login');
+    if (!authLoading && !user) {
+      router.push("/login");
       return;
     }
 
-    if (authContext.user.role !== 'RESTAURANT_OWNER') {
-      router.push('/');
+    if (!authLoading && user?.role !== "RESTAURANT_OWNER") {
+      router.push("/");
       return;
     }
 
-    loadRestaurants();
-  }, [authContext, router]);
+    if (!authLoading && user) {
+      loadRestaurants();
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (selectedRestaurantId) {
@@ -123,14 +131,14 @@ export default function OwnerOrdersPage() {
       const data = await ownerService.getMyRestaurants();
       setRestaurants(data);
 
-      if (searchParams.get('restaurantId')) {
-        setSelectedRestaurantId(searchParams.get('restaurantId')!);
+      if (searchParams.get("restaurantId")) {
+        setSelectedRestaurantId(searchParams.get("restaurantId")!);
       } else if (data.length > 0) {
         setSelectedRestaurantId(data[0].id);
       }
     } catch (err) {
-      console.error('Erro ao carregar restaurantes:', err);
-      setError('Erro ao carregar restaurantes. Tente novamente.');
+      console.error("Erro ao carregar restaurantes:", err);
+      setError("Erro ao carregar restaurantes. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -145,22 +153,25 @@ export default function OwnerOrdersPage() {
         selectedRestaurantId,
         statusFilter || undefined
       );
-      setOrders(data);
+      setOrders(data as Order[]);
     } catch (err) {
-      console.error('Erro ao carregar pedidos:', err);
-      setError('Erro ao carregar pedidos. Tente novamente.');
+      console.error("Erro ao carregar pedidos:", err);
+      setError("Erro ao carregar pedidos. Tente novamente.");
     }
   };
 
-  const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
+  const handleStatusUpdate = async (
+    orderId: string,
+    newStatus: Order["status"]
+  ) => {
     try {
       setUpdatingOrderId(orderId);
       await ownerService.updateOrderStatus(orderId, newStatus);
       loadOrders();
       setSelectedOrder(null);
     } catch (err) {
-      console.error('Erro ao atualizar status:', err);
-      setError('Erro ao atualizar status do pedido. Tente novamente.');
+      console.error("Erro ao atualizar status:", err);
+      setError("Erro ao atualizar status do pedido. Tente novamente.");
     } finally {
       setUpdatingOrderId(null);
     }
@@ -211,7 +222,10 @@ export default function OwnerOrdersPage() {
         <div className="grid grid-cols-2 gap-4 mb-8">
           {restaurants.length > 0 && (
             <div className="bg-white rounded-lg shadow-md p-4">
-              <label htmlFor="restaurant-select" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="restaurant-select"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Restaurante
               </label>
               <select
@@ -231,7 +245,10 @@ export default function OwnerOrdersPage() {
           )}
 
           <div className="bg-white rounded-lg shadow-md p-4">
-            <label htmlFor="status-select" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="status-select"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Status
             </label>
             <select
@@ -268,7 +285,9 @@ export default function OwnerOrdersPage() {
                     <div
                       className="p-6 cursor-pointer border-b border-gray-200 hover:bg-gray-50"
                       onClick={() =>
-                        setSelectedOrder(selectedOrder?.id === order.id ? null : order)
+                        setSelectedOrder(
+                          selectedOrder?.id === order.id ? null : order
+                        )
                       }
                     >
                       <div className="flex items-center justify-between">
@@ -283,13 +302,17 @@ export default function OwnerOrdersPage() {
 
                             <div>
                               <p className="text-sm text-gray-500">Cliente</p>
-                              <p className="font-medium text-gray-900">{order.user?.name || 'N/A'}</p>
+                              <p className="font-medium text-gray-900">
+                                {order.user?.name || "N/A"}
+                              </p>
                             </div>
 
                             <div>
                               <p className="text-sm text-gray-500">Data</p>
                               <p className="font-medium text-gray-900">
-                                {new Date(order.createdAt).toLocaleDateString('pt-BR')}
+                                {new Date(order.createdAt).toLocaleDateString(
+                                  "pt-BR"
+                                )}
                               </p>
                             </div>
                           </div>
@@ -314,7 +337,9 @@ export default function OwnerOrdersPage() {
                           <div className="text-gray-400">
                             <svg
                               className={`w-5 h-5 transition-transform ${
-                                selectedOrder?.id === order.id ? 'rotate-180' : ''
+                                selectedOrder?.id === order.id
+                                  ? "rotate-180"
+                                  : ""
                               }`}
                               fill="none"
                               stroke="currentColor"
@@ -337,7 +362,9 @@ export default function OwnerOrdersPage() {
                       <div className="p-6 space-y-6 border-t border-gray-200 bg-gray-50">
                         {/* Itens do Pedido */}
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-4">Itens do Pedido</h4>
+                          <h4 className="font-semibold text-gray-900 mb-4">
+                            Itens do Pedido
+                          </h4>
                           <div className="space-y-3">
                             {order.items?.map((item) => (
                               <div
@@ -346,7 +373,8 @@ export default function OwnerOrdersPage() {
                               >
                                 <div>
                                   <p className="font-medium text-gray-900">
-                                    {item.product?.name || `Produto #${item.productId.slice(0, 8)}`}
+                                    {item.product?.name ||
+                                      `Produto #${item.productId.slice(0, 8)}`}
                                   </p>
                                   {item.product?.description && (
                                     <p className="text-sm text-gray-600 mt-1">
@@ -376,10 +404,13 @@ export default function OwnerOrdersPage() {
                                 {order.address.street}, {order.address.number}
                               </p>
                               {order.address.complement && (
-                                <p className="text-gray-700">{order.address.complement}</p>
+                                <p className="text-gray-700">
+                                  {order.address.complement}
+                                </p>
                               )}
                               <p className="text-gray-700">
-                                {order.address.city}, {order.address.state} - {order.address.zipCode}
+                                {order.address.city}, {order.address.state} -{" "}
+                                {order.address.zipCode}
                               </p>
                             </div>
                           </div>
@@ -387,7 +418,9 @@ export default function OwnerOrdersPage() {
 
                         {/* Resumo Financeiro */}
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-3">Resumo Financeiro</h4>
+                          <h4 className="font-semibold text-gray-900 mb-3">
+                            Resumo Financeiro
+                          </h4>
                           <div className="bg-white p-4 rounded border border-gray-200 space-y-2">
                             <div className="flex justify-between text-gray-700">
                               <span>Subtotal:</span>
@@ -411,22 +444,32 @@ export default function OwnerOrdersPage() {
                         {/* Informações do Cliente */}
                         {order.user && (
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Informações do Cliente</h4>
+                            <h4 className="font-semibold text-gray-900 mb-3">
+                              Informações do Cliente
+                            </h4>
                             <div className="bg-white p-4 rounded border border-gray-200 space-y-2">
                               <div className="flex justify-between">
                                 <span className="text-gray-700">Nome:</span>
-                                <span className="text-gray-900 font-medium">{order.user.name}</span>
+                                <span className="text-gray-900 font-medium">
+                                  {order.user.name}
+                                </span>
                               </div>
                               {order.user.email && (
                                 <div className="flex justify-between">
                                   <span className="text-gray-700">Email:</span>
-                                  <span className="text-gray-900 font-medium">{order.user.email}</span>
+                                  <span className="text-gray-900 font-medium">
+                                    {order.user.email}
+                                  </span>
                                 </div>
                               )}
                               {order.user.phone && (
                                 <div className="flex justify-between">
-                                  <span className="text-gray-700">Telefone:</span>
-                                  <span className="text-gray-900 font-medium">{order.user.phone}</span>
+                                  <span className="text-gray-700">
+                                    Telefone:
+                                  </span>
+                                  <span className="text-gray-900 font-medium">
+                                    {order.user.phone}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -436,29 +479,39 @@ export default function OwnerOrdersPage() {
                         {/* Atualizações de Status */}
                         {STATUS_PROGRESSION[order.status].length > 0 && (
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Próximas Ações</h4>
+                            <h4 className="font-semibold text-gray-900 mb-3">
+                              Próximas Ações
+                            </h4>
                             <div className="flex gap-2 flex-wrap">
-                              {STATUS_PROGRESSION[order.status].map((nextStatus) => (
-                                <button
-                                  key={nextStatus}
-                                  onClick={() => handleStatusUpdate(order.id, nextStatus)}
-                                  disabled={updatingOrderId === order.id}
-                                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                    nextStatus === 'CANCELLED'
-                                      ? 'bg-red-500 hover:bg-red-600 text-white'
-                                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                                  } disabled:opacity-50`}
-                                >
-                                  {updatingOrderId === order.id ? 'Atualizando...' : STATUS_LABELS[nextStatus]}
-                                </button>
-                              ))}
+                              {STATUS_PROGRESSION[order.status].map(
+                                (nextStatus) => (
+                                  <button
+                                    key={nextStatus}
+                                    onClick={() =>
+                                      handleStatusUpdate(order.id, nextStatus)
+                                    }
+                                    disabled={updatingOrderId === order.id}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                      nextStatus === "CANCELLED"
+                                        ? "bg-red-500 hover:bg-red-600 text-white"
+                                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                                    } disabled:opacity-50`}
+                                  >
+                                    {updatingOrderId === order.id
+                                      ? "Atualizando..."
+                                      : STATUS_LABELS[nextStatus]}
+                                  </button>
+                                )
+                              )}
                             </div>
                           </div>
                         )}
 
                         {STATUS_PROGRESSION[order.status].length === 0 && (
                           <div className="p-4 bg-gray-200 rounded-lg text-gray-700">
-                            <p>Este pedido não pode ser alterado neste status.</p>
+                            <p>
+                              Este pedido não pode ser alterado neste status.
+                            </p>
                           </div>
                         )}
                       </div>
@@ -470,7 +523,9 @@ export default function OwnerOrdersPage() {
           </>
         ) : (
           <div className="text-center py-12 bg-white rounded-lg shadow">
-            <p className="text-gray-600">Selecione um restaurante para visualizar seus pedidos.</p>
+            <p className="text-gray-600">
+              Selecione um restaurante para visualizar seus pedidos.
+            </p>
           </div>
         )}
       </div>

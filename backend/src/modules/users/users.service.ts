@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../../database/prisma.service';
+import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -104,6 +105,34 @@ export class UsersService {
 
     return {
       message: 'Usuário removido com sucesso',
+    };
+  }
+
+  /**
+   * Muda a role de um usuário (apenas ADMIN)
+   */
+  async updateRole(userId: string, newRole: UserRole) {
+    // Verificar se usuário existe
+    await this.findOne(userId);
+
+    // Atualizar role
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        is2FAEnabled: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: `Papel do usuário alterado para ${newRole} com sucesso`,
+      user: updatedUser,
     };
   }
 }

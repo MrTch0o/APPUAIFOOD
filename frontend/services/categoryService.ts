@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+import api from "@/lib/api";
 
 export interface RestaurantCategory {
   id: string;
@@ -25,13 +23,14 @@ export interface ProductCategory {
 export const restaurantCategoryService = {
   async getAll(onlyActive = false) {
     try {
-      const response = await axios.get<RestaurantCategory[]>(
-        `${API_URL}/restaurant-categories`,
-        {
-          params: { active: onlyActive },
-        }
-      );
-      return response.data;
+      const response = await api.get<{
+        success: boolean;
+        data: RestaurantCategory[];
+        timestamp: string;
+      }>(`/restaurant-categories`, {
+        params: { active: onlyActive },
+      });
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao buscar categorias de restaurante:", error);
       throw error;
@@ -40,10 +39,12 @@ export const restaurantCategoryService = {
 
   async getById(id: string) {
     try {
-      const response = await axios.get<RestaurantCategory>(
-        `${API_URL}/restaurant-categories/${id}`
-      );
-      return response.data;
+      const response = await api.get<{
+        success: boolean;
+        data: RestaurantCategory;
+        timestamp: string;
+      }>(`/restaurant-categories/${id}`);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao buscar categoria:", error);
       throw error;
@@ -54,11 +55,12 @@ export const restaurantCategoryService = {
     data: Omit<RestaurantCategory, "id" | "createdAt" | "updatedAt">
   ) {
     try {
-      const response = await axios.post<RestaurantCategory>(
-        `${API_URL}/restaurant-categories`,
-        data
-      );
-      return response.data;
+      const response = await api.post<{
+        success: boolean;
+        data: RestaurantCategory;
+        timestamp: string;
+      }>(`/restaurant-categories`, data);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao criar categoria:", error);
       throw error;
@@ -70,11 +72,12 @@ export const restaurantCategoryService = {
     data: Partial<Omit<RestaurantCategory, "id" | "createdAt" | "updatedAt">>
   ) {
     try {
-      const response = await axios.patch<RestaurantCategory>(
-        `${API_URL}/restaurant-categories/${id}`,
-        data
-      );
-      return response.data;
+      const response = await api.patch<{
+        success: boolean;
+        data: RestaurantCategory;
+        timestamp: string;
+      }>(`/restaurant-categories/${id}`, data);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao atualizar categoria:", error);
       throw error;
@@ -83,7 +86,7 @@ export const restaurantCategoryService = {
 
   async delete(id: string) {
     try {
-      await axios.delete(`${API_URL}/restaurant-categories/${id}`);
+      await api.delete(`/restaurant-categories/${id}`);
     } catch (error) {
       console.error("Erro ao deletar categoria:", error);
       throw error;
@@ -92,10 +95,12 @@ export const restaurantCategoryService = {
 
   async activate(id: string) {
     try {
-      const response = await axios.patch<RestaurantCategory>(
-        `${API_URL}/restaurant-categories/${id}/activate`
-      );
-      return response.data;
+      const response = await api.patch<{
+        success: boolean;
+        data: RestaurantCategory;
+        timestamp: string;
+      }>(`/restaurant-categories/${id}/activate`);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao ativar categoria:", error);
       throw error;
@@ -104,10 +109,12 @@ export const restaurantCategoryService = {
 
   async deactivate(id: string) {
     try {
-      const response = await axios.patch<RestaurantCategory>(
-        `${API_URL}/restaurant-categories/${id}/deactivate`
-      );
-      return response.data;
+      const response = await api.patch<{
+        success: boolean;
+        data: RestaurantCategory;
+        timestamp: string;
+      }>(`/restaurant-categories/${id}/deactivate`);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao desativar categoria:", error);
       throw error;
@@ -118,13 +125,14 @@ export const restaurantCategoryService = {
 export const productCategoryService = {
   async getAll(onlyActive = false) {
     try {
-      const response = await axios.get<ProductCategory[]>(
-        `${API_URL}/product-categories`,
-        {
-          params: { active: onlyActive },
-        }
-      );
-      return response.data;
+      const response = await api.get<{
+        success: boolean;
+        data: ProductCategory[];
+        timestamp: string;
+      }>(`/product-categories`, {
+        params: { active: onlyActive },
+      });
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao buscar categorias de produto:", error);
       throw error;
@@ -133,10 +141,12 @@ export const productCategoryService = {
 
   async getById(id: string) {
     try {
-      const response = await axios.get<ProductCategory>(
-        `${API_URL}/product-categories/${id}`
-      );
-      return response.data;
+      const response = await api.get<{
+        success: boolean;
+        data: ProductCategory;
+        timestamp: string;
+      }>(`/product-categories/${id}`);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao buscar categoria:", error);
       throw error;
@@ -145,11 +155,12 @@ export const productCategoryService = {
 
   async create(data: Omit<ProductCategory, "id" | "createdAt" | "updatedAt">) {
     try {
-      const response = await axios.post<ProductCategory>(
-        `${API_URL}/product-categories`,
-        data
-      );
-      return response.data;
+      const response = await api.post<{
+        success: boolean;
+        data: ProductCategory;
+        timestamp: string;
+      }>(`/product-categories`, data);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao criar categoria:", error);
       throw error;
@@ -161,11 +172,12 @@ export const productCategoryService = {
     data: Partial<Omit<ProductCategory, "id" | "createdAt" | "updatedAt">>
   ) {
     try {
-      const response = await axios.patch<ProductCategory>(
-        `${API_URL}/product-categories/${id}`,
-        data
-      );
-      return response.data;
+      const response = await api.patch<{
+        success: boolean;
+        data: ProductCategory;
+        timestamp: string;
+      }>(`/product-categories/${id}`, data);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao atualizar categoria:", error);
       throw error;
@@ -174,7 +186,7 @@ export const productCategoryService = {
 
   async delete(id: string) {
     try {
-      await axios.delete(`${API_URL}/product-categories/${id}`);
+      await api.delete(`/product-categories/${id}`);
     } catch (error) {
       console.error("Erro ao deletar categoria:", error);
       throw error;
@@ -183,10 +195,12 @@ export const productCategoryService = {
 
   async activate(id: string) {
     try {
-      const response = await axios.patch<ProductCategory>(
-        `${API_URL}/product-categories/${id}/activate`
-      );
-      return response.data;
+      const response = await api.patch<{
+        success: boolean;
+        data: ProductCategory;
+        timestamp: string;
+      }>(`/product-categories/${id}/activate`);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao ativar categoria:", error);
       throw error;
@@ -195,10 +209,12 @@ export const productCategoryService = {
 
   async deactivate(id: string) {
     try {
-      const response = await axios.patch<ProductCategory>(
-        `${API_URL}/product-categories/${id}/deactivate`
-      );
-      return response.data;
+      const response = await api.patch<{
+        success: boolean;
+        data: ProductCategory;
+        timestamp: string;
+      }>(`/product-categories/${id}/deactivate`);
+      return response.data.data;
     } catch (error) {
       console.error("Erro ao desativar categoria:", error);
       throw error;

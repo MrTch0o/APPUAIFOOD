@@ -1,6 +1,23 @@
 import api from "@/lib/api";
 import { Product } from "@/types";
 
+export interface CreateProductRequest {
+  name: string;
+  description?: string;
+  price: number;
+  restaurantId: string;
+  productCategoryId: string;
+  image?: string;
+}
+
+export interface UpdateProductRequest {
+  name?: string;
+  description?: string;
+  price?: number;
+  productCategoryId?: string;
+  image?: string;
+}
+
 export const productService = {
   /**
    * Listar todos os produtos com filtros opcionais
@@ -47,5 +64,59 @@ export const productService = {
    */
   async getByCategory(category: string): Promise<Product[]> {
     return this.getAll(undefined, category);
+  },
+
+  /**
+   * Criar novo produto (ADMIN)
+   * POST /products
+   */
+  async create(data: CreateProductRequest): Promise<Product> {
+    const response = await api.post<{
+      success: boolean;
+      data: Product;
+      timestamp: string;
+    }>("/products", data);
+    return response.data.data;
+  },
+
+  /**
+   * Atualizar produto (ADMIN)
+   * PATCH /products/:id
+   */
+  async update(id: string, data: UpdateProductRequest): Promise<Product> {
+    const response = await api.patch<{
+      success: boolean;
+      data: Product;
+      timestamp: string;
+    }>(`/products/${id}`, data);
+    return response.data.data;
+  },
+
+  /**
+   * Deletar produto (ADMIN)
+   * DELETE /products/:id
+   */
+  async delete(id: string): Promise<void> {
+    await api.delete(`/products/${id}`);
+  },
+
+  /**
+   * Upload de imagem para produto (ADMIN)
+   * POST /products/:id/image
+   */
+  async uploadImage(id: string, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await api.post<{
+      success: boolean;
+      data: { imageUrl: string };
+      timestamp: string;
+    }>(`/products/${id}/image`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data.data.imageUrl;
   },
 };

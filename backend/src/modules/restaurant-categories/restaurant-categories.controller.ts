@@ -60,9 +60,11 @@ export class RestaurantCategoriesController {
   }
 
   /**
-   * Lista todas as categorias
+   * Lista todas as categorias (requer autenticação)
    */
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar categorias de restaurante' })
   @ApiQuery({
     name: 'active',
@@ -74,19 +76,29 @@ export class RestaurantCategoriesController {
     status: 200,
     description: 'Lista de categorias',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autenticado',
+  })
   findAll(@Query('active') active?: string) {
     const onlyActive = active === 'true';
     return this.categoriesService.findAll(onlyActive);
   }
 
   /**
-   * Encontra uma categoria por ID
+   * Encontra uma categoria por ID (requer autenticação)
    */
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Obter categoria por ID' })
   @ApiResponse({
     status: 200,
     description: 'Categoria encontrada',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autenticado',
   })
   @ApiResponse({
     status: 404,

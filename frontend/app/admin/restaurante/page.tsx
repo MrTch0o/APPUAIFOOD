@@ -209,6 +209,13 @@ export default function CadastroRestaurantePage() {
                   UAIFOOD
                 </h2>
               </Link>
+              <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 px-4 py-2 bg-[#f3ece7] text-[#1b130d] rounded-lg hover:bg-[#e7d9cf] transition-colors font-medium"
+              >
+                <span className="material-symbols-outlined">arrow_back</span>
+                Voltar
+              </button>
             </header>
 
             {/* Page Title */}

@@ -32,6 +32,17 @@ export interface AuthResponse {
   timestamp: string;
 }
 
+// Restaurant Category Types
+export interface RestaurantCategory {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Restaurant Types
 export interface Restaurant {
   id: string;
@@ -41,7 +52,7 @@ export interface Restaurant {
   phone: string;
   image?: string;
   imageUrl?: string;
-  category?: string;
+  category?: RestaurantCategory;
   restaurantCategoryId?: string;
   rating?: number;
   deliveryTime?: string;

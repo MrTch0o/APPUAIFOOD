@@ -4,6 +4,7 @@ import {
   Body,
   Patch,
   Delete,
+  Param,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -65,5 +66,15 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Patch(':id/role')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Mudar a role de um usuário (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Role alterada com sucesso' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  updateRole(@Param('id') id: string, @Body() body: { role: UserRole }) {
+    return this.usersService.updateRole(id, body.role);
   }
 }

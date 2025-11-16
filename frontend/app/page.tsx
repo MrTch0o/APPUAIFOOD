@@ -42,7 +42,8 @@ export default function Home() {
             restaurant.description
               ?.toLowerCase()
               .includes(searchTerm.toLowerCase())) &&
-          (selectedCategory === "" || restaurant.category === selectedCategory)
+          (selectedCategory === "" ||
+            restaurant.category?.name === selectedCategory)
       )
     : [];
 
@@ -133,7 +134,7 @@ export default function Home() {
                           </Link>
                           {user.role === "ADMIN" && (
                             <Link
-                              href="/admin/restaurante"
+                              href="/admin"
                               onClick={() => setShowUserMenu(false)}
                             >
                               <button className="w-full px-4 py-2 text-left text-[#1b130d] hover:bg-[#f3ece7] flex items-center gap-2 transition-colors border-t border-[#e7d9cf] border-b">
@@ -276,9 +277,9 @@ export default function Home() {
                   <p className="text-sm font-medium leading-normal">Saudável</p>
                 </button>
                 <button
-                  onClick={() => setSelectedCategory("Pizzaria")}
+                  onClick={() => setSelectedCategory("Sobremesas")}
                   className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg pl-3 pr-4 transition-all hover:scale-105 ${
-                    selectedCategory === "Pizzaria"
+                    selectedCategory === "Sobremesas"
                       ? "bg-[#ee7c2b] text-white"
                       : "bg-[#f3ece7] text-[#1b130d] hover:bg-[#ee7c2b]/20"
                   }`}

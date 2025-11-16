@@ -34,6 +34,7 @@ export default function EditRestaurantePage() {
     deliveryFee: 0,
     deliveryTime: "",
     minimumOrder: 0,
+    openingHours: undefined,
   });
 
   const loadRestaurant = async () => {
@@ -51,6 +52,7 @@ export default function EditRestaurantePage() {
         deliveryFee: data.deliveryFee,
         deliveryTime: data.deliveryTime?.toString(),
         minimumOrder: data.minimumOrder,
+        openingHours: data.openingHours,
       });
       setError("");
     } catch (err) {
@@ -102,7 +104,7 @@ export default function EditRestaurantePage() {
       setSaving(true);
       await restaurantAdminService.deactivateRestaurant(restaurantId);
       setSuccess("Restaurante desativado com sucesso!");
-      setTimeout(() => router.back(), 2000);
+      setTimeout(() => router.push("/admin/restaurantes"), 2000);
     } catch (err) {
       logger.error("Erro ao desativar restaurante", err);
       setError("Erro ao desativar restaurante");
@@ -397,6 +399,28 @@ export default function EditRestaurantePage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] placeholder-[#9a6c4c] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
                 />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-[#1b130d] font-bold mb-2">
+                  Horário de Funcionamento
+                </label>
+                <textarea
+                  name="openingHours"
+                  value={
+                    typeof formData.openingHours === "string"
+                      ? formData.openingHours
+                      : ""
+                  }
+                  onChange={handleInputChange}
+                  placeholder="Ex: Seg-Sex: 11h-23h | Sáb-Dom: 12h-00h"
+                  rows={2}
+                  className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] placeholder-[#9a6c4c] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                />
+                <p className="text-[#9a6c4c] text-xs mt-1">
+                  Insira os horários de funcionamento. Use pipe (|) para separar
+                  diferentes períodos.
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-6">

@@ -85,13 +85,8 @@ export class RestaurantsController {
   @ApiOperation({ summary: 'Listar todos os restaurantes (apenas ADMIN)' })
   @ApiResponse({ status: 200, description: 'Lista de todos os restaurantes' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
-  async getAllRestaurants() {
-    const restaurants = await this.restaurantsService.findAllAdmin();
-    return {
-      success: true,
-      data: restaurants,
-      timestamp: new Date().toISOString(),
-    };
+  getAllRestaurants() {
+    return this.restaurantsService.findAllAdmin();
   }
 
   @Public()

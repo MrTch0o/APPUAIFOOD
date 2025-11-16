@@ -138,6 +138,12 @@ export default function RestaurantsManagementPage() {
                         Telefone
                       </th>
                       <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
+                        Taxa Entrega
+                      </th>
+                      <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
+                        Horário
+                      </th>
+                      <th className="px-4 py-3 text-left text-[#1b130d] font-bold text-sm">
                         Status
                       </th>
                       <th className="px-3 py-3 text-left text-[#1b130d] font-bold text-xs">
@@ -155,7 +161,7 @@ export default function RestaurantsManagementPage() {
                     {loading ? (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={9}
                           className="px-4 py-8 text-center text-[#9a6c4c]"
                         >
                           Carregando restaurantes...
@@ -164,7 +170,7 @@ export default function RestaurantsManagementPage() {
                     ) : restaurants.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={9}
                           className="px-4 py-8 text-center text-[#9a6c4c]"
                         >
                           Nenhum restaurante encontrado
@@ -191,6 +197,16 @@ export default function RestaurantsManagementPage() {
                               {restaurant.phone ||
                                 restaurant.owner?.phone ||
                                 "-"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-[#1b130d] text-sm">
+                              R$ {restaurant.deliveryFee?.toFixed(2) || "-"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-[#1b130d] text-sm max-w-xs truncate">
+                              {restaurant.openingHours || "-"}
                             </span>
                           </td>
                           <td className="px-4 py-3">

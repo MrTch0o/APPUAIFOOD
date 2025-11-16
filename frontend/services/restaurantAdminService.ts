@@ -34,7 +34,7 @@ export interface CreateRestaurantRequest {
   deliveryFee: number;
   deliveryTime: string;
   minimumOrder?: number;
-  openingHours?: Record<string, string>;
+  openingHours?: string;
 }
 
 export interface UpdateRestaurantRequest {
@@ -46,7 +46,7 @@ export interface UpdateRestaurantRequest {
   deliveryFee?: number;
   deliveryTime?: string;
   minimumOrder?: number;
-  openingHours?: Record<string, string>;
+  openingHours?: string;
 }
 
 export const restaurantAdminService = {
@@ -91,7 +91,9 @@ export const restaurantAdminService = {
       data: AdminRestaurantResponse[];
       timestamp: string;
     }>("/restaurants/admin/list");
-    return response.data.data;
+    // O backend retorna um array, e o interceptor envolve em {success, data}
+    const data = response.data.data;
+    return Array.isArray(data) ? data : [];
   },
 
   /**
@@ -195,5 +197,18 @@ export const restaurantAdminService = {
       message: "Restaurante ativado com sucesso",
       restaurant: response.data.data,
     };
+  },
+
+  /**
+   * Deletar restaurante (apenas ADMIN)
+   * DELETE /restaurants/:id
+   */
+  async deleteRestaurant(id: string): Promise<{ message: string }> {
+    const response = await api.delete<{
+      success: boolean;
+      data: { message: string };
+      timestamp: string;
+    }>(`/restaurants/${id}`);
+    return response.data.data;
   },
 };

@@ -17,6 +17,7 @@ export interface AdminRestaurantResponse {
   deliveryFee?: number;
   deliveryTime?: number;
   minimumOrder?: number;
+  restaurantCategoryId?: string;
   category?: string;
   image?: string;
   isActive: boolean;

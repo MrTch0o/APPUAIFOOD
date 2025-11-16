@@ -172,6 +172,7 @@ export class RestaurantsService {
         deliveryFee: true,
         deliveryTime: true,
         minimumOrder: true,
+        restaurantCategoryId: true,
         category: true,
         image: true,
         isActive: true,

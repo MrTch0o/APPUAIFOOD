@@ -9,6 +9,10 @@ import {
   AdminRestaurantResponse,
   UpdateRestaurantRequest,
 } from "@/services/restaurantAdminService";
+import {
+  restaurantCategoryService,
+  RestaurantCategory,
+} from "@/services/categoryService";
 import { logger } from "@/lib/logger";
 import { OpeningHoursInput } from "@/components/OpeningHoursInput";
 
@@ -26,6 +30,7 @@ export default function EditRestaurantePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [categories, setCategories] = useState<RestaurantCategory[]>([]);
 
   const [formData, setFormData] = useState<UpdateRestaurantRequest>({
     name: "",
@@ -35,25 +40,29 @@ export default function EditRestaurantePage() {
     deliveryFee: 0,
     deliveryTime: "",
     minimumOrder: 0,
+    restaurantCategoryId: "",
     openingHours: undefined,
   });
 
   const loadRestaurant = async () => {
     try {
       setLoading(true);
-      const data = await restaurantAdminService.getRestaurantById(
-        restaurantId!
-      );
-      setRestaurant(data);
+      const [restaurantData, categoriesData] = await Promise.all([
+        restaurantAdminService.getRestaurantById(restaurantId!),
+        restaurantCategoryService.getAll(),
+      ]);
+      setRestaurant(restaurantData);
+      setCategories(categoriesData);
       setFormData({
-        name: data.name,
-        description: data.description,
-        address: data.address,
-        phone: data.phone,
-        deliveryFee: data.deliveryFee,
-        deliveryTime: data.deliveryTime?.toString(),
-        minimumOrder: data.minimumOrder,
-        openingHours: data.openingHours || undefined,
+        name: restaurantData.name,
+        description: restaurantData.description,
+        address: restaurantData.address,
+        phone: restaurantData.phone,
+        deliveryFee: restaurantData.deliveryFee,
+        deliveryTime: restaurantData.deliveryTime?.toString(),
+        minimumOrder: restaurantData.minimumOrder,
+        restaurantCategoryId: restaurantData.restaurantCategoryId || "",
+        openingHours: restaurantData.openingHours || undefined,
       });
       setError("");
     } catch (err) {
@@ -93,6 +102,9 @@ export default function EditRestaurantePage() {
       if (formData.description) updateData.description = formData.description;
       if (formData.address) updateData.address = formData.address;
       if (formData.phone) updateData.phone = formData.phone;
+      if (formData.restaurantCategoryId) {
+        updateData.restaurantCategoryId = formData.restaurantCategoryId;
+      }
       if (formData.deliveryFee !== undefined && formData.deliveryFee !== null) {
         updateData.deliveryFee = formData.deliveryFee;
       }
@@ -370,6 +382,14 @@ export default function EditRestaurantePage() {
                   )}
                 </div>
                 <div>
+                  <p className="text-sm text-[#9a6c4c]">Categoria</p>
+                  <p className="text-[#1b130d] text-sm">
+                    {categories.find(
+                      (cat) => cat.id === restaurant.restaurantCategoryId
+                    )?.name || "-"}
+                  </p>
+                </div>
+                <div>
                   <p className="text-sm text-[#9a6c4c]">Status</p>
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
@@ -457,6 +477,25 @@ export default function EditRestaurantePage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] placeholder-[#9a6c4c] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
                 />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-[#1b130d] font-bold mb-2">
+                  Categoria do Restaurante
+                </label>
+                <select
+                  name="restaurantCategoryId"
+                  value={formData.restaurantCategoryId || ""}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-6">

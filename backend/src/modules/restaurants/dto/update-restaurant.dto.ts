@@ -10,6 +10,7 @@ import {
   Max,
   IsBoolean,
   Validate,
+  IsUUID,
 } from 'class-validator';
 import { IsValidOpeningHoursConstraint } from '../validators/opening-hours.validator';
 
@@ -58,6 +59,14 @@ export class UpdateRestaurantDto {
     message: 'Telefone deve ter 10 ou 11 dígitos (apenas números)',
   })
   phone?: string;
+
+  @ApiPropertyOptional({
+    description: 'ID da categoria do restaurante',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsUUID('4')
+  @IsOptional()
+  restaurantCategoryId?: string;
 
   @ApiPropertyOptional({
     description: 'Horário de funcionamento (objeto JSON ou string)',

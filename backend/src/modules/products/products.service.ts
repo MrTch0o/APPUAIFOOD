@@ -32,7 +32,7 @@ export class ProductsService {
   /**
    * Lista todos os produtos para admin
    */
-  async findAllAdmin() {
+  async findAllAdmin(): Promise<unknown[]> {
     return this.prisma.product.findMany({
       select: {
         id: true,
@@ -62,7 +62,7 @@ export class ProductsService {
   /**
    * Lista produtos de um restaurante (admin)
    */
-  async findByRestaurantIdAdmin(restaurantId: string) {
+  async findByRestaurantIdAdmin(restaurantId: string): Promise<unknown[]> {
     return this.prisma.product.findMany({
       where: { restaurantId },
       select: {
@@ -93,7 +93,7 @@ export class ProductsService {
   /**
    * Busca um produto específico (admin)
    */
-  async findOneAdmin(id: string) {
+  async findOneAdmin(id: string): Promise<unknown> {
     const product = await this.prisma.product.findUnique({
       where: { id },
       select: {
@@ -259,7 +259,7 @@ export class ProductsService {
   /**
    * Desativa um produto (soft delete)
    */
-  async deactivate(id: string) {
+  async deactivate(id: string): Promise<unknown> {
     // Verificar se produto existe
     await this.findOne(id);
 
@@ -283,7 +283,7 @@ export class ProductsService {
   /**
    * Ativa um produto
    */
-  async activate(id: string) {
+  async activate(id: string): Promise<unknown> {
     const product = await this.prisma.product.findUnique({
       where: { id },
     });

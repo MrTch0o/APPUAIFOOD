@@ -60,7 +60,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Listar todos os produtos (apenas ADMIN)' })
   @ApiResponse({ status: 200, description: 'Lista de todos os produtos' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
-  getAllProducts() {
+  getAllProducts(): Promise<unknown[]> {
     return this.productsService.findAllAdmin();
   }
 
@@ -70,7 +70,9 @@ export class ProductsController {
   @ApiOperation({ summary: 'Listar produtos por restaurante (apenas ADMIN)' })
   @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
-  getProductsByRestaurant(@Param('restaurantId') restaurantId: string) {
+  getProductsByRestaurant(
+    @Param('restaurantId') restaurantId: string,
+  ): Promise<unknown[]> {
     return this.productsService.findByRestaurantIdAdmin(restaurantId);
   }
 
@@ -81,7 +83,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Produto encontrado' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
-  findOneAdmin(@Param('id') id: string) {
+  findOneAdmin(@Param('id') id: string): Promise<unknown> {
     return this.productsService.findOneAdmin(id);
   }
 
@@ -181,7 +183,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Produto desativado com sucesso' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
-  deactivate(@Param('id') id: string) {
+  deactivate(@Param('id') id: string): Promise<unknown> {
     return this.productsService.deactivate(id);
   }
 
@@ -193,7 +195,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Produto ativado com sucesso' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
-  activate(@Param('id') id: string) {
+  activate(@Param('id') id: string): Promise<unknown> {
     return this.productsService.activate(id);
   }
 }

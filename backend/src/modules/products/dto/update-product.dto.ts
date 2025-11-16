@@ -1,12 +1,9 @@
-import { PartialType, OmitType } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
 import { CreateProductDto } from './create-product.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
 
-// Omit restaurantId (não pode ser alterado)
-export class UpdateProductDto extends PartialType(
-  OmitType(CreateProductDto, ['restaurantId'] as const),
-) {
+export class UpdateProductDto extends PartialType(CreateProductDto) {
   @ApiPropertyOptional({
     description: 'Disponibilidade do produto',
     example: true,
@@ -14,4 +11,12 @@ export class UpdateProductDto extends PartialType(
   @IsBoolean({ message: 'A disponibilidade deve ser verdadeiro ou falso' })
   @IsOptional()
   available?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'ID do restaurante (pode ser alterado)',
+    example: 'uuid-do-restaurante',
+  })
+  @IsUUID('4', { message: 'restaurantId deve ser um UUID válido' })
+  @IsOptional()
+  restaurantId?: string;
 }

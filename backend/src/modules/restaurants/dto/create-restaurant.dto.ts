@@ -65,7 +65,7 @@ export class CreateRestaurantDto {
     required: false,
   })
   @IsOptional()
-  openingHours?: Record<string, string> | string | null;
+  openingHours?: Record<string, string> | string;
 
   @ApiProperty({
     description: 'Taxa de entrega em reais',

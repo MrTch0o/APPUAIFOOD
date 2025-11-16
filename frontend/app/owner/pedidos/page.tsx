@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { ownerService } from '@/services/ownerService';
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { ownerService } from "@/services/ownerService";
 
 interface Restaurant {
   id: string;
@@ -153,7 +153,7 @@ export default function OwnerOrdersPage() {
         selectedRestaurantId,
         statusFilter || undefined
       );
-      setOrders(data as Order[]);
+      setOrders(data as unknown as Order[]);
     } catch (err) {
       console.error("Erro ao carregar pedidos:", err);
       setError("Erro ao carregar pedidos. Tente novamente.");

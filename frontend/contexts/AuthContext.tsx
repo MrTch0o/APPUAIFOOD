@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           logger.info("Token validado com sucesso");
           setUser(profile);
-        } catch (error) {
+        } catch {
           // Token inválido ou backend indisponível, limpar
           logger.warn(
             "Token inválido ou servidor indisponível, removendo dados de sessão"

@@ -12,7 +12,7 @@ interface Restaurant {
   description?: string;
   address?: string;
   phone?: string;
-  openingHours?: string | Record<string, string | string[]>;
+  openingHours?: string | Record<string, string | string[]> | null;
   deliveryFee?: number;
   deliveryTime?: number;
   minimumOrder?: number;
@@ -198,7 +198,11 @@ export default function RestaurantDetailsPage() {
               <h4 className="text-sm font-semibold text-gray-700 mb-1">
                 Horário de Funcionamento
               </h4>
-              <p className="text-gray-600">{restaurant.openingHours}</p>
+              <p className="text-gray-600">
+                {typeof restaurant.openingHours === "string"
+                  ? restaurant.openingHours
+                  : "Horário disponível"}
+              </p>
             </div>
           )}
 
@@ -235,10 +239,12 @@ export default function RestaurantDetailsPage() {
               Criado em:{" "}
               {new Date(restaurant.createdAt).toLocaleDateString("pt-BR")}
             </p>
-            <p>
-              Último update:{" "}
-              {new Date(restaurant.updatedAt).toLocaleDateString("pt-BR")}
-            </p>
+            {restaurant.updatedAt && (
+              <p>
+                Último update:{" "}
+                {new Date(restaurant.updatedAt).toLocaleDateString("pt-BR")}
+              </p>
+            )}
           </div>
 
           {/* Ações */}

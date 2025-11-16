@@ -198,9 +198,16 @@ export class RestaurantsService {
     // Verificar se restaurante existe
     await this.findOne(id);
 
+    // Filtrar campos undefined para evitar erro de tipo do Prisma
+    const updateData = Object.fromEntries(
+      Object.entries(updateRestaurantDto).filter(
+        ([, value]) => value !== undefined,
+      ),
+    );
+
     const restaurant = await this.prisma.restaurant.update({
       where: { id },
-      data: updateRestaurantDto,
+      data: updateData as any,
       select: {
         id: true,
         name: true,

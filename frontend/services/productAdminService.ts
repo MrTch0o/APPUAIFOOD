@@ -31,6 +31,7 @@ export interface UpdateProductRequest {
   name?: string;
   description?: string;
   price?: number;
+  restaurantId?: string;
   productCategoryId?: string;
   preparationTime?: number;
   isActive?: boolean;

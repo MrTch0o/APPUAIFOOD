@@ -14,6 +14,10 @@ import {
   productCategoryService,
   ProductCategory,
 } from "@/services/categoryService";
+import {
+  restaurantAdminService,
+  AdminRestaurantResponse,
+} from "@/services/restaurantAdminService";
 import { logger } from "@/lib/logger";
 
 export default function EditProductPage() {
@@ -28,6 +32,7 @@ export default function EditProductPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [restaurants, setRestaurants] = useState<AdminRestaurantResponse[]>([]);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -40,15 +45,20 @@ export default function EditProductPage() {
     isActive: true,
   });
 
+  const [restaurantId, setRestaurantId] = useState<string>("");
+
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const [productData, categoriesData] = await Promise.all([
+      const [productData, categoriesData, restaurantsData] = await Promise.all([
         productAdminService.getProductById(productId!),
         productCategoryService.getAll(),
+        restaurantAdminService.getAllRestaurants(),
       ]);
       setProduct(productData);
       setCategories(categoriesData);
+      setRestaurants(restaurantsData);
+      setRestaurantId(productData.restaurantId);
       setFormData({
         name: productData.name,
         description: productData.description,
@@ -111,7 +121,10 @@ export default function EditProductPage() {
 
     try {
       setSaving(true);
-      await productAdminService.updateProduct(productId, formData);
+      await productAdminService.updateProduct(productId, {
+        ...formData,
+        restaurantId,
+      });
 
       if (selectedFile) {
         logger.info("Fazendo upload de imagem", { productId });
@@ -396,22 +409,42 @@ export default function EditProductPage() {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label className="block text-[#1b130d] font-bold mb-2">
-                  Categoria
-                </label>
-                <select
-                  name="productCategoryId"
-                  value={formData.productCategoryId}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-white text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-[#1b130d] font-bold mb-2">
+                    Restaurante
+                  </label>
+                  <select
+                    value={restaurantId}
+                    onChange={(e) => setRestaurantId(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-white text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                  >
+                    <option value="">Selecione um restaurante</option>
+                    {restaurants.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[#1b130d] font-bold mb-2">
+                    Categoria
+                  </label>
+                  <select
+                    name="productCategoryId"
+                    value={formData.productCategoryId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-white text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Image Upload */}

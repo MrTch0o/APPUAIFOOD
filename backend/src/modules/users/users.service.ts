@@ -13,6 +13,7 @@ export class UsersService {
    */
   async findAll() {
     return this.prisma.user.findMany({
+      where: { isActive: true },
       select: {
         id: true,
         email: true,
@@ -20,6 +21,7 @@ export class UsersService {
         phone: true,
         role: true,
         is2FAEnabled: true,
+        isActive: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -126,6 +128,7 @@ export class UsersService {
         phone: true,
         role: true,
         is2FAEnabled: true,
+        isActive: true,
         updatedAt: true,
       },
     });
@@ -133,6 +136,33 @@ export class UsersService {
     return {
       message: `Papel do usuário alterado para ${newRole} com sucesso`,
       user: updatedUser,
+    };
+  }
+
+  /**
+   * Desativa um usuário (soft delete) - apenas ADMIN
+   */
+  async deactivate(userId: string) {
+    // Verificar se usuário existe
+    await this.findOne(userId);
+
+    // Desativar usuário
+    const deactivatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isActive: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: 'Usuário desativado com sucesso',
+      user: deactivatedUser,
     };
   }
 }

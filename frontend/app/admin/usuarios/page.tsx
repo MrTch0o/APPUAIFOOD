@@ -4,25 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import api from "@/lib/api";
+import { userService, AdminUserResponse } from "@/services/userService";
 import { logger } from "@/lib/logger";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "CLIENT" | "RESTAURANT_OWNER" | "ADMIN";
-  createdAt: string;
-}
 
 export default function UsersManagementPage() {
   const router = useRouter();
   const { user: authUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [changingRoleId, setChangingRoleId] = useState<string | null>(null);
 
   useEffect(() => {
     if (authUser && authUser.role === "ADMIN") {
@@ -33,56 +23,14 @@ export default function UsersManagementPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/users");
-      setUsers(response.data.data || []);
+      const data = await userService.getAllUsers();
+      setUsers(data);
       setError("");
     } catch (err) {
       logger.error("Erro ao carregar usuários", err);
       setError("Erro ao carregar usuários");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePromoteToRestaurantOwner = async (userId: string) => {
-    if (
-      !confirm(
-        "Tem certeza que deseja promover este usuário para Proprietário de Restaurante?"
-      )
-    ) {
-      return;
-    }
-
-    try {
-      setChangingRoleId(userId);
-      await api.patch(`/users/${userId}/role`, { role: "RESTAURANT_OWNER" });
-      setSuccess("Usuário promovido com sucesso!");
-      loadUsers();
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      logger.error("Erro ao promover usuário", err);
-      setError("Erro ao promover usuário");
-    } finally {
-      setChangingRoleId(null);
-    }
-  };
-
-  const handlePromoteToAdmin = async (userId: string) => {
-    if (!confirm("Tem certeza que deseja promover este usuário para Admin?")) {
-      return;
-    }
-
-    try {
-      setChangingRoleId(userId);
-      await api.patch(`/users/${userId}/role`, { role: "ADMIN" });
-      setSuccess("Usuário promovido para Admin com sucesso!");
-      loadUsers();
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      logger.error("Erro ao promover usuário para admin", err);
-      setError("Erro ao promover usuário para admin");
-    } finally {
-      setChangingRoleId(null);
     }
   };
 
@@ -96,19 +44,6 @@ export default function UsersManagementPage() {
         return "bg-gray-100 text-gray-700";
       default:
         return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case "ADMIN":
-        return "Administrador";
-      case "RESTAURANT_OWNER":
-        return "Proprietário";
-      case "CLIENT":
-        return "Cliente";
-      default:
-        return role;
     }
   };
 
@@ -151,11 +86,6 @@ export default function UsersManagementPage() {
             {error && (
               <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
                 {error}
-              </div>
-            )}
-            {success && (
-              <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
-                {success}
               </div>
             )}
 
@@ -230,53 +160,22 @@ export default function UsersManagementPage() {
                                 u.role
                               )}`}
                             >
-                              {getRoleLabel(u.role)}
+                              {u.role === "ADMIN"
+                                ? "Administrador"
+                                : u.role === "RESTAURANT_OWNER"
+                                ? "Proprietário"
+                                : "Cliente"}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-[#9a6c4c] text-sm">
                             {new Date(u.createdAt).toLocaleDateString("pt-BR")}
                           </td>
-                          <td className="px-6 py-4 text-center flex gap-2 justify-center">
-                            {u.role === "CLIENT" && (
-                              <>
-                                <button
-                                  onClick={() =>
-                                    handlePromoteToRestaurantOwner(u.id)
-                                  }
-                                  disabled={changingRoleId === u.id}
-                                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm font-medium disabled:opacity-50"
-                                >
-                                  {changingRoleId === u.id
-                                    ? "..."
-                                    : "Promover a Proprietário"}
-                                </button>
-                                <button
-                                  onClick={() => handlePromoteToAdmin(u.id)}
-                                  disabled={changingRoleId === u.id}
-                                  className="px-3 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 text-sm font-medium disabled:opacity-50"
-                                >
-                                  {changingRoleId === u.id
-                                    ? "..."
-                                    : "Promover a Admin"}
-                                </button>
-                              </>
-                            )}
-                            {u.role === "RESTAURANT_OWNER" && (
-                              <button
-                                onClick={() => handlePromoteToAdmin(u.id)}
-                                disabled={changingRoleId === u.id}
-                                className="px-3 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 text-sm font-medium disabled:opacity-50"
-                              >
-                                {changingRoleId === u.id
-                                  ? "..."
-                                  : "Promover a Admin"}
+                          <td className="px-6 py-4 text-center">
+                            <Link href={`/admin/usuarios/editar?id=${u.id}`}>
+                              <button className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded hover:bg-cyan-200 text-sm font-medium">
+                                Editar
                               </button>
-                            )}
-                            {u.role === "ADMIN" && (
-                              <span className="text-[#9a6c4c] text-sm">
-                                Admin
-                              </span>
-                            )}
+                            </Link>
                           </td>
                         </tr>
                       ))

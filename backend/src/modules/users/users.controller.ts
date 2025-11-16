@@ -77,4 +77,25 @@ export class UsersController {
   updateRole(@Param('id') id: string, @Body() body: { role: UserRole }) {
     return this.usersService.updateRole(id, body.role);
   }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Editar dados de um usuário (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
+  }
+
+  @Patch(':id/deactivate')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Desativar um usuário (apenas ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Usuário desativado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
+  deactivateUser(@Param('id') id: string) {
+    return this.usersService.deactivate(id);
+  }
 }

@@ -77,19 +77,6 @@ export class ProductsController {
     return this.productsService.findByRestaurantIdAdmin(restaurantId);
   }
 
-  @Get('owner/:restaurantId')
-  @Roles(UserRole.RESTAURANT_OWNER)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Listar produtos de um restaurante (RESTAURANT_OWNER)' })
-  @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
-  @ApiResponse({ status: 403, description: 'Acesso negado ou restaurante não é seu' })
-  getProductsByRestaurantOwner(
-    @Param('restaurantId') restaurantId: string,
-    @Request() req: any,
-  ): Promise<unknown[]> {
-    return this.productsService.findByRestaurantIdOwner(restaurantId, req.user.id);
-  }
-
   @Get('admin/:id')
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
@@ -99,6 +86,27 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   findOneAdmin(@Param('id') id: string): Promise<unknown> {
     return this.productsService.findOneAdmin(id);
+  }
+
+  @Get('owner/:restaurantId')
+  @Roles(UserRole.RESTAURANT_OWNER)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar produtos de um restaurante (RESTAURANT_OWNER)',
+  })
+  @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado ou restaurante não é seu',
+  })
+  getProductsByRestaurantOwner(
+    @Param('restaurantId') restaurantId: string,
+    @Request() req: any,
+  ): Promise<unknown[]> {
+    return this.productsService.findByRestaurantIdOwner(
+      restaurantId,
+      req.user.id,
+    );
   }
 
   @Public()

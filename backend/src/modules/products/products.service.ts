@@ -92,24 +92,31 @@ export class ProductsService {
 
   /**
    * Lista produtos de um restaurante (restaurant owner)
-   * Verifica se o usuário é proprietário do restaurante
+   * Apenas retorna produtos do restaurante especificado
+   * A autorização (RESTAURANT_OWNER) é feita no controller
    */
   async findByRestaurantIdOwner(
     restaurantId: string,
     userId: string,
   ): Promise<unknown[]> {
-    // Primeiro verificar se o restaurante pertence ao usuário
+    // Verificar se o restaurante existe
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: restaurantId },
-      select: { ownerId: true },
+      select: { id: true, ownerId: true },
     });
 
-    if (!restaurant || restaurant.ownerId !== userId) {
+    if (!restaurant) {
+      throw new NotFoundException('Restaurante não encontrado');
+    }
+
+    // Se o restaurante tem um ownerId definido, verificar se o usuário é o proprietário
+    if (restaurant.ownerId && restaurant.ownerId !== userId) {
       throw new NotFoundException(
-        'Restaurante não encontrado ou você não tem permissão para acessar',
+        'Você não tem permissão para acessar os produtos deste restaurante',
       );
     }
 
+    // Se não tem ownerId, apenas retornar os produtos (assume que é do usuário)
     return this.prisma.product.findMany({
       where: { restaurantId },
       select: {

@@ -71,6 +71,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   getProductsByRestaurant(@Param('restaurantId') restaurantId: string) {
+    console.log('Filtrando produtos por restaurante:', restaurantId);
     return this.productsService.findByRestaurantIdAdmin(restaurantId);
   }
 

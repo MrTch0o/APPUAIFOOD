@@ -116,7 +116,24 @@ export default function EditRestaurantePage() {
       setTimeout(() => router.back(), 2000);
     } catch (err) {
       logger.error("Erro ao salvar restaurante", err);
-      setError("Erro ao salvar restaurante");
+      
+      // Extrair mensagem de erro do backend
+      let errorMessage = "Erro ao salvar restaurante";
+      
+      const error = err as { response?: { data?: { message?: string; error?: string; errors?: Array<{ constraints?: Record<string, string>; message?: string }> } } };
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        // Para validação do class-validator
+        errorMessage = error.response.data.errors
+          .map((e) => e.constraints ? Object.values(e.constraints).join(', ') : e.message)
+          .join('; ');
+      }
+      
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }

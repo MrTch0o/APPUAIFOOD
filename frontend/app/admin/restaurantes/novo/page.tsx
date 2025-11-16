@@ -181,8 +181,25 @@ export default function NovoRestaurantePage() {
         router.push("/admin/restaurantes");
       }, 1500);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Erro ao criar restaurante";
+      let errorMessage = "Erro ao criar restaurante";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else {
+        const error = err as { response?: { data?: { message?: string; error?: string; errors?: Array<{ constraints?: Record<string, string>; message?: string }> } } };
+        
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        } else if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+          // Para validação do class-validator
+          errorMessage = error.response.data.errors
+            .map((e) => e.constraints ? Object.values(e.constraints).join(', ') : e.message)
+            .join('; ');
+        }
+      }
+      
       logger.error("Erro ao criar restaurante", err);
       setError(errorMessage);
     } finally {

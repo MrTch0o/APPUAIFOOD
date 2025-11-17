@@ -9,7 +9,7 @@ import { User } from "@/types";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const router = useRouter();
 
   const [profile, setProfile] = useState<User | null>(null);
@@ -49,6 +49,8 @@ export default function ProfilePage() {
       const data = await userService.getProfile();
       logger.info("Perfil carregado com sucesso", { user: data });
       setProfile(data);
+      // Atualizar o context com os dados mais recentes
+      updateUser(data);
       setFormData({
         name: data.name || "",
         email: data.email || "",

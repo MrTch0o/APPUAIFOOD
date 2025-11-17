@@ -19,6 +19,7 @@ export default function ProfilePage() {
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [hasLoadedProfile, setHasLoadedProfile] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -40,31 +41,35 @@ export default function ProfilePage() {
       return;
     }
 
-    loadProfile();
-  }, [user, router]);
+    // Carregar perfil apenas uma vez quando o componente monta
+    if (!hasLoadedProfile) {
+      const fetchProfile = async () => {
+        try {
+          setLoading(true);
+          const data = await userService.getProfile();
+          logger.info("Perfil carregado com sucesso", { user: data });
+          setProfile(data);
+          // Atualizar o context com os dados mais recentes
+          updateUser(data);
+          setFormData({
+            name: data.name || "",
+            email: data.email || "",
+            phone: data.phone || "",
+            password: "",
+            confirmPassword: "",
+          });
+        } catch (error) {
+          logger.error("Erro ao carregar perfil", error);
+          setErrorMessage("Erro ao carregar perfil do usuário");
+        } finally {
+          setLoading(false);
+        }
+      };
 
-  const loadProfile = async () => {
-    try {
-      setLoading(true);
-      const data = await userService.getProfile();
-      logger.info("Perfil carregado com sucesso", { user: data });
-      setProfile(data);
-      // Atualizar o context com os dados mais recentes
-      updateUser(data);
-      setFormData({
-        name: data.name || "",
-        email: data.email || "",
-        phone: data.phone || "",
-        password: "",
-        confirmPassword: "",
-      });
-    } catch (error) {
-      logger.error("Erro ao carregar perfil", error);
-      setErrorMessage("Erro ao carregar perfil do usuário");
-    } finally {
-      setLoading(false);
+      fetchProfile();
+      setHasLoadedProfile(true);
     }
-  };
+  }, [hasLoadedProfile, router, updateUser, user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -191,7 +196,7 @@ export default function ProfilePage() {
 
     try {
       logger.info("Alterando senha do usuário");
-      const result = await userService.changePassword(
+      await userService.changePassword(
         changePasswordData.currentPassword,
         changePasswordData.newPassword
       );
@@ -317,7 +322,11 @@ export default function ProfilePage() {
                   <p className="text-[#9a6c4c]">{profile.email}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-xs font-semibold text-white bg-[#ee7c2b] px-3 py-1 rounded-full">
-                      {profile.role === "ADMIN" ? "Admin" : "Usuário"}
+                      {profile.role === "ADMIN"
+                        ? "Admin"
+                        : profile.role === "RESTAURANT_OWNER"
+                        ? "Proprietário"
+                        : "Usuário"}
                     </span>
                     {profile.is2FAEnabled && (
                       <span className="text-xs font-semibold text-white bg-green-600 px-3 py-1 rounded-full">
@@ -508,6 +517,8 @@ export default function ProfilePage() {
                     <p className="text-lg font-semibold text-[#1b130d]">
                       {profile.role === "ADMIN"
                         ? "Administrador"
+                        : profile.role === "RESTAURANT_OWNER"
+                        ? "Proprietário"
                         : "Usuário Regular"}
                     </p>
                   </div>

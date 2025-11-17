@@ -60,6 +60,38 @@ export class ProductsService {
   }
 
   /**
+   * Lista produtos de um restaurante (owner - incluindo inativos)
+   */
+  async findByRestaurantIdOwner(restaurantId: string): Promise<unknown[]> {
+    return this.prisma.product.findMany({
+      where: { restaurantId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        image: true,
+        productCategoryId: true,
+        restaurantId: true,
+        isActive: true,
+        available: true,
+        preparationTime: true,
+        createdAt: true,
+        updatedAt: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  /**
    * Lista produtos de um restaurante (admin)
    */
   async findByRestaurantIdAdmin(restaurantId: string): Promise<unknown[]> {

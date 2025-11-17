@@ -252,7 +252,7 @@ export default function OwnerProductsPage() {
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <Link
-                            href={`/admin/produtos/${product.id}`}
+                            href={`/owner/produtos/${product.id}/editar?restaurantId=${selectedRestaurantId}`}
                             className="inline-block px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm font-medium"
                           >
                             Editar

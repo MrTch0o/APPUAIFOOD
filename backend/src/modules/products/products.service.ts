@@ -91,68 +91,6 @@ export class ProductsService {
   }
 
   /**
-   * Lista produtos de um restaurante (restaurant owner)
-   * Apenas retorna produtos do restaurante especificado
-   * A autorização (RESTAURANT_OWNER) é feita no controller
-   */
-  async findByRestaurantIdOwner(
-    restaurantId: string,
-    userId: string,
-  ): Promise<unknown[]> {
-    // Verificar se o restaurante existe
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { id: restaurantId },
-      select: { id: true, ownerId: true },
-    });
-
-    if (!restaurant) {
-      throw new NotFoundException('Restaurante não encontrado');
-    }
-
-    // Debug: log para entender o problema
-    console.log('DEBUG findByRestaurantIdOwner:', {
-      restaurantId,
-      userId,
-      restaurantOwnerId: restaurant.ownerId,
-      isMatch: restaurant.ownerId === userId,
-    });
-
-    // Se o restaurante tem um ownerId definido, verificar se o usuário é o proprietário
-    if (restaurant.ownerId && restaurant.ownerId !== userId) {
-      throw new NotFoundException(
-        'Você não tem permissão para acessar os produtos deste restaurante',
-      );
-    }
-
-    // Se não tem ownerId, apenas retornar os produtos (assume que é do usuário)
-    return this.prisma.product.findMany({
-      where: { restaurantId },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        price: true,
-        image: true,
-        productCategoryId: true,
-        restaurantId: true,
-        isActive: true,
-        preparationTime: true,
-        createdAt: true,
-        updatedAt: true,
-        restaurant: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
-  }
-
-  /**
    * Busca um produto específico (admin)
    */
   async findOneAdmin(id: string): Promise<unknown> {

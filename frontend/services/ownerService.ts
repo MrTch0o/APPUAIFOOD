@@ -140,7 +140,9 @@ export const ownerService = {
       success: boolean;
       data: OwnerProductResponse[];
       timestamp: string;
-    }>(`/products/owner/${restaurantId}`);
+    }>(`/products`, {
+      params: { restaurantId },
+    });
     const data = response.data.data;
     return Array.isArray(data) ? data : [];
   },

@@ -37,8 +37,6 @@ export default function CreateOwnerProductPage() {
     restaurantId: restaurantId || "",
     productCategoryId: "",
     preparationTime: 30,
-    available: true,
-    isActive: true,
   });
 
   useEffect(() => {
@@ -59,7 +57,6 @@ export default function CreateOwnerProductPage() {
     if (user && user.role === "RESTAURANT_OWNER" && restaurantId) {
       loadCategories();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, restaurantId]);
 
   const handleInputChange = (

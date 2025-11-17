@@ -45,10 +45,13 @@ export const productAdminService = {
   async create(data: CreateProductRequest): Promise<AdminProductResponse> {
     const response = await api.post<{
       success: boolean;
-      data: AdminProductResponse;
+      data: {
+        message: string;
+        product: AdminProductResponse;
+      };
       timestamp: string;
     }>("/products", data);
-    return response.data.data;
+    return response.data.data.product;
   },
 
   /**

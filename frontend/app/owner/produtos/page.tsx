@@ -22,6 +22,7 @@ interface Product {
   restaurantId: string;
   isActive: boolean;
   createdAt: string;
+  updatedAt?: string | null;
 }
 
 export default function OwnerProductsPage() {
@@ -134,7 +135,7 @@ export default function OwnerProductsPage() {
           action={
             selectedRestaurantId && (
               <Link
-                href={`/admin/produtos/criar?restaurantId=${selectedRestaurantId}`}
+                href={`/owner/produtos/criar?restaurantId=${selectedRestaurantId}`}
                 className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
               >
                 + Novo Produto
@@ -183,7 +184,7 @@ export default function OwnerProductsPage() {
                   Nenhum produto cadastrado neste restaurante.
                 </p>
                 <Link
-                  href={`/admin/produtos/criar?restaurantId=${selectedRestaurantId}`}
+                  href={`/owner/produtos/criar?restaurantId=${selectedRestaurantId}`}
                   className="inline-block px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                 >
                   Criar Primeiro Produto
@@ -205,6 +206,9 @@ export default function OwnerProductsPage() {
                       </th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                         Criado em
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        Alterado em
                       </th>
                       <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
                         Ações
@@ -247,8 +251,31 @@ export default function OwnerProductsPage() {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {new Date(product.createdAt).toLocaleDateString(
-                            "pt-BR"
+                            "pt-BR",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            }
                           )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {product.updatedAt
+                            ? new Date(product.updatedAt).toLocaleDateString(
+                                "pt-BR",
+                                {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                }
+                              )
+                            : "-"}
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <Link

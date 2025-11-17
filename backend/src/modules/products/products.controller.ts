@@ -88,18 +88,6 @@ export class ProductsController {
     return this.productsService.findOneAdmin(id);
   }
 
-  @Get('owner/restaurant/:restaurantId')
-  @Roles(UserRole.RESTAURANT_OWNER)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Listar todos os produtos de um restaurante do proprietário (incluindo inativos)' })
-  @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
-  @ApiResponse({ status: 403, description: 'Acesso negado' })
-  async getOwnerRestaurantProducts(
-    @Param('restaurantId') restaurantId: string,
-  ): Promise<unknown[]> {
-    return this.productsService.findByRestaurantIdOwner(restaurantId);
-  }
-
   @Public()
   @Get()
   @ApiOperation({ summary: 'Listar produtos disponíveis' })
@@ -119,6 +107,21 @@ export class ProductsController {
     @Query('category') category?: string,
   ) {
     return this.productsService.findAll(restaurantId, category);
+  }
+
+  @Get('owner/restaurant/:restaurantId')
+  @Roles(UserRole.RESTAURANT_OWNER)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Listar todos os produtos de um restaurante do proprietário (incluindo inativos)',
+  })
+  @ApiResponse({ status: 200, description: 'Lista de produtos do restaurante' })
+  @ApiResponse({ status: 403, description: 'Acesso negado' })
+  async getOwnerRestaurantProducts(
+    @Param('restaurantId') restaurantId: string,
+  ): Promise<unknown[]> {
+    return this.productsService.findByRestaurantIdOwner(restaurantId);
   }
 
   @Public()

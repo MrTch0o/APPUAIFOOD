@@ -6,6 +6,7 @@ import {
   Patch,
   Delete,
   Param,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -15,6 +16,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -65,10 +67,16 @@ export class UsersController {
   @Get()
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Listar todos os usuários (apenas ADMIN)' })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: UserRole,
+    description: 'Filtrar usuários por role',
+  })
   @ApiResponse({ status: 200, description: 'Lista de usuários retornada' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query('role') role?: string) {
+    return this.usersService.findAll(role);
   }
 
   @Get(':id')

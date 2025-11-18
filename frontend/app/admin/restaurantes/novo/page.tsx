@@ -13,6 +13,7 @@ import {
   restaurantCategoryService,
   RestaurantCategory,
 } from "@/services/categoryService";
+import { userService, AdminUserResponse } from "@/services/userService";
 import { logger } from "@/lib/logger";
 import { OpeningHoursInput } from "@/components/OpeningHoursInput";
 
@@ -26,6 +27,8 @@ export default function NovoRestaurantePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<RestaurantCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [owners, setOwners] = useState<AdminUserResponse[]>([]);
+  const [loadingOwners, setLoadingOwners] = useState(true);
 
   const [formData, setFormData] = useState<CreateRestaurantRequest>({
     name: "",
@@ -36,6 +39,7 @@ export default function NovoRestaurantePage() {
     deliveryFee: 0,
     deliveryTime: "",
     minimumOrder: 0,
+    ownerId: "",
   });
 
   useEffect(() => {
@@ -51,7 +55,20 @@ export default function NovoRestaurantePage() {
       }
     };
 
+    const loadOwners = async () => {
+      try {
+        const data = await userService.getRestaurantOwners();
+        setOwners(data);
+      } catch (err) {
+        logger.error("Erro ao carregar proprietários", err);
+        setError("Erro ao carregar proprietários. Tente recarregar a página.");
+      } finally {
+        setLoadingOwners(false);
+      }
+    };
+
     loadCategories();
+    loadOwners();
   }, []);
 
   if (!user || user.role !== "ADMIN") {
@@ -151,6 +168,9 @@ export default function NovoRestaurantePage() {
       }
       if (!formData.restaurantCategoryId.trim()) {
         throw new Error("Categoria é obrigatória");
+      }
+      if (!formData.ownerId?.trim()) {
+        throw new Error("Proprietário é obrigatório");
       }
       if (formData.deliveryFee <= 0) {
         throw new Error("Taxa de entrega deve ser maior que 0");
@@ -397,6 +417,37 @@ export default function NovoRestaurantePage() {
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Owner */}
+              <div className="mb-4">
+                <label className="block text-[#1b130d] font-bold mb-2">
+                  Proprietário *
+                </label>
+                {loadingOwners ? (
+                  <div className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d]">
+                    Carregando proprietários...
+                  </div>
+                ) : owners.length === 0 ? (
+                  <div className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#9a6c4c]">
+                    Nenhum proprietário disponível. Crie usuários com role
+                    RESTAURANT_OWNER primeiro.
+                  </div>
+                ) : (
+                  <select
+                    name="ownerId"
+                    value={formData.ownerId || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                  >
+                    <option value="">Selecione um proprietário</option>
+                    {owners.map((owner) => (
+                      <option key={owner.id} value={owner.id}>
+                        {owner.name} ({owner.email})
                       </option>
                     ))}
                   </select>

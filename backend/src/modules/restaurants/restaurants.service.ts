@@ -18,6 +18,21 @@ export class RestaurantsService {
     // Remover openingHours se for null ou undefined (outros campos são obrigatórios)
     const { openingHours, ...requiredFields } = createRestaurantDto;
 
+    // Validar se o proprietário existe e tem role RESTAURANT_OWNER
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+    });
+
+    if (!owner) {
+      throw new BadRequestException('Proprietário não encontrado');
+    }
+
+    if (owner.role !== 'RESTAURANT_OWNER') {
+      throw new BadRequestException(
+        'O usuário selecionado não é um proprietário de restaurante',
+      );
+    }
+
     const createData: any = {
       ...requiredFields,
       ownerId,

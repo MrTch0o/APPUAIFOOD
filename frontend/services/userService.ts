@@ -188,4 +188,14 @@ export const userService = {
     });
     return response.data.data;
   },
+
+  /**
+   * Listar apenas usuários com role RESTAURANT_OWNER (ADMIN only)
+   */
+  async getRestaurantOwners(): Promise<AdminUserResponse[]> {
+    const response = await api.get<{
+      data: AdminUserResponse[];
+    }>("/users?role=RESTAURANT_OWNER");
+    return response.data.data;
+  },
 };

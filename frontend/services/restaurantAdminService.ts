@@ -36,6 +36,7 @@ export interface CreateRestaurantRequest {
   deliveryTime: string;
   minimumOrder?: number;
   openingHours?: Record<string, string | string[]>;
+  ownerId?: string; // Opcional para compatibilidade, admin precisa informar
 }
 
 export interface UpdateRestaurantRequest {

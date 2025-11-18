@@ -19,8 +19,16 @@ export class UsersService {
   /**
    * Lista todos os usuários (apenas para ADMIN)
    */
-  async findAll() {
+  async findAll(role?: string) {
+    const where: any = {};
+
+    // Filtrar por role se fornecido
+    if (role && Object.values(UserRole).includes(role as UserRole)) {
+      where.role = role;
+    }
+
     return this.prisma.user.findMany({
+      where,
       select: {
         id: true,
         email: true,

@@ -26,6 +26,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../../common/config/multer.config';
 import { RestaurantsService } from './restaurants.service';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
+import { CreateRestaurantAdminDto } from './dto/create-restaurant-admin.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -51,10 +52,14 @@ export class RestaurantsController {
   @ApiResponse({ status: 201, description: 'Restaurante criado com sucesso' })
   @ApiResponse({ status: 403, description: 'Acesso negado - requer ADMIN' })
   create(
-    @Body() createRestaurantDto: CreateRestaurantDto,
+    @Body() createRestaurantDto: CreateRestaurantAdminDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.restaurantsService.create(createRestaurantDto, user.sub);
+    // ADMIN pode especificar o proprietário
+    return this.restaurantsService.create(
+      createRestaurantDto as any,
+      createRestaurantDto.ownerId,
+    );
   }
 
   @Public()

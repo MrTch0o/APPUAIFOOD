@@ -47,21 +47,11 @@ export default function CarrinhoPage() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // Log quando cart muda
-  useEffect(() => {
-    console.log("🛒 Cart state updated:", {
-      hasCart: !!cart,
-      itemsLength: cart?.items?.length,
-      cart,
-    });
-  }, [cart]);
-
   const fetchCart = async () => {
     try {
       setLoading(true);
       const cartData = await cartService.getCart();
       logger.info("Carrinho carregado com sucesso", { cartData });
-      console.log("✅ setCart chamado com:", cartData);
       setCart(cartData);
     } catch (err) {
       logger.error("Erro ao carregar carrinho", err);
@@ -157,23 +147,6 @@ export default function CarrinhoPage() {
         {success && (
           <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
             {success}
-          </div>
-        )}
-
-        {/* Debug Info */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="mb-4 p-2 bg-blue-50 border border-blue-200 text-blue-700 rounded text-xs">
-            <div>cart: {cart ? "exists" : "null"}</div>
-            <div>
-              cart.items:{" "}
-              {cart?.items ? `Array(${cart.items.length})` : "undefined"}
-            </div>
-            <div>
-              isEmpty:{" "}
-              {!cart || !cart.items || cart.items.length === 0
-                ? "true"
-                : "false"}
-            </div>
           </div>
         )}
 

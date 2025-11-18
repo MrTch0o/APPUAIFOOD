@@ -77,10 +77,32 @@ export default function CheckoutPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
+
+    // Validações específicas por campo
+    let finalValue = value;
+
+    if (name === "state") {
+      // State deve ser apenas 2 letras maiúsculas
+      finalValue = value.toUpperCase().slice(0, 2);
+    } else if (name === "zipCode") {
+      // CEP: apenas números e formatar automaticamente
+      finalValue = value.replace(/\D/g, "").slice(0, 8);
+      if (finalValue.length === 5) {
+        finalValue += "-";
+      } else if (finalValue.length > 5 && !finalValue.includes("-")) {
+        finalValue = finalValue.slice(0, 5) + "-" + finalValue.slice(5);
+      }
+    } else if (name === "number") {
+      // Número: apenas números
+      finalValue = value.replace(/\D/g, "").slice(0, 10);
+    }
+
     setNewAddress((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : finalValue,
     }));
   };
 
@@ -106,7 +128,17 @@ export default function CheckoutPage() {
       const createdAddress = await addressService.create(
         newAddress as Omit<Address, "id" | "userId" | "createdAt" | "updatedAt">
       );
-      setAddresses([...addresses, createdAddress]);
+
+      // Se marcado como padrão, desmarcar os outros
+      let updatedAddresses = addresses;
+      if (newAddress.isDefault) {
+        updatedAddresses = addresses.map((addr) => ({
+          ...addr,
+          isDefault: false,
+        }));
+      }
+
+      setAddresses([...updatedAddresses, createdAddress]);
       setSelectedAddressId(createdAddress.id);
       setShowAddressForm(false);
       setNewAddress({
@@ -125,6 +157,32 @@ export default function CheckoutPage() {
     } catch (err) {
       logger.error("Erro ao adicionar endereço", err);
       setError("Erro ao adicionar endereço. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSetAddressAsDefault = async (addressId: string) => {
+    try {
+      setSubmitting(true);
+      setError("");
+
+      // Chama endpoint do backend para marcar como padrão
+      await addressService.update(addressId, { isDefault: true });
+
+      // Atualiza lista local: desmarcar todos e marcar só o selecionado
+      const updatedAddresses = addresses.map((addr) => ({
+        ...addr,
+        isDefault: addr.id === addressId,
+      }));
+
+      setAddresses(updatedAddresses);
+      setSelectedAddressId(addressId);
+      setSuccess("Endereço definido como padrão");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      logger.error("Erro ao definir endereço como padrão", err);
+      setError("Erro ao definir endereço como padrão. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -229,9 +287,9 @@ export default function CheckoutPage() {
                 {addresses.length > 0 && (
                   <div className="space-y-3 mb-4">
                     {addresses.map((address) => (
-                      <label
+                      <div
                         key={address.id}
-                        className="flex items-start p-4 border-2 border-[#e7d9cf] rounded-lg cursor-pointer hover:bg-[#faf9f8] transition"
+                        className="flex items-start p-4 border-2 border-[#e7d9cf] rounded-lg hover:bg-[#faf9f8] transition"
                       >
                         <input
                           type="radio"
@@ -239,7 +297,7 @@ export default function CheckoutPage() {
                           value={address.id}
                           checked={selectedAddressId === address.id}
                           onChange={(e) => setSelectedAddressId(e.target.value)}
-                          className="mt-1"
+                          className="mt-1 cursor-pointer"
                         />
                         <div className="ml-4 flex-grow">
                           <p className="font-semibold text-[#1b130d]">
@@ -253,13 +311,26 @@ export default function CheckoutPage() {
                             {address.neighborhood}, {address.city} -{" "}
                             {address.state} {address.zipCode}
                           </p>
-                          {address.isDefault && (
-                            <span className="text-xs bg-[#ee7c2b] text-white px-2 py-1 rounded mt-2 inline-block">
-                              Padrão
-                            </span>
-                          )}
+                          <div className="flex items-center gap-2 mt-3">
+                            {address.isDefault ? (
+                              <span className="text-xs bg-[#ee7c2b] text-white px-2 py-1 rounded font-medium">
+                                Padrão
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleSetAddressAsDefault(address.id)
+                                }
+                                disabled={submitting}
+                                className="text-xs text-[#ee7c2b] hover:text-[#d66a1f] font-medium hover:underline disabled:opacity-50 transition"
+                              >
+                                Definir como padrão
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -273,10 +344,7 @@ export default function CheckoutPage() {
                 </button>
 
                 {showAddressForm && (
-                  <form
-                    onSubmit={handleAddAddress}
-                    className="mt-4 pt-4 border-t border-[#e7d9cf] space-y-3"
-                  >
+                  <div className="mt-4 pt-4 border-t border-[#e7d9cf] space-y-3 bg-[#faf9f8] p-4 rounded-lg">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <input
                         type="text"
@@ -284,7 +352,7 @@ export default function CheckoutPage() {
                         placeholder="Ex: Casa, Trabalho"
                         value={newAddress.label}
                         onChange={handleAddAddressChange}
-                        className="col-span-full px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        className="col-span-full px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20"
                         required
                       />
                       <input
@@ -293,16 +361,16 @@ export default function CheckoutPage() {
                         placeholder="Rua"
                         value={newAddress.street}
                         onChange={handleAddAddressChange}
-                        className="px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        className="px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20"
                         required
                       />
                       <input
                         type="text"
                         name="number"
-                        placeholder="Número"
+                        placeholder="Número (ex: 789)"
                         value={newAddress.number}
                         onChange={handleAddAddressChange}
-                        className="px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        className="px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20"
                         required
                       />
                       <input
@@ -311,7 +379,7 @@ export default function CheckoutPage() {
                         placeholder="Complemento (opcional)"
                         value={newAddress.complement}
                         onChange={handleAddAddressChange}
-                        className="col-span-full px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        className="col-span-full px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20"
                       />
                       <input
                         type="text"
@@ -319,7 +387,7 @@ export default function CheckoutPage() {
                         placeholder="Bairro"
                         value={newAddress.neighborhood}
                         onChange={handleAddAddressChange}
-                        className="px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        className="px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20"
                         required
                       />
                       <input
@@ -328,48 +396,50 @@ export default function CheckoutPage() {
                         placeholder="Cidade"
                         value={newAddress.city}
                         onChange={handleAddAddressChange}
-                        className="px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        className="px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20"
                         required
                       />
                       <input
                         type="text"
                         name="state"
-                        placeholder="Estado"
+                        placeholder="UF (ex: MG)"
                         value={newAddress.state}
                         onChange={handleAddAddressChange}
-                        className="px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        maxLength={2}
+                        className="px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20 uppercase"
                         required
                       />
                       <input
                         type="text"
                         name="zipCode"
-                        placeholder="CEP"
+                        placeholder="CEP (ex: 30160-011)"
                         value={newAddress.zipCode}
                         onChange={handleAddAddressChange}
-                        className="px-4 py-2 border border-[#e7d9cf] rounded focus:outline-none focus:border-[#ee7c2b]"
+                        className="px-4 py-3 bg-white border-2 border-[#e7d9cf] rounded text-[#1b130d] placeholder-gray-400 focus:outline-none focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b] focus:ring-opacity-20"
                         required
                       />
-                      <label className="col-span-full flex items-center">
+                      <label className="col-span-full flex items-center p-3 bg-white rounded-lg border-2 border-[#e7d9cf] cursor-pointer hover:bg-[#faf9f8] transition">
                         <input
                           type="checkbox"
                           name="isDefault"
                           checked={newAddress.isDefault}
                           onChange={handleAddAddressChange}
-                          className="mr-2"
+                          className="mr-3 w-5 h-5 accent-[#ee7c2b]"
                         />
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-[#1b130d] font-medium">
                           Marcar como endereço padrão
                         </span>
                       </label>
                     </div>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleAddAddress}
                       disabled={submitting}
-                      className="w-full bg-[#ee7c2b] hover:bg-[#d66a1f] text-white font-bold py-2 px-4 rounded disabled:opacity-50 transition"
+                      className="w-full bg-[#ee7c2b] hover:bg-[#d66a1f] text-white font-bold py-3 px-4 rounded disabled:opacity-50 transition"
                     >
                       {submitting ? "Adicionando..." : "Adicionar Endereço"}
                     </button>
-                  </form>
+                  </div>
                 )}
               </div>
 
@@ -415,6 +485,15 @@ export default function CheckoutPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Botão de Confirmar */}
+              <button
+                type="submit"
+                disabled={submitting || !selectedAddressId}
+                className="w-full bg-[#ee7c2b] hover:bg-[#d66a1f] text-white font-bold py-3 px-6 rounded-lg transition disabled:opacity-50"
+              >
+                {submitting ? "Processando..." : "Confirmar Pedido"}
+              </button>
             </form>
           </div>
 
@@ -458,16 +537,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <button
-                onClick={handleCreateOrder}
-                disabled={submitting || !selectedAddressId}
-                type="submit"
-                className="w-full bg-[#ee7c2b] hover:bg-[#d66a1f] text-white font-bold py-3 px-6 rounded-lg transition disabled:opacity-50"
-              >
-                {submitting ? "Processando..." : "Confirmar Pedido"}
-              </button>
-
-              <p className="text-xs text-gray-500 text-center mt-4">
+              <p className="text-xs text-gray-500 text-center">
                 Seu pagamento será processado imediatamente após confirmar o
                 pedido
               </p>

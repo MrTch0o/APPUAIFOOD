@@ -31,6 +31,6 @@ export const cartService = {
   },
 
   async clearCart(): Promise<void> {
-    await api.delete("/cart");
+    await api.delete("/cart/clear");
   },
 };

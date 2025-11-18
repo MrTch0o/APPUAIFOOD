@@ -25,16 +25,7 @@ export default function Home() {
       const data = await restaurantService.getAll();
       logger.info("Restaurantes carregados com sucesso", {
         count: Array.isArray(data) ? data.length : 0,
-        data,
       });
-      console.log(
-        "🔍 Restaurantes com categorias:",
-        data.map((r) => ({
-          id: r.id,
-          name: r.name,
-          categoryId: r.restaurantCategoryId,
-        }))
-      );
       setRestaurants(Array.isArray(data) ? data : []);
     } catch (error) {
       logger.error("Erro ao carregar restaurantes", error);
@@ -45,26 +36,15 @@ export default function Home() {
   };
 
   const filteredRestaurants = Array.isArray(restaurants)
-    ? restaurants.filter((restaurant) => {
-        const matchesSearch =
-          restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          restaurant.description
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
-        const matchesCategory =
-          selectedCategory === "" ||
-          restaurant.restaurantCategoryId === selectedCategory;
-
-        if (selectedCategory !== "") {
-          console.log(`🔍 Filtrando ${restaurant.name}:`, {
-            restaurantCategoryId: restaurant.restaurantCategoryId,
-            selectedCategory,
-            matches: matchesCategory,
-          });
-        }
-
-        return matchesSearch && matchesCategory;
-      })
+    ? restaurants.filter(
+        (restaurant) =>
+          (restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            restaurant.description
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase())) &&
+          (selectedCategory === "" ||
+            restaurant.restaurantCategoryId === selectedCategory)
+      )
     : [];
 
   return (

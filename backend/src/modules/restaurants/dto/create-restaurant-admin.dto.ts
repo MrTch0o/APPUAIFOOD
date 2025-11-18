@@ -116,7 +116,7 @@ export class CreateRestaurantAdminDto {
     description: 'ID do proprietário do restaurante (apenas ADMIN)',
     example: 'uuid-do-proprietario',
   })
-  @IsUUID({ message: 'ID do proprietário deve ser um UUID válido' })
+  @IsUUID(undefined, { message: 'ID do proprietário deve ser um UUID válido' })
   @IsNotEmpty({ message: 'O proprietário é obrigatório' })
   ownerId: string;
 }

@@ -24,7 +24,9 @@ export const orderService = {
   },
 
   async cancel(id: string): Promise<Order> {
-    const response = await api.patch<Order>(`/orders/${id}/cancel`);
+    const response = await api.patch<Order>(`/orders/${id}/status`, {
+      status: "CANCELLED",
+    });
     return response.data;
   },
 };

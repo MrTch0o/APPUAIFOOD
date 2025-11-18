@@ -136,7 +136,7 @@ export class OrdersService {
     const deliveryFee = restaurant.deliveryFee;
     const total = subtotal + deliveryFee;
 
-    // Criar pedido
+    // Criar pedido COM isPaid: true (simular pagamento confirmado)
     const order = await this.prisma.order.create({
       data: {
         userId,
@@ -148,6 +148,8 @@ export class OrdersService {
         total,
         paymentMethod,
         notes,
+        isPaid: true, // Simular pagamento confirmado
+        paymentVerifiedAt: new Date(), // Registrar quando foi "pago"
         items: {
           create: orderItemsData,
         },
@@ -219,11 +221,12 @@ export class OrdersService {
   }
 
   /**
-   * Lista pedidos de um restaurante (para o OWNER)
+   * Lista pedidos de um restaurante (para o OWNER) - APENAS pedidos pagos
    */
   async findRestaurantOrders(restaurantId: string, status?: OrderStatus) {
     const where = {
       restaurantId,
+      isPaid: true, // IMPORTANTE: Mostrar APENAS pedidos pagos ao restaurante
       ...(status && { status }),
     };
 

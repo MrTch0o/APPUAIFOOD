@@ -153,6 +153,8 @@ model Order {
   total         Float
   paymentMethod String      @map("payment_method")
   notes         String?
+  isPaid        Boolean     @default(false) @map("is_paid")
+  paymentVerifiedAt DateTime? @map("payment_verified_at")
   
   userId        String      @map("user_id")
   restaurantId  String      @map("restaurant_id")

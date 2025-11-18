@@ -147,6 +147,8 @@ export interface Order {
   total: number;
   deliveryFee: number;
   paymentMethod: PaymentMethod;
+  isPaid: boolean;
+  paymentVerifiedAt?: string;
   userId: string;
   user?: User;
   restaurantId: string;

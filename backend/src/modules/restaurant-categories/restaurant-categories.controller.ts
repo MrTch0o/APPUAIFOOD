@@ -19,6 +19,7 @@ import {
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { UserRole } from '@prisma/client';
 import { RestaurantCategoriesService } from './restaurant-categories.service';
 import {
@@ -60,11 +61,10 @@ export class RestaurantCategoriesController {
   }
 
   /**
-   * Lista todas as categorias (requer autenticação)
+   * Lista todas as categorias (publico - nao requer autenticacao)
    */
+  @Public()
   @Get()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar categorias de restaurante' })
   @ApiQuery({
     name: 'active',
@@ -76,29 +76,20 @@ export class RestaurantCategoriesController {
     status: 200,
     description: 'Lista de categorias',
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Não autenticado',
-  })
   findAll(@Query('active') active?: string) {
     const onlyActive = active === 'true';
     return this.categoriesService.findAll(onlyActive);
   }
 
   /**
-   * Encontra uma categoria por ID (requer autenticação)
+   * Encontra uma categoria por ID (publico - nao requer autenticacao)
    */
+  @Public()
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Obter categoria por ID' })
   @ApiResponse({
     status: 200,
     description: 'Categoria encontrada',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Não autenticado',
   })
   @ApiResponse({
     status: 404,

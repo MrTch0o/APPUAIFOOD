@@ -66,23 +66,10 @@ export class RestaurantsService {
   async findAll(showInactive = false) {
     const where = showInactive ? {} : { isActive: true };
 
-    return this.prisma.restaurant.findMany({
+    const restaurants = await this.prisma.restaurant.findMany({
       where,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        address: true,
-        phone: true,
-        openingHours: true,
-        deliveryFee: true,
-        deliveryTime: true,
-        minimumOrder: true,
+      include: {
         category: true,
-        image: true,
-        isActive: true,
-        rating: true,
-        createdAt: true,
         _count: {
           select: {
             products: true,
@@ -93,42 +80,33 @@ export class RestaurantsService {
         createdAt: 'desc',
       },
     });
+
+    // Garantir que restaurantCategoryId está incluído na resposta
+    return restaurants.map((r) => ({
+      ...r,
+      restaurantCategoryId: r.restaurantCategoryId,
+    }));
   }
 
   /**
    * Lista todos os restaurantes para admin (ativo ou inativo)
    */
   async findAllAdmin() {
-    return this.prisma.restaurant.findMany({
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        address: true,
-        phone: true,
-        openingHours: true,
-        deliveryFee: true,
-        deliveryTime: true,
-        minimumOrder: true,
+    const restaurants = await this.prisma.restaurant.findMany({
+      include: {
         category: true,
-        image: true,
-        isActive: true,
-        rating: true,
-        createdAt: true,
-        updatedAt: true,
-        owner: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
+        owner: true,
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
+
+    // Garantir que restaurantCategoryId está incluído na resposta
+    return restaurants.map((r) => ({
+      ...r,
+      restaurantCategoryId: r.restaurantCategoryId,
+    }));
   }
 
   /**

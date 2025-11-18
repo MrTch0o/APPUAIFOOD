@@ -64,7 +64,7 @@ export default function MeusPedidosPage() {
     }
   };
 
-  const filteredOrders = selectedStatus
+  const filteredOrders: Order[] = selectedStatus
     ? orders.filter((order) => order.status === selectedStatus)
     : orders;
 
@@ -151,7 +151,7 @@ export default function MeusPedidosPage() {
         )}
 
         {/* Lista de Pedidos */}
-        {filteredOrders.length === 0 ? (
+        {!filteredOrders || filteredOrders.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow-md">
             <p className="text-gray-600 text-lg mb-6">
               {orders.length === 0
@@ -167,165 +167,173 @@ export default function MeusPedidosPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredOrders.map((order) => (
-              <div
-                key={order.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
-              >
-                {/* Cabeçalho do Pedido */}
+            {Array.isArray(filteredOrders) &&
+              filteredOrders.map((order) => (
                 <div
-                  onClick={() =>
-                    setExpandedOrderId(
-                      expandedOrderId === order.id ? null : order.id
-                    )
-                  }
-                  className="p-4 cursor-pointer hover:bg-[#faf9f8] transition"
+                  key={order.id}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-grow">
-                      <div className="flex items-center gap-3 mb-2">
-                        <p className="font-bold text-[#1b130d]">
-                          Pedido #{order.id.substring(0, 8).toUpperCase()}
+                  {/* Cabeçalho do Pedido */}
+                  <div
+                    onClick={() =>
+                      setExpandedOrderId(
+                        expandedOrderId === order.id ? null : order.id
+                      )
+                    }
+                    className="p-4 cursor-pointer hover:bg-[#faf9f8] transition"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-grow">
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className="font-bold text-[#1b130d]">
+                            Pedido #{order.id.substring(0, 8).toUpperCase()}
+                          </p>
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                              statusColors[order.status as OrderStatus].bg
+                            } ${
+                              statusColors[order.status as OrderStatus].text
+                            }`}
+                          >
+                            {statusLabels[order.status as OrderStatus]}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {order.restaurant?.name}
                         </p>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                            statusColors[order.status as OrderStatus].bg
-                          } ${statusColors[order.status as OrderStatus].text}`}
-                        >
-                          {statusLabels[order.status as OrderStatus]}
-                        </span>
+                        <p className="text-sm text-gray-600">
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "pt-BR",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        {order.restaurant?.name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {new Date(order.createdAt).toLocaleDateString("pt-BR", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-[#ee7c2b]">
-                        R$ {order.total.toFixed(2)}
-                      </p>
-                      <svg
-                        className={`w-6 h-6 text-gray-400 transition transform ${
-                          expandedOrderId === order.id ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                        />
-                      </svg>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-[#ee7c2b]">
+                          R$ {order.total.toFixed(2)}
+                        </p>
+                        <svg
+                          className={`w-6 h-6 text-gray-400 transition transform ${
+                            expandedOrderId === order.id ? "rotate-180" : ""
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Detalhes Expandidos */}
-                {expandedOrderId === order.id && (
-                  <div className="border-t border-[#e7d9cf] p-4 bg-[#faf9f8]">
-                    {/* Itens */}
-                    <div className="mb-6">
-                      <h3 className="font-bold text-[#1b130d] mb-3">Itens:</h3>
-                      <div className="space-y-2">
-                        {order.items.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex justify-between text-sm"
-                          >
-                            <span>
-                              {item.product.name} x{item.quantity}
-                            </span>
-                            <span className="font-semibold">
-                              R$ {(item.price * item.quantity).toFixed(2)}
-                            </span>
-                          </div>
-                        ))}
+                  {/* Detalhes Expandidos */}
+                  {expandedOrderId === order.id && (
+                    <div className="border-t border-[#e7d9cf] p-4 bg-[#faf9f8]">
+                      {/* Itens */}
+                      <div className="mb-6">
+                        <h3 className="font-bold text-[#1b130d] mb-3">
+                          Itens:
+                        </h3>
+                        <div className="space-y-2">
+                          {order.items.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex justify-between text-sm"
+                            >
+                              <span>
+                                {item.product.name} x{item.quantity}
+                              </span>
+                              <span className="font-semibold">
+                                R$ {(item.price * item.quantity).toFixed(2)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Endereço de Entrega */}
-                    <div className="mb-6">
-                      <h3 className="font-bold text-[#1b130d] mb-2">
-                        Endereço de Entrega:
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {order.address?.street}, {order.address?.number}
-                        {order.address?.complement &&
-                          ` - ${order.address.complement}`}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {order.address?.neighborhood}, {order.address?.city} -{" "}
-                        {order.address?.state} {order.address?.zipCode}
-                      </p>
-                    </div>
-
-                    {/* Contato do Restaurante */}
-                    {order.restaurant?.phone && (
+                      {/* Endereço de Entrega */}
                       <div className="mb-6">
                         <h3 className="font-bold text-[#1b130d] mb-2">
-                          Contato:
+                          Endereço de Entrega:
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {order.restaurant.phone}
+                          {order.address?.street}, {order.address?.number}
+                          {order.address?.complement &&
+                            ` - ${order.address.complement}`}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {order.address?.neighborhood}, {order.address?.city} -{" "}
+                          {order.address?.state} {order.address?.zipCode}
                         </p>
                       </div>
-                    )}
 
-                    {/* Totais */}
-                    <div className="border-t border-[#e7d9cf] pt-4 mb-6">
-                      <div className="flex justify-between text-sm mb-2">
-                        <span>Subtotal:</span>
-                        <span>
-                          R$ {(order.total - order.deliveryFee).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm mb-3">
-                        <span>Taxa de entrega:</span>
-                        <span>R$ {order.deliveryFee.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between font-bold text-lg">
-                        <span>Total:</span>
-                        <span className="text-[#ee7c2b]">
-                          R$ {order.total.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Ações */}
-                    <div className="flex gap-3">
-                      <Link
-                        href={`/confirmacao-pedido/${order.id}`}
-                        className="flex-1 text-center bg-[#ee7c2b] hover:bg-[#d66a1f] text-white font-bold py-2 px-4 rounded transition"
-                      >
-                        Ver Detalhes
-                      </Link>
-                      {order.status === OrderStatus.PENDING && (
-                        <button
-                          onClick={() => handleCancelOrder(order.id)}
-                          disabled={cancelling === order.id}
-                          className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded transition disabled:opacity-50"
-                        >
-                          {cancelling === order.id
-                            ? "Cancelando..."
-                            : "Cancelar"}
-                        </button>
+                      {/* Contato do Restaurante */}
+                      {order.restaurant?.phone && (
+                        <div className="mb-6">
+                          <h3 className="font-bold text-[#1b130d] mb-2">
+                            Contato:
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {order.restaurant.phone}
+                          </p>
+                        </div>
                       )}
+
+                      {/* Totais */}
+                      <div className="border-t border-[#e7d9cf] pt-4 mb-6">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span>Subtotal:</span>
+                          <span>
+                            R$ {(order.total - order.deliveryFee).toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm mb-3">
+                          <span>Taxa de entrega:</span>
+                          <span>R$ {order.deliveryFee.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg">
+                          <span>Total:</span>
+                          <span className="text-[#ee7c2b]">
+                            R$ {order.total.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Ações */}
+                      <div className="flex gap-3">
+                        <Link
+                          href={`/confirmacao-pedido/${order.id}`}
+                          className="flex-1 text-center bg-[#ee7c2b] hover:bg-[#d66a1f] text-white font-bold py-2 px-4 rounded transition"
+                        >
+                          Ver Detalhes
+                        </Link>
+                        {order.status === OrderStatus.PENDING && (
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            disabled={cancelling === order.id}
+                            className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded transition disabled:opacity-50"
+                          >
+                            {cancelling === order.id
+                              ? "Cancelando..."
+                              : "Cancelar"}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
           </div>
         )}
       </div>

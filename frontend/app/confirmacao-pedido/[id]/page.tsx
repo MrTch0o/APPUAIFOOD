@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { orderService } from "@/services/orderService";
 import { logger } from "@/lib/logger";
 import { Order, OrderItem } from "@/types";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function ConfirmacaoPedidoPage() {
   const { user } = useAuth();
@@ -31,25 +31,25 @@ export default function ConfirmacaoPedidoPage() {
       return;
     }
 
-    fetchOrder();
-  }, [user, orderId, router]);
+    const handleFetchOrder = async () => {
+      try {
+        setLoading(true);
+        const orderData = await orderService.getById(orderId);
+        setOrder(orderData);
+        logger.info("Pedido carregado com sucesso", { orderId });
+      } catch (err) {
+        logger.error("Erro ao carregar pedido", err);
+        setError("Erro ao carregar dados do pedido. Redirecionando...");
+        setTimeout(() => {
+          router.push("/meus-pedidos");
+        }, 3000);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchOrder = async () => {
-    try {
-      setLoading(true);
-      const orderData = await orderService.getById(orderId);
-      setOrder(orderData);
-      logger.info("Pedido carregado com sucesso", { orderId });
-    } catch (err) {
-      logger.error("Erro ao carregar pedido", err);
-      setError("Erro ao carregar dados do pedido. Redirecionando...");
-      setTimeout(() => {
-        router.push("/meus-pedidos");
-      }, 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
+    handleFetchOrder();
+  }, [user, orderId, router]);
 
   if (loading) {
     return (
@@ -295,15 +295,10 @@ export default function ConfirmacaoPedidoPage() {
                       <p className="text-sm text-gray-600">
                         Quantidade: {item.quantity}
                       </p>
-                      {item.notes && (
-                        <p className="text-sm text-gray-500 italic mt-1">
-                          Observação: {item.notes}
-                        </p>
-                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-[#ee7c2b]">
-                        R$ {item.subtotal.toFixed(2)}
+                        R$ {(item.price * item.quantity).toFixed(2)}
                       </p>
                       <p className="text-xs text-gray-600">
                         R$ {item.price.toFixed(2)} x {item.quantity}
@@ -325,7 +320,7 @@ export default function ConfirmacaoPedidoPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal:</span>
-                  <span>R$ {order.subtotal?.toFixed(2)}</span>
+                  <span>R$ {(order.total - order.deliveryFee).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Taxa de entrega:</span>

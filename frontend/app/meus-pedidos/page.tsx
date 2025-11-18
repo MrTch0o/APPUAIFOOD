@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { orderService } from "@/services/orderService";
 import { logger } from "@/lib/logger";
 import { Order, OrderStatus } from "@/types";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function MeusPedidosPage() {
   const { user } = useAuth();
@@ -247,7 +247,7 @@ export default function MeusPedidosPage() {
                               {item.product.name} x{item.quantity}
                             </span>
                             <span className="font-semibold">
-                              R$ {item.subtotal.toFixed(2)}
+                              R$ {(item.price * item.quantity).toFixed(2)}
                             </span>
                           </div>
                         ))}
@@ -286,7 +286,9 @@ export default function MeusPedidosPage() {
                     <div className="border-t border-[#e7d9cf] pt-4 mb-6">
                       <div className="flex justify-between text-sm mb-2">
                         <span>Subtotal:</span>
-                        <span>R$ {order.subtotal?.toFixed(2)}</span>
+                        <span>
+                          R$ {(order.total - order.deliveryFee).toFixed(2)}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm mb-3">
                         <span>Taxa de entrega:</span>

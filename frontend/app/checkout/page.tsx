@@ -8,7 +8,7 @@ import { orderService } from "@/services/orderService";
 import { addressService } from "@/services/addressService";
 import { logger } from "@/lib/logger";
 import { Cart, CartItem, Address, PaymentMethod } from "@/types";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function CheckoutPage() {
   const { user } = useAuth();
@@ -159,11 +159,9 @@ export default function CheckoutPage() {
       setTimeout(() => {
         router.push(`/confirmacao-pedido/${order.id}`);
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
       logger.error("Erro ao criar pedido", err);
-      setError(
-        err.response?.data?.message || "Erro ao criar pedido. Tente novamente."
-      );
+      setError("Erro ao criar pedido. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -245,7 +243,7 @@ export default function CheckoutPage() {
                         />
                         <div className="ml-4 flex-grow">
                           <p className="font-semibold text-[#1b130d]">
-                            {address.label}
+                            {address.street}, {address.number}
                           </p>
                           <p className="text-sm text-gray-600">
                             {address.street}, {address.number}

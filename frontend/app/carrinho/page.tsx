@@ -7,8 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cartService } from "@/services/cartService";
 import { logger } from "@/lib/logger";
 import { Cart, CartItem } from "@/types";
-import PageHeader from "@/components/PageHeader";
-import BackButton from "@/components/BackButton";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function CarrinhoPage() {
   const { user } = useAuth();
@@ -161,10 +160,10 @@ export default function CarrinhoPage() {
                       className="p-6 hover:bg-[#faf9f8] transition flex items-start gap-4"
                     >
                       {/* Imagem do Produto */}
-                      {item.product.imageUrl || item.product.image ? (
+                      {item.product.imageUrl ? (
                         <div className="flex-shrink-0">
                           <img
-                            src={item.product.imageUrl || item.product.image}
+                            src={item.product.imageUrl}
                             alt={item.product.name}
                             className="h-24 w-24 object-cover rounded"
                           />

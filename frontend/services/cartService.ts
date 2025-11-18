@@ -3,23 +3,27 @@ import { Cart, CartItem } from "@/types";
 
 export const cartService = {
   async getCart(): Promise<Cart> {
-    const response = await api.get<Cart>("/cart");
-    return response.data;
+    const response = await api.get<any>("/cart");
+    // Handle both direct return and wrapped response
+    const data = response.data.data || response.data;
+    return data;
   },
 
   async addItem(productId: string, quantity: number = 1): Promise<CartItem> {
-    const response = await api.post<CartItem>("/cart/items", {
+    const response = await api.post<any>("/cart/items", {
       productId,
       quantity,
     });
-    return response.data;
+    const data = response.data.data || response.data;
+    return data;
   },
 
   async updateItem(itemId: string, quantity: number): Promise<CartItem> {
-    const response = await api.patch<CartItem>(`/cart/items/${itemId}`, {
+    const response = await api.patch<any>(`/cart/items/${itemId}`, {
       quantity,
     });
-    return response.data;
+    const data = response.data.data || response.data;
+    return data;
   },
 
   async removeItem(itemId: string): Promise<void> {

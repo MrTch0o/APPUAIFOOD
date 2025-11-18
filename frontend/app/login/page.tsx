@@ -63,16 +63,77 @@ export default function LoginPage() {
       logger.info("Iniciando login via formulário", {
         email: loginData.email,
       });
-      await login({ email: loginData.email, password: loginData.password });
-      logger.info("Login bem-sucedido, redirecionando");
-      // Aguardar um pouco para o state ser atualizado antes de redirecionar
+      console.log("[LOGIN] Starting login with email:", loginData.email);
+
+      // Primeiro, fazer requisição direta para verificar 2FA
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: loginData.email,
+            password: loginData.password,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao fazer login");
+      }
+
+      const data = await response.json();
+
+      // Acessar os dados considerando o interceptador TransformInterceptor
+      // O backend retorna {data: {user, accessToken, refreshToken}}
+      // O interceptador envolve com {success, data, timestamp}
+      // Resultado: {success: true, data: {data: {user, accessToken, refreshToken}}, timestamp}
+      let authData = data.data?.data || data.data;
+
+      // Verificar se 2FA é necessário
+      if (authData.requires2FA) {
+        logger.info("2FA requerido, redirecionando para verificação", {
+          userId: authData.userId,
+        });
+
+        // Armazenar userId temporariamente na sessionStorage
+        sessionStorage.setItem("2faUserId", authData.userId);
+
+        // Redirecionar para página de verificação 2FA
+        router.push("/2fa/verificar");
+        setIsLoading(false);
+        return;
+      }
+
+      // Login normal (sem 2FA)
+      logger.info("Login bem-sucedido, atualizando contexto");
+
+      // Salvar tokens e usuário
+      if (!authData.accessToken) {
+        throw new Error("Falha ao fazer login: token não recebido");
+      }
+
+      if (!authData.user) {
+        throw new Error("Falha ao fazer login: dados de usuário não recebidos");
+      }
+
+      localStorage.setItem("token", authData.accessToken);
+      localStorage.setItem("user", JSON.stringify(authData.user));
+
+      // Aguardar um pouco para o localStorage ser sincronizado
       setTimeout(() => {
-        router.push("/");
+        window.location.href = "/";
       }, 500);
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
+      const error = err as {
+        message?: string;
+        response?: { data?: { message?: string } };
+      };
       const errorMessage =
-        error.response?.data?.message || "Erro ao fazer login";
+        error.message || error.response?.data?.message || "Erro ao fazer login";
       logger.error("Erro ao fazer login", { error: errorMessage });
       setError(errorMessage);
       setIsLoading(false);

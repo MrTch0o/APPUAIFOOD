@@ -83,12 +83,21 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
+    console.log(`[AUTH] Login attempt for email: ${email}`);
+
     // Validar usuário
     const user = await this.validateUser(email, password);
 
     if (!user) {
+      console.log(
+        `[AUTH] Login failed - invalid credentials for email: ${email}`,
+      );
       throw new UnauthorizedException('Credenciais inválidas');
     }
+
+    console.log(
+      `[AUTH] User found: ${user.id}, 2FA enabled: ${user.is2FAEnabled}`,
+    );
 
     // Verificar se 2FA está ativado
     if (user.is2FAEnabled) {

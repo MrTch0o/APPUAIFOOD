@@ -20,6 +20,9 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [hasLoadedProfile, setHasLoadedProfile] = useState(false);
+  const [show2FACode, setShow2FACode] = useState(false);
+  const [twoFACode, setTwoFACode] = useState("");
+  const [disabling2FA, setDisabling2FA] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -220,6 +223,71 @@ export default function ProfilePage() {
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Erro ao alterar senha. Verifique a senha atual.";
       setErrorMessage(errorMsg);
+    }
+  };
+
+  const handleDisable2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!twoFACode || twoFACode.length !== 6) {
+      setErrorMessage("Digite um código válido de 6 dígitos");
+      return;
+    }
+
+    setDisabling2FA(true);
+
+    try {
+      logger.info("Desativando 2FA");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/2fa/disable`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            token: twoFACode,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao desativar 2FA");
+      }
+
+      logger.info("2FA desativado com sucesso");
+      setSuccessMessage("2FA foi desativado com sucesso!");
+      setShow2FACode(false);
+      setTwoFACode("");
+
+      // Atualizar o perfil
+      const updatedProfile = { ...profile, is2FAEnabled: false };
+      setProfile(updatedProfile);
+      updateUser(updatedProfile);
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+    } catch (error) {
+      logger.error("Erro ao desativar 2FA", error);
+      const errorMsg =
+        (
+          error as {
+            message?: string;
+            response?: { data?: { message?: string } };
+          }
+        )?.message ||
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message ||
+        "Erro ao desativar 2FA";
+      setErrorMessage(errorMsg);
+    } finally {
+      setDisabling2FA(false);
     }
   };
 
@@ -665,6 +733,106 @@ export default function ProfilePage() {
                     </span>
                     Você pode alterar sua senha a qualquer momento
                   </p>
+                </div>
+              )}
+            </div>
+
+            {/* Two-Factor Authentication Section */}
+            <div className="mt-6 bg-white rounded-xl shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-lg font-bold text-[#1b130d] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#ee7c2b]">
+                      verified_user
+                    </span>
+                    Autenticação de Dois Fatores
+                  </h2>
+                  <p className="text-sm text-[#9a6c4c] mt-1">
+                    {profile.is2FAEnabled
+                      ? "2FA está ativado. Sua conta está protegida com um código adicional no login."
+                      : "Ative 2FA para aumentar a segurança da sua conta."}
+                  </p>
+                </div>
+              </div>
+
+              {!profile.is2FAEnabled ? (
+                <Link href="/2fa/configurar">
+                  <button className="w-full px-6 py-3 bg-[#ee7c2b] text-white font-bold rounded-lg hover:bg-[#ee7c2b]/90 transition-colors flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined">
+                      add_circle
+                    </span>
+                    Ativar 2FA com Google Authenticator
+                  </button>
+                </Link>
+              ) : (
+                <div>
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                    <span className="material-symbols-outlined text-green-600 text-2xl">
+                      check_circle
+                    </span>
+                    <div>
+                      <p className="font-semibold text-green-700">
+                        2FA Ativado com Sucesso
+                      </p>
+                      <p className="text-sm text-green-600">
+                        Sua conta está protegida com autenticação de dois
+                        fatores
+                      </p>
+                    </div>
+                  </div>
+
+                  {!show2FACode ? (
+                    <button
+                      onClick={() => setShow2FACode(true)}
+                      className="w-full px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-outlined">delete</span>
+                      Desativar 2FA
+                    </button>
+                  ) : (
+                    <form onSubmit={handleDisable2FA} className="space-y-4">
+                      <p className="text-sm text-[#9a6c4c]">
+                        Para desativar 2FA, digite o código do seu app
+                        autenticador:
+                      </p>
+                      <input
+                        type="text"
+                        value={twoFACode}
+                        onChange={(e) => {
+                          const value = e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 6);
+                          setTwoFACode(value);
+                        }}
+                        placeholder="000000"
+                        maxLength={6}
+                        autoComplete="off"
+                        inputMode="numeric"
+                        className="w-full px-4 py-3 text-center text-2xl tracking-widest rounded-lg border-2 border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] placeholder-[#ccc] focus:outline-0 focus:border-[#ee7c2b] focus:ring-2 focus:ring-[#ee7c2b]/50 font-mono"
+                      />
+                      <div className="flex gap-3">
+                        <button
+                          type="submit"
+                          disabled={disabling2FA || twoFACode.length !== 6}
+                          className="flex-1 px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {disabling2FA
+                            ? "Desativando..."
+                            : "Confirmar Desativação"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShow2FACode(false);
+                            setTwoFACode("");
+                          }}
+                          className="flex-1 px-6 py-3 bg-[#f3ece7] text-[#1b130d] font-semibold rounded-lg hover:bg-[#e7d9cf] transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               )}
             </div>

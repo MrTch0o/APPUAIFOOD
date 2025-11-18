@@ -35,7 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         storedUser !== "undefined" &&
         storedUser !== "null"
       ) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
 
         // Validar token com o backend com timeout de 5 segundos
         try {
@@ -53,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           logger.info("Token validado com sucesso");
           setUser(profile);
-        } catch {
+        } catch (error) {
           // Token inválido ou backend indisponível, limpar
           logger.warn(
             "Token inválido ou servidor indisponível, removendo dados de sessão"

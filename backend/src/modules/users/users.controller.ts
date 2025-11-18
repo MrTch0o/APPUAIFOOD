@@ -41,7 +41,10 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Perfil retornado com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   findMe(@CurrentUser() user: JwtPayload) {
-    return this.usersService.findOne(user.sub);
+    console.log(`[USERS] GET /me called for user: ${user.sub}`);
+    const result = this.usersService.findOne(user.sub);
+    console.log(`[USERS] Returning profile for user: ${user.sub}`);
+    return result;
   }
 
   @Patch('me')

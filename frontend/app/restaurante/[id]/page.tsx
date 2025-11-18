@@ -358,8 +358,12 @@ export default function RestaurantDetailPage() {
                           R$ {product.price.toFixed(2)}
                         </span>
                         <button
-                          onClick={() => handleAddToCart(product.id, product.name)}
-                          disabled={!product.available || addingToCartId === product.id}
+                          onClick={() =>
+                            handleAddToCart(product.id, product.name)
+                          }
+                          disabled={
+                            !product.available || addingToCartId === product.id
+                          }
                           className="flex h-10 px-4 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#ee7c2b] text-white text-sm font-bold hover:bg-[#ee7c2b]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {addingToCartId === product.id ? (
@@ -411,18 +415,18 @@ export default function RestaurantDetailPage() {
                   FAQ
                 </a>
               </div>
-              </div>
             </div>
+          </div>
         </footer>
+
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
       </div>
     </div>
-
-    {toast && (
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast(null)}
-      />
-    )}
   );
 }

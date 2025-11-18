@@ -49,6 +49,7 @@ export interface UpdateRestaurantRequest {
   deliveryTime?: string;
   minimumOrder?: number;
   openingHours?: Record<string, string | string[]>;
+  ownerId?: string; // Apenas ADMIN pode alterar
 }
 
 export const restaurantAdminService = {

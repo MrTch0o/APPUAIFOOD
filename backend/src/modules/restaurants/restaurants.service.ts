@@ -286,6 +286,23 @@ export class RestaurantsService {
     // Verificar se restaurante existe
     await this.findOne(id);
 
+    // Se está tentando atualizar o proprietário, validar
+    if (updateRestaurantDto.ownerId) {
+      const owner = await this.prisma.user.findUnique({
+        where: { id: updateRestaurantDto.ownerId },
+      });
+
+      if (!owner) {
+        throw new BadRequestException('Proprietário não encontrado');
+      }
+
+      if (owner.role !== 'RESTAURANT_OWNER') {
+        throw new BadRequestException(
+          'O usuário selecionado não é um proprietário de restaurante',
+        );
+      }
+    }
+
     // Filtrar apenas campos undefined (null é válido para alguns campos)
     const updateData: any = Object.fromEntries(
       Object.entries(updateRestaurantDto).filter(

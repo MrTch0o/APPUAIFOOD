@@ -69,6 +69,14 @@ export class UpdateRestaurantDto {
   restaurantCategoryId?: string;
 
   @ApiPropertyOptional({
+    description: 'ID do proprietário do restaurante (apenas ADMIN)',
+    example: 'uuid-do-proprietario',
+  })
+  @IsUUID(undefined, { message: 'ID do proprietário deve ser um UUID válido' })
+  @IsOptional()
+  ownerId?: string;
+
+  @ApiPropertyOptional({
     description: 'Horário de funcionamento (objeto JSON ou string)',
     example: { seg: '11:00-23:00', ter: '11:00-23:00' },
   })

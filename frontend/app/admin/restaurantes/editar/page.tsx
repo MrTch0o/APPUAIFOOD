@@ -13,6 +13,7 @@ import {
   restaurantCategoryService,
   RestaurantCategory,
 } from "@/services/categoryService";
+import { userService, AdminUserResponse } from "@/services/userService";
 import { logger } from "@/lib/logger";
 import { OpeningHoursInput } from "@/components/OpeningHoursInput";
 
@@ -31,6 +32,8 @@ export default function EditRestaurantePage() {
   const [success, setSuccess] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [categories, setCategories] = useState<RestaurantCategory[]>([]);
+  const [owners, setOwners] = useState<AdminUserResponse[]>([]);
+  const [loadingOwners, setLoadingOwners] = useState(true);
 
   const [formData, setFormData] = useState<UpdateRestaurantRequest>({
     name: "",
@@ -42,17 +45,20 @@ export default function EditRestaurantePage() {
     minimumOrder: 0,
     restaurantCategoryId: "",
     openingHours: undefined,
+    ownerId: "",
   });
 
   const loadRestaurant = async () => {
     try {
       setLoading(true);
-      const [restaurantData, categoriesData] = await Promise.all([
+      const [restaurantData, categoriesData, ownersData] = await Promise.all([
         restaurantAdminService.getRestaurantById(restaurantId!),
         restaurantCategoryService.getAll(),
+        userService.getRestaurantOwners(),
       ]);
       setRestaurant(restaurantData);
       setCategories(categoriesData);
+      setOwners(ownersData);
       setFormData({
         name: restaurantData.name,
         description: restaurantData.description,
@@ -63,6 +69,7 @@ export default function EditRestaurantePage() {
         minimumOrder: restaurantData.minimumOrder,
         restaurantCategoryId: restaurantData.restaurantCategoryId || "",
         openingHours: restaurantData.openingHours || undefined,
+        ownerId: restaurantData.owner?.id || "",
       });
       setError("");
     } catch (err) {
@@ -70,6 +77,7 @@ export default function EditRestaurantePage() {
       setError("Erro ao carregar restaurante");
     } finally {
       setLoading(false);
+      setLoadingOwners(false);
     }
   };
 
@@ -122,6 +130,9 @@ export default function EditRestaurantePage() {
       // Incluir openingHours sempre que estiver definido (mesmo que vazio)
       if (formData.openingHours !== undefined) {
         updateData.openingHours = formData.openingHours;
+      }
+      if (formData.ownerId && formData.ownerId !== restaurant?.owner?.id) {
+        updateData.ownerId = formData.ownerId;
       }
 
       console.log("Sending update data:", updateData);
@@ -498,6 +509,35 @@ export default function EditRestaurantePage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-[#1b130d] font-bold mb-2">
+                  Proprietário
+                </label>
+                {loadingOwners ? (
+                  <div className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d]">
+                    Carregando proprietários...
+                  </div>
+                ) : owners.length === 0 ? (
+                  <div className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#9a6c4c]">
+                    Nenhum proprietário disponível
+                  </div>
+                ) : (
+                  <select
+                    name="ownerId"
+                    value={formData.ownerId || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-[#e7d9cf] bg-[#f3ece7] text-[#1b130d] focus:outline-0 focus:ring-2 focus:ring-[#ee7c2b]/50"
+                  >
+                    <option value="">Selecione um proprietário</option>
+                    {owners.map((owner) => (
+                      <option key={owner.id} value={owner.id}>
+                        {owner.name} ({owner.email})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-6">

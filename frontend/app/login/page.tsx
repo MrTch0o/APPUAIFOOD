@@ -91,7 +91,7 @@ export default function LoginPage() {
       // O backend retorna {data: {user, accessToken, refreshToken}}
       // O interceptador envolve com {success, data, timestamp}
       // Resultado: {success: true, data: {data: {user, accessToken, refreshToken}}, timestamp}
-      let authData = data.data?.data || data.data;
+      const authData = data.data;
 
       // Verificar se 2FA é necessário
       if (authData.requires2FA) {
@@ -112,16 +112,16 @@ export default function LoginPage() {
       logger.info("Login bem-sucedido, atualizando contexto");
 
       // Salvar tokens e usuário
-      if (!authData.accessToken) {
+      if (!authData.data?.accessToken) {
         throw new Error("Falha ao fazer login: token não recebido");
       }
 
-      if (!authData.user) {
+      if (!authData.data?.user) {
         throw new Error("Falha ao fazer login: dados de usuário não recebidos");
       }
 
-      localStorage.setItem("token", authData.accessToken);
-      localStorage.setItem("user", JSON.stringify(authData.user));
+      localStorage.setItem("token", authData.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(authData.data.user));
 
       // Aguardar um pouco para o localStorage ser sincronizado
       setTimeout(() => {

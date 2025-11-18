@@ -266,9 +266,11 @@ export default function ProfilePage() {
       setTwoFACode("");
 
       // Atualizar o perfil
-      const updatedProfile = { ...profile, is2FAEnabled: false };
-      setProfile(updatedProfile);
-      updateUser(updatedProfile);
+      if (profile) {
+        const updatedProfile = { ...profile, is2FAEnabled: false };
+        setProfile(updatedProfile);
+        updateUser(updatedProfile);
+      }
 
       setTimeout(() => {
         setSuccessMessage("");

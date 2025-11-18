@@ -25,13 +25,33 @@ export default function CarrinhoPage() {
       return;
     }
 
-    fetchCart();
+    // Recarregar carrinho quando a página for visitada
+    const timer = setTimeout(() => {
+      fetchCart();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [user, router]);
+
+  // Hook adicional para recarregar quando visibilidade muda
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Página ficou visível - recarrega carrinho
+        fetchCart();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   const fetchCart = async () => {
     try {
       setLoading(true);
       const cartData = await cartService.getCart();
+      logger.info("Carrinho carregado com sucesso", { cartData });
       setCart(cartData);
     } catch (err) {
       logger.error("Erro ao carregar carrinho", err);
@@ -160,10 +180,12 @@ export default function CarrinhoPage() {
                       className="p-6 hover:bg-[#faf9f8] transition flex items-start gap-4"
                     >
                       {/* Imagem do Produto */}
-                      {item.product.imageUrl ? (
+                      {item.product.imageUrl || item.product.image ? (
                         <div className="flex-shrink-0">
                           <img
-                            src={item.product.imageUrl}
+                            src={
+                              item.product.imageUrl || item.product.image || ""
+                            }
                             alt={item.product.name}
                             className="h-24 w-24 object-cover rounded"
                           />

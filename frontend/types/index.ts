@@ -88,15 +88,30 @@ export interface CartItem {
   quantity: number;
   product: Product;
   productId: string;
-  cartId: string;
+  cartId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CartSummary {
+  itemCount: number;
+  totalQuantity: number;
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  restaurantId: string | null;
+  restaurantName: string;
+  minimumOrder: number;
+  meetsMinimumOrder: boolean;
 }
 
 export interface Cart {
-  id: string;
-  userId: string;
+  id?: string;
+  userId?: string;
   items: CartItem[];
-  createdAt: string;
-  updatedAt: string;
+  summary?: CartSummary;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Address Types

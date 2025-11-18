@@ -6,7 +6,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { restaurantService } from "@/services/restaurantService";
 import { productService } from "@/services/productService";
+import { cartService } from "@/services/cartService";
 import { logger } from "@/lib/logger";
+import { Toast } from "@/components/Toast";
 import { Restaurant, Product } from "@/types";
 
 export default function RestaurantDetailPage() {
@@ -19,6 +21,11 @@ export default function RestaurantDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "info";
+  } | null>(null);
 
   const loadRestaurantAndProducts = useCallback(async () => {
     try {
@@ -70,6 +77,55 @@ export default function RestaurantDetailPage() {
           product.description?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
+
+  const handleAddToCart = useCallback(
+    async (productId: string, productName: string) => {
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        setAddingToCartId(productId);
+        setToast(null);
+
+        await cartService.addItem(productId, 1);
+
+        setToast({
+          message: `${productName} adicionado ao carrinho!`,
+          type: "success",
+        });
+
+        logger.info("Produto adicionado ao carrinho com sucesso", {
+          productId,
+          productName,
+        });
+      } catch (err: any) {
+        logger.error("Erro ao adicionar produto ao carrinho", err);
+
+        const errorMessage = err.response?.data?.message || "Erro desconhecido";
+
+        if (
+          errorMessage.includes("mesmo restaurante") ||
+          errorMessage.includes("Limpe o carrinho")
+        ) {
+          setToast({
+            message:
+              "Já tem itens de outro restaurante no carrinho. Limpe o carrinho para adicionar produtos deste restaurante.",
+            type: "error",
+          });
+        } else {
+          setToast({
+            message: errorMessage,
+            type: "error",
+          });
+        }
+      } finally {
+        setAddingToCartId(null);
+      }
+    },
+    [user, router]
+  );
 
   if (loading) {
     return (
@@ -302,23 +358,19 @@ export default function RestaurantDetailPage() {
                           R$ {product.price.toFixed(2)}
                         </span>
                         <button
-                          onClick={() => {
-                            if (!user) {
-                              router.push("/login");
-                            } else {
-                              // TODO: Adicionar ao carrinho
-                              logger.info("Adicionar ao carrinho", {
-                                productId: product.id,
-                                productName: product.name,
-                              });
-                            }
-                          }}
-                          disabled={!product.available}
+                          onClick={() => handleAddToCart(product.id, product.name)}
+                          disabled={!product.available || addingToCartId === product.id}
                           className="flex h-10 px-4 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#ee7c2b] text-white text-sm font-bold hover:bg-[#ee7c2b]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <span className="material-symbols-outlined text-lg">
-                            add_shopping_cart
-                          </span>
+                          {addingToCartId === product.id ? (
+                            <span className="material-symbols-outlined text-lg animate-spin">
+                              loading
+                            </span>
+                          ) : (
+                            <span className="material-symbols-outlined text-lg">
+                              add_shopping_cart
+                            </span>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -359,10 +411,18 @@ export default function RestaurantDetailPage() {
                   FAQ
                 </a>
               </div>
+              </div>
             </div>
-          </div>
         </footer>
       </div>
     </div>
+
+    {toast && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast(null)}
+      />
+    )}
   );
 }

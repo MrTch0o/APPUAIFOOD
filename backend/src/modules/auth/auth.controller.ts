@@ -20,7 +20,8 @@ import { Enable2FADto } from './dto/enable-2fa.dto';
 import { Verify2FADto } from './dto/verify-2fa.dto';
 import { Disable2FADto } from './dto/disable-2fa.dto';
 import { Public } from '../../common/decorators/public.decorator';
-import { GetUser } from '../../common/decorators/get-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('Autenticação')
@@ -88,8 +89,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout de usuário' })
   @ApiResponse({ status: 200, description: 'Logout realizado com sucesso' })
-  async logout(@GetUser('id') userId: string) {
-    return this.authService.logout(userId);
+  async logout(@CurrentUser() user: JwtPayload) {
+    return this.authService.logout(user.sub);
   }
 
   // ==================== ENDPOINTS 2FA ====================
@@ -114,8 +115,8 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 409, description: '2FA já está ativado' })
-  async generate2FA(@GetUser('id') userId: string) {
-    return this.authService.generate2FA(userId);
+  async generate2FA(@CurrentUser() user: JwtPayload) {
+    return this.authService.generate2FA(user.sub);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -126,10 +127,10 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '2FA ativado com sucesso' })
   @ApiResponse({ status: 401, description: 'Código 2FA inválido' })
   async enable2FA(
-    @GetUser('id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() enable2FADto: Enable2FADto,
   ) {
-    return this.authService.enable2FA(userId, enable2FADto.token);
+    return this.authService.enable2FA(user.sub, enable2FADto.token);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -141,10 +142,10 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Código 2FA inválido' })
   @ApiResponse({ status: 409, description: '2FA não está ativado' })
   async disable2FA(
-    @GetUser('id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() disable2FADto: Disable2FADto,
   ) {
-    return this.authService.disable2FA(userId, disable2FADto.token);
+    return this.authService.disable2FA(user.sub, disable2FADto.token);
   }
 
   @Public()
@@ -158,9 +159,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Código verificado com sucesso' })
   @ApiResponse({ status: 401, description: 'Código 2FA inválido' })
   async verify2FA(
-    @GetUser('id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() verify2FADto: Verify2FADto,
   ) {
-    return this.authService.verify2FALogin(userId, verify2FADto.token);
+    return this.authService.verify2FALogin(user.sub, verify2FADto.token);
   }
 }

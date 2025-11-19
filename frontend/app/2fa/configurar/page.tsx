@@ -28,6 +28,16 @@ export default function Configure2FAPage() {
     }
   }, [user, router]);
 
+  // Debug state changes
+  useEffect(() => {
+    console.log("🔄 QR Code state updated:", {
+      qrCode,
+      qrCodeLength: qrCode?.length,
+      qrCodeTruthy: !!qrCode,
+      step,
+    });
+  }, [qrCode, step]);
+
   const handleGenerateQR = async () => {
     setError("");
     setLoading(true);
@@ -45,9 +55,24 @@ export default function Configure2FAPage() {
         timestamp: string;
       }>("/auth/2fa/generate");
 
-      setSecret(response.data.data.secret);
-      setQrCode(response.data.data.qrCode);
+      console.log("🔍 Response completo:", response);
+      console.log("🔍 response.data:", response.data);
+
+      // O interceptor wraps em { success, data, ... }
+      const extractedSecret = response.data.data.secret;
+      const extractedQrCode = response.data.data.qrCode;
+
+      console.log("🔍 Extracted QR Code:", extractedQrCode);
+      console.log("🔍 QR Code length:", extractedQrCode?.length);
+      console.log("🔍 QR Code starts with:", extractedQrCode?.substring(0, 50));
+      console.log("🔍 QR Code is truthy?:", !!extractedQrCode);
+
+      // Set state immediately
+      setSecret(extractedSecret);
+      setQrCode(extractedQrCode);
       setStep("qr");
+
+      console.log("✅ States setados - qr code:", extractedQrCode);
 
       logger.info("QR code gerado com sucesso");
     } catch (err: unknown) {
@@ -223,10 +248,34 @@ export default function Configure2FAPage() {
                   Escaneie o QR Code
                 </h2>
 
-                <div className="bg-[#f3ece7] p-6 rounded-lg mb-6 flex items-center justify-center">
-                  {qrCode && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={qrCode} alt="QR Code 2FA" className="w-64 h-64" />
+                <div className="bg-[#f3ece7] p-6 rounded-lg mb-6 flex items-center justify-center min-h-80">
+                  {qrCode ? (
+                    <>
+                      {console.log(
+                        "✅ QR Code encontrado, renderizando imagem"
+                      )}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={qrCode}
+                        alt="QR Code 2FA"
+                        className="w-64 h-64 object-contain"
+                        onLoad={() =>
+                          console.log("✅ QR Code carregado com sucesso")
+                        }
+                        onError={(e) =>
+                          console.error("❌ Erro ao carregar QR Code:", e)
+                        }
+                      />
+                    </>
+                  ) : (
+                    <div className="text-center text-[#9a6c4c]">
+                      {console.log("❌ QR Code vazio:", qrCode)}
+                      <p>QR Code não disponível</p>
+                      <p className="text-xs mt-2">
+                        Valor do estado:{" "}
+                        {qrCode === "" ? "string vazia" : typeof qrCode}
+                      </p>
+                    </div>
                   )}
                 </div>
 

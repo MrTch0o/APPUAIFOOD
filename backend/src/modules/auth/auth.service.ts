@@ -261,12 +261,10 @@ export class AuthService {
     });
 
     return {
-      data: {
-        secret,
-        qrCode,
-        message:
-          'Escaneie o QR code com seu app autenticador (Google Authenticator, Authy, etc.)',
-      },
+      secret,
+      qrCode,
+      message:
+        'Escaneie o QR code com seu app autenticador (Google Authenticator, Authy, etc.)',
     };
   }
 

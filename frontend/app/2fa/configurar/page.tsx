@@ -251,9 +251,6 @@ export default function Configure2FAPage() {
                 <div className="bg-[#f3ece7] p-6 rounded-lg mb-6 flex items-center justify-center min-h-80">
                   {qrCode ? (
                     <>
-                      {console.log(
-                        "✅ QR Code encontrado, renderizando imagem"
-                      )}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={qrCode}
@@ -269,7 +266,6 @@ export default function Configure2FAPage() {
                     </>
                   ) : (
                     <div className="text-center text-[#9a6c4c]">
-                      {console.log("❌ QR Code vazio:", qrCode)}
                       <p>QR Code não disponível</p>
                       <p className="text-xs mt-2">
                         Valor do estado:{" "}

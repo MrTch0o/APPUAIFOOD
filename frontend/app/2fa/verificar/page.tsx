@@ -75,10 +75,13 @@ export default function Verify2FAPage() {
       localStorage.setItem("user", JSON.stringify(authData.user));
 
       // Limpar sessionStorage
-      sessionStorage.removeItem("2faUserId");
+      //sessionStorage.removeItem("2faUserId");
 
       // Redirecionar
-      router.push("/");
+      //router.push("/"); quando usa router.push dentro de uma promise ele nao redireciona corretamente com isso nao carrega o token do localstorage na primeira vez somente quando atualiza a pagina manualmente entao usei esse window.location.href com setTimeout
+          setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
     } catch (err: unknown) {
       const error = err as {
         response?: { data?: { message?: string; statusCode?: number } };

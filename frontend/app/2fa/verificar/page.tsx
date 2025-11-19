@@ -45,14 +45,16 @@ export default function Verify2FAPage() {
       const response = await api.post<{
         success: boolean;
         data: {
-          user: {
-            id: string;
-            name: string;
-            email: string;
-            role: string;
+          data: {
+            user: {
+              id: string;
+              name: string;
+              email: string;
+              role: string;
+            };
+            accessToken: string;
+            refreshToken: string;
           };
-          accessToken: string;
-          refreshToken: string;
         };
         timestamp: string;
       }>("/auth/2fa/verify", {
@@ -61,11 +63,16 @@ export default function Verify2FAPage() {
       });
 
       logger.info("Código 2FA verificado com sucesso");
+      console.log("[2FA] Verify response:", response.data);
+
+      // O interceptor envolve com {success, data, timestamp}
+      // O backend retorna {data: {user, accessToken, refreshToken}}
+      // Resultado: {success: true, data: {data: {user, accessToken, refreshToken}}, timestamp}
+      const authData = response.data.data.data;
 
       // Salvar tokens
-      localStorage.setItem("accessToken", response.data.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
+      localStorage.setItem("token", authData.accessToken);
+      localStorage.setItem("user", JSON.stringify(authData.user));
 
       // Limpar sessionStorage
       sessionStorage.removeItem("2faUserId");

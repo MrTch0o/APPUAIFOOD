@@ -86,18 +86,21 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
+      console.log("[LOGIN] Response from backend:", data);
 
       // Acessar os dados considerando o interceptador TransformInterceptor
-      // O backend retorna {data: {user, accessToken, refreshToken}}
+      // O backend retorna {data: {user, accessToken, refreshToken}} ou {data: {requires2FA, userId}}
       // O interceptador envolve com {success, data, timestamp}
-      // Resultado: {success: true, data: {data: {user, accessToken, refreshToken}}, timestamp}
-      const authData = data.data;
+      // Resultado: {success: true, data: {data: {...}}, timestamp}
+      const authData = data.data.data;
+      console.log("[LOGIN] Auth data extracted:", authData);
 
       // Verificar se 2FA é necessário
       if (authData.requires2FA) {
         logger.info("2FA requerido, redirecionando para verificação", {
           userId: authData.userId,
         });
+        console.log("[LOGIN] 2FA required, redirecting to verification");
 
         // Armazenar userId temporariamente na sessionStorage
         sessionStorage.setItem("2faUserId", authData.userId);
@@ -110,18 +113,19 @@ export default function LoginPage() {
 
       // Login normal (sem 2FA)
       logger.info("Login bem-sucedido, atualizando contexto");
+      console.log("[LOGIN] 2FA not required, proceeding with normal login");
 
       // Salvar tokens e usuário
-      if (!authData.data?.accessToken) {
+      if (!authData.accessToken) {
         throw new Error("Falha ao fazer login: token não recebido");
       }
 
-      if (!authData.data?.user) {
+      if (!authData.user) {
         throw new Error("Falha ao fazer login: dados de usuário não recebidos");
       }
 
-      localStorage.setItem("token", authData.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(authData.data.user));
+      localStorage.setItem("token", authData.accessToken);
+      localStorage.setItem("user", JSON.stringify(authData.user));
 
       // Aguardar um pouco para o localStorage ser sincronizado
       setTimeout(() => {

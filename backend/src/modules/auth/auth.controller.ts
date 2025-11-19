@@ -158,10 +158,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'Código verificado com sucesso' })
   @ApiResponse({ status: 401, description: 'Código 2FA inválido' })
-  async verify2FA(
-    @CurrentUser() user: JwtPayload,
-    @Body() verify2FADto: Verify2FADto,
-  ) {
-    return this.authService.verify2FALogin(user.sub, verify2FADto.token);
+  async verify2FA(@Body() verify2FADto: Verify2FADto) {
+    return this.authService.verify2FALogin(
+      verify2FADto.userId,
+      verify2FADto.token,
+    );
   }
 }

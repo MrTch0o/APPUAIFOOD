@@ -3,6 +3,14 @@ import { IsString, IsNotEmpty, Length } from 'class-validator';
 
 export class Verify2FADto {
   @ApiProperty({
+    description: 'ID do usuário que está fazendo login',
+    example: 'user-uuid-here',
+  })
+  @IsString()
+  @IsNotEmpty({ message: 'O ID do usuário é obrigatório' })
+  userId: string;
+
+  @ApiProperty({
     description: 'Código TOTP de 6 dígitos gerado pelo app autenticador',
     example: '123456',
     minLength: 6,
